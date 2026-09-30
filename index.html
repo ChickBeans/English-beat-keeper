@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>拍キープ・ドリル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Charis+SIL&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDF1; --panel:#F7F9FB; --ink:#16202C; --muted:#5F6B7A; --line:#C9D1DA;
+  --strong:#2346C4; --weak:#6F7A89; --now:#F3B22A; --nowInk:#1D1400; --wash:rgba(243,178,42,.16);
+  --btn:#16202C; --btnInk:#F7F9FB;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151C; --panel:#18202A; --ink:#E6EAF0; --muted:#99A4B2; --line:#2D3744;
+    --strong:#90AAFF; --weak:#8D98A6; --now:#E2A41E; --nowInk:#171000; --wash:rgba(226,164,30,.16);
+    --btn:#E6EAF0; --btnInk:#10151C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151C; --panel:#18202A; --ink:#E6EAF0; --muted:#99A4B2; --line:#2D3744;
+  --strong:#90AAFF; --weak:#8D98A6; --now:#E2A41E; --nowInk:#171000; --wash:rgba(226,164,30,.16);
+  --btn:#E6EAF0; --btnInk:#10151C; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+  line-height:1.6;font-size:16px;padding-bottom:110px}
+.wrap{max-width:1000px;margin:0 auto;padding:28px 20px 20px}
+header h1{font-size:2.1rem;line-height:1.15;margin:0;letter-spacing:.01em}
+header p{margin:.4rem 0 0;color:var(--muted);max-width:60ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px;margin-top:18px}
+h2{font-size:1.05rem;margin:0 0 .6rem}
+details>summary{cursor:pointer;font-weight:700;font-size:1.05rem;list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";display:inline-block;width:1.1em;transition:transform .15s}
+details[open]>summary::before{transform:rotate(90deg)}
+textarea{width:100%;min-height:150px;margin-top:12px;font:inherit;font-size:.98rem;line-height:1.5;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+button,.filebtn{font:inherit;font-size:.95rem;border-radius:999px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:7px 16px;cursor:pointer;line-height:1.3}
+button.primary{background:var(--btn);color:var(--btnInk);border-color:var(--btn);font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,.filebtn:focus-within,input:focus-visible,textarea:focus-visible,.syl:focus-visible{outline:3px solid var(--now);outline-offset:2px}
+.filebtn input{position:absolute;opacity:0;width:1px;height:1px}
+.status{color:var(--muted);font-size:.9rem}
+.note{color:var(--muted);font-size:.88rem;margin:.5rem 0 0}
+
+/* stage */
+.stagehead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 14px}
+.stagehead .pos{font-weight:700;font-size:1.05rem}
+.badge{font-size:.8rem;border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.count{font-weight:700;color:var(--ink);background:var(--wash);border-color:var(--now)}
+.fulltext{margin:.5rem 0 1rem;font-size:1.05rem;max-width:70ch}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-bottom:10px}
+.legend b{color:var(--strong)}
+.lane{display:flex;flex-wrap:wrap;row-gap:22px;--cellw:120px;--fs:clamp(1.05rem, calc(var(--cellw) * .19), 1.75rem)}
+.bar{display:flex;border-left:3px solid var(--ink)}
+.bar.lastbar{border-right:3px solid var(--ink)}
+.cell{position:relative;width:var(--cellw);height:92px;border-right:1px solid var(--line);padding:0 6px 22px;display:flex;align-items:flex-end}
+.bar .cell:last-child{border-right:none}
+.cell .mid{position:absolute;top:18px;bottom:6px;left:50%;border-left:1px dotted var(--line)}
+.cell .num{position:absolute;top:2px;left:6px;font-size:.72rem;color:var(--muted)}
+.cell .ura{position:absolute;top:2px;left:calc(50% + 5px);font-size:.72rem;color:var(--muted)}
+.cell.pick{width:calc(var(--cellw) * .62);border:1px dashed var(--line);border-right:none;margin-right:0}
+.cell.pick .num{left:6px}
+.cell.now{background:var(--wash)}
+.cin{display:flex;align-items:flex-end;width:100%;min-width:0}
+.sg{flex:none;white-space:nowrap}
+.wg{flex:none;margin-left:auto;white-space:nowrap;overflow:visible}
+.wi{display:inline-block;white-space:nowrap;transform-origin:left bottom}
+.syl{position:relative;display:inline-block;border-radius:5px;padding:0 1px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.syl.s{font-weight:700;font-size:var(--fs);color:var(--strong);line-height:1.1}
+.syl.w{font-size:calc(var(--fs) * .62);color:var(--weak)}
+.syl.ws{margin-left:.28em}
+.sg .syl.ws,.wi .syl.ws:first-child{margin-left:0}
+.syl.now{background:var(--now);color:var(--nowInk)}
+.syl .wf{position:absolute;left:1px;top:100%;font-style:normal;font-size:.72em;color:var(--muted);white-space:nowrap;margin-top:1px}
+.restmark{font-size:.85rem;color:var(--muted)}
+.lane.skeleton .syl.w{opacity:.18}
+.lane.skeleton .syl .wf{display:none}
+.lane.nohint .syl .wf{display:none}
+.tip{font-size:.85rem;color:var(--muted);margin-top:14px}
+.empty{color:var(--muted);padding:24px 0}
+
+/* settings */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.seg button{border:none;border-radius:0;padding:7px 14px}
+.seg button+button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--btn);color:var(--btnInk);font-weight:700}
+.seg small{display:block;font-size:.7rem;opacity:.8;font-weight:400}
+.sugg{margin-top:10px;font-size:.95rem}
+.sugg strong{font-size:1.2rem}
+input[type=range]{width:100%;accent-color:var(--strong)}
+.checks label{display:flex;gap:10px;align-items:flex-start;margin:6px 0;cursor:pointer}
+.checks input{margin-top:5px;accent-color:var(--strong);width:17px;height:17px;flex:none}
+.checks small{display:block;color:var(--muted);font-size:.8rem;line-height:1.35}
+
+/* list */
+ol.slist{margin:0;padding:0;list-style:none;counter-reset:s}
+ol.slist li{counter-increment:s;display:flex;gap:10px;align-items:baseline;border-top:1px solid var(--line)}
+ol.slist li:first-child{border-top:none}
+ol.slist li::before{content:counter(s);font-size:.78rem;color:var(--muted);width:2em;text-align:right;flex:none}
+.sent{border:none;border-radius:8px;text-align:left;padding:8px 10px;flex:1;font-size:.98rem;line-height:1.5}
+.sent.on{background:var(--wash)}
+.sent .ls{font-weight:700;color:var(--strong)}
+
+/* transport */
+.transport{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
+.tin{max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:center}
+.tin .play{min-width:112px;font-size:1.05rem}
+.bpmbox{display:flex;align-items:center;gap:6px}
+.bpmbox button{width:36px;height:36px;padding:0;border-radius:50%}
+.bpmbox output{min-width:4.6em;text-align:center;font-weight:700}
+.icon{width:40px;height:40px;padding:0;border-radius:50%}
+@media (max-width:560px){
+  header h1{font-size:1.7rem}
+  .wrap{padding:20px 14px}
+  .panel{padding:14px}
+}
+@media (prefers-reduced-motion: reduce){ details>summary::before{transition:none} }
+
+.deckrow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:10px}
+select{font:inherit;font-size:.95rem;padding:6px 10px;border-radius:10px;border:1.5px solid var(--ink);background:var(--panel);color:var(--ink);max-width:100%}
+.lane.even .wg{margin-left:.2em}
+.lane.even .cell .ura{display:none}
+.canvasWrap{width:100%;margin:10px 0 6px}
+#recCanvas{display:block;width:100%;height:150px;background:var(--bg);border-radius:10px}
+.inline{display:inline-flex;gap:8px;align-items:center;margin:0}
+.stageStatus{font-size:.88rem;color:var(--muted);margin:.4rem 0 0}
+.drillhint{font-size:.88rem;color:var(--muted);margin:.2rem 0 .8rem;max-width:70ch}
+.tin .rec{border-color:#C8323A;color:#C8323A}
+.tin .rec[data-on="1"]{background:#C8323A;color:#fff}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.chip{border-radius:12px;border:1.5px solid var(--line);text-align:left;padding:8px 12px;display:flex;flex-direction:column;gap:2px}
+.chip .t{font-weight:700;font-size:.95rem;letter-spacing:.02em}
+.chip .m{font-size:.78rem;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--btn);color:var(--btnInk)}
+.chip[aria-pressed="true"] .m{color:inherit;opacity:.8}
+.prompt{margin:10px 0 4px;padding:14px 16px;border-radius:12px;border:1.5px dashed var(--line)}
+.plabel{font-size:.78rem;color:var(--muted)}
+.pbase{font-size:1.5rem;font-weight:700;color:var(--strong);letter-spacing:.03em;margin-bottom:6px}
+.pcue{font-size:1.15rem;font-weight:700}
+.syl.hid{min-width:.5em}
+.slist .cue{display:block;font-size:.78rem;color:var(--muted)}
+.slist .hide{color:var(--muted);font-style:italic}
+.canvasWrap{width:100%;margin:10px 0 6px}
+#recCanvas{display:block;width:100%;height:150px;background:var(--bg);border-radius:10px}
+.inline{display:inline-flex;gap:8px;align-items:center;margin:0}
+.stageStatus{font-size:.88rem;color:var(--muted);margin:.4rem 0 0}
+.tin .rec{border-color:#C8323A;color:#C8323A}
+.tin .rec[data-on="1"]{background:#C8323A;color:#fff}
+.lane.even .wg{margin-left:.2em}
+.lane.even .cell .ura{display:none}
+.seg{flex-wrap:wrap}
+.lane.pickoff .cell.pick{opacity:.3}
+.syl.col{display:inline-flex;flex-direction:column;align-items:flex-start;vertical-align:bottom}
+.syl .ipa{font-family:"Charis SIL","Doulos SIL","Noto Sans","Lucida Sans Unicode",serif;font-weight:400;font-size:.62em;color:var(--muted);line-height:1.2;white-space:nowrap}
+.syl.s .ipa{color:var(--strong);opacity:.85}
+.syl.ipaonly{font-family:"Charis SIL","Doulos SIL","Noto Sans","Lucida Sans Unicode",serif}
+.ipaline{display:block;font-family:"Charis SIL","Doulos SIL","Noto Sans",serif;font-size:.9rem;color:var(--muted)}
+.syl.now .ipa{color:var(--nowInk)}
+.syl.lk{margin-left:0!important}
+.syl.lk::before{content:"‿";color:var(--now);font-weight:700;margin-right:1px}
+.syl.col.lk::before{position:absolute;left:-.55em;bottom:.2em}
+.syl.col.lk{position:relative;margin-left:.15em!important}
+.trow{display:flex;align-items:center;gap:10px;justify-content:center}
+.icon.mode{position:relative;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);border-color:var(--line)}
+.icon.mode[aria-pressed="true"],.icon.mode.on{color:var(--strong);border-color:var(--strong);background:rgba(120,140,255,.12)}
+.rbadge{position:absolute;right:-6px;top:-6px;min-width:20px;height:18px;padding:0 4px;border-radius:9px;background:var(--strong);color:var(--panel);font-size:.66rem;font-weight:700;line-height:18px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>拍キープ・ドリル</h1>
+    <p>オモテ（強い音節）の数は最後まで同じ。下の行ほどウラの音節が増えます。文が長くなっても、同じテンポのまま拍に乗せ続けられるかを練習します。</p>
+  </header>
+
+  <section class="panel">
+    <h2>セット</h2>
+    <div class="seg" role="group" aria-label="場面" id="sceneSeg" style="margin-bottom:10px"></div>
+    <div class="seg" role="group" aria-label="拍数" id="catSeg" style="margin-bottom:12px"></div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="panel" id="stage">
+    <div class="seg" role="group" aria-label="練習モード" id="modeSeg">
+      <button type="button" data-m="read">読む<small>全文を見る</small></button>
+      <button type="button" data-m="recall">思い出す<small>オモテだけ見る</small></button>
+      <button type="button" data-m="build">作る<small>指示から組み立てる</small></button>
+    </div>
+    <div class="stagehead" style="margin-top:14px">
+      <span class="pos" id="pos">—</span>
+      <span class="badge" id="cueBadge"></span>
+      <span class="badge count" id="countBadge" hidden></span>
+    </div>
+    <div class="prompt" id="prompt" hidden>
+      <div class="plabel">材料</div>
+      <div class="pbase" id="pbase"></div>
+      <div class="plabel">指示</div>
+      <div class="pcue" id="pcue"></div>
+    </div>
+    <p class="fulltext" id="fulltext"></p>
+    <div class="lane" id="lane"></div>
+    <div class="row">
+      <button type="button" id="revealBtn" hidden>答えを見る</button>
+    </div>
+    <p class="stageStatus" id="stageStatus" role="status"></p>
+    <p class="stageStatus" id="bgStatus" role="status"></p>
+    <p class="tip" id="tip"></p>
+  </section>
+
+  <section class="panel" id="recPanel" hidden>
+    <h2>録音の確認</h2>
+    <p class="note" style="margin-top:0">太い縦線が拍の頭（オモテ）、点線が拍の真ん中です。灰色の山が声の大きさ。強い音節の山が太い線のすぐあとに来ていれば、拍に乗れています。</p>
+    <div class="canvasWrap"><canvas id="recCanvas"></canvas></div>
+    <div class="row">
+      <button type="button" id="recPlay" class="primary">録音を聞く</button>
+      <label class="inline status"><input type="checkbox" id="recClicks" checked style="accent-color:var(--strong)"> ビートも鳴らす</label>
+    </div>
+    <div style="margin-top:10px">
+      <label class="status" for="recAdj">ずれ補正（全体がずれて見えるときに調整）：<output id="recAdjOut">0 ms</output></label>
+      <input type="range" id="recAdj" min="-300" max="300" step="5" value="0">
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>このセットの行</h2>
+    <ol class="slist" id="list"></ol>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>テンポ</h2>
+      <div class="seg" role="group" aria-label="目標の話す速さ" id="presetSeg">
+        <button type="button" data-p="slow">練習<small>2.5音節/秒</small></button>
+        <button type="button" data-p="mid">ふつう<small>3.5音節/秒</small></button>
+        <button type="button" data-p="fast">自然<small>4.5音節/秒</small></button>
+      </div>
+      <p class="sugg" id="sugg"></p>
+      <div class="checks" style="margin-top:6px">
+        <label><input type="checkbox" id="autoBpm"><span>セットや速さを変えたら提案BPMに合わせる</span></label>
+      </div>
+      <label for="bpmRange" class="status">BPM</label>
+      <input type="range" id="bpmRange" min="40" max="160" step="1">
+    </section>
+
+    <section class="panel checks">
+      <h2>音と流し方</h2>
+      <div class="status" style="margin-bottom:4px">音色（名機を再現した合成音）</div>
+      <div class="seg" role="group" aria-label="音色" id="kitSeg" style="margin-bottom:6px"></div>
+      <p class="note" id="kitDesc" style="margin:0 0 10px"></p>
+      <div class="status" style="margin-bottom:4px">拍の音</div>
+      <div class="seg" role="group" aria-label="拍の音" id="soundSeg" style="margin-bottom:10px">
+        <button type="button" data-s="drum">ドラム</button>
+        <button type="button" data-s="click">クリック</button>
+        <button type="button" data-s="none">なし</button>
+      </div>
+      <div class="status" style="margin-bottom:4px">音節の音（文字と一緒に鳴る）</div>
+      <div class="seg" role="group" aria-label="音節の音" id="sylSeg" style="margin-bottom:6px">
+        <button type="button" data-y="on">あり<small>オモテ大・ウラ小</small></button>
+        <button type="button" data-y="off">なし</button>
+      </div>
+      <p class="note" style="margin:0 0 10px">音節の音ありで耳でリズムをつかみ、なしで自分の声だけで再現する、の往復がおすすめです。「拍の音：なし」にすると音節の音だけを聞けます。</p>
+      <div class="seg" role="group" aria-label="ウラの流し方" id="timingSeg" style="margin-bottom:8px">
+        <button type="button" data-t="even">自然<small>拍全体に均等</small></button>
+        <button type="button" data-t="strict">厳密<small>拍の後半に詰める</small></button>
+      </div>
+      <div class="seg" role="group" aria-label="行の順番" id="orderSeg" style="margin-bottom:8px">
+        <button type="button" data-o="seq">順番どおり</button>
+        <button type="button" data-o="shuffle">シャッフル</button>
+      </div>
+      <div class="seg" role="group" aria-label="くり返し" id="repSeg" style="margin-bottom:8px">
+        <button type="button" data-r="1">各行1回</button>
+        <button type="button" data-r="2">各行2回</button>
+        <button type="button" data-r="inf">同じ行を無限</button>
+      </div>
+      <label><input type="checkbox" id="contract"><span>短縮形で読む<small>have been → 've been のように、ネイティブの詰め込み方で読みます。</small></span></label>
+      <label><input type="checkbox" id="skipPick"><span>弱起を省く<small>文頭のウラ（The、and など）を抜いて、最初のオモテから入ります。</small></span></label>
+      <div class="status" style="margin:6px 0 4px">表示</div>
+      <div class="seg" role="group" aria-label="表示" id="dispSeg" style="margin-bottom:8px">
+        <button type="button" data-d="en">英語</button>
+        <button type="button" data-d="both">英語＋発音記号</button>
+        <button type="button" data-d="ipa">発音記号のみ</button>
+      </div>
+      <label><input type="checkbox" id="conn"><span>つながりを表示（連結・脱落・同化）<small>‿ ＝ 前の語とつなげて読む／(t) ＝ ほぼ発音しない／dɪdʒu ＝ did you のように音が変わる。弱い have・has・his・her の h も落とします。</small></span></label>
+      <p class="note" style="margin:0 0 8px">発音記号はイギリス英語（標準的な発音）。ウラの機能語は弱形（the → ðə など）で表示しています。ˈ はオモテの印です。</p>
+      <label><input type="checkbox" id="hints"><span>弱形のヒント<small>表示が「英語」のとき、the → ðə のような弱い音を表示します。</small></span></label>
+      <label><input type="checkbox" id="fillBar"><span>小節の区切りまで休む<small>行の終わりを4拍の区切りまで休みで埋めて、次の行に入りやすくします。</small></span></label>
+      <label><input type="checkbox" id="countIn"><span>最初に「1, 2, 3, and」のカウント</span></label>
+      <label><input type="checkbox" id="autoNext"><span>終わったら次の行へ進む<small>「作る」モードでは1行ずつ止まります。</small></span></label>
+      <label><input type="checkbox" id="loopSet"><span>セットを無限にくり返す<small>最後の行のあと、ビートを止めずに最初の行へ戻ります。シャッフル中は毎周、順番が変わります。</small></span></label>
+    </section>
+  </div>
+</div>
+
+<div class="transport">
+  <div class="tin">
+    <div class="trow">
+    <button class="icon mode" id="shufBtn" type="button" aria-label="シャッフル" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 4.8C14.3 16 15.5 17 17.5 17H21M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M14.2 8.4c.9-.9 1.9-1.4 3.3-1.4H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="icon" id="prevBtn" type="button" aria-label="前の行">◀</button>
+    <button class="primary play" id="playBtn" type="button">▶ 再生</button>
+    <button class="icon" id="nextBtn" type="button" aria-label="次の行">▶</button>
+    <button class="icon mode" id="repBtn" type="button" aria-label="くり返し">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 11V9a3 3 0 0 1 3-3h12M16 3l3 3-3 3M20 13v2a3 3 0 0 1-3 3H5M8 21l-3-3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="rbadge" id="repBadge">→5</span>
+    </button>
+    </div>
+    <div class="bpmbox">
+      <button type="button" id="bpmDown" aria-label="BPMを下げる">−</button>
+      <output id="bpmOut">— BPM</output>
+      <button type="button" id="bpmUp" aria-label="BPMを上げる">＋</button>
+    </div>
+    <button type="button" id="recBtn" class="rec">● 録音して練習</button>
+    <button type="button" id="bgBtn">🎧 バックグラウンド再生</button>
+    <audio id="bgAudio" playsinline preload="none"></audio>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const el=(tag,cls)=>{const e=document.createElement(tag); if(cls) e.className=cls; return e;};
+const KEY="beatkeep.v1";
+const PRESETS={slow:2.5,mid:3.5,fast:4.5};
+const FN={a:"ə",an:"ən",the:"ðə",and:"ən",but:"bət",or:"ə",nor:"",so:"",of:"əv",to:"tə",in:"",on:"",at:"ət",for:"fə",from:"frəm",with:"",by:"",as:"əz",into:"",onto:"",per:"pə",
+i:"",me:"",my:"",you:"jə",your:"jə",he:"i",him:"ɪm",his:"ɪz",she:"",her:"hə",it:"",its:"",we:"",us:"əs",our:"",they:"",them:"ðəm",their:"ðə",
+is:"z",am:"əm",are:"ə",was:"wəz",were:"wə",be:"",been:"bɪn",being:"",have:"həv",has:"həz",had:"həd",do:"də",does:"dəz",did:"",will:"l",would:"wəd",can:"kən",could:"kəd",shall:"ʃəl",should:"ʃəd",may:"",might:"",must:"məst",
+there:"ðə",dot:"",than:"ðən",that:"ðət",if:"",when:"",while:"",because:"",which:"",who:"",some:"səm",any:"",just:"",
+"i'm":"","i'd":"","i've":"","i'll":"","it's":"","that's":"","we're":"","you're":"","they're":"","there's":"","let's":"","we've":"","we'll":"","he's":"","she's":""};
+const NEG=new Set(["not","no","never","can't","cannot","don't","doesn't","didn't","won't","wasn't","weren't","isn't","aren't","haven't","hasn't","hadn't","couldn't","wouldn't","shouldn't","mustn't","nothing","nobody"]);
+const PRON=new Set(["i","you","we","they","he","she","it"]);
+const QW=new Set(["what","where","how","why","when","which","who"]);
+const PP=new Set(["been","done","got","gone","made","built","had","seen","found","led","set","put","taken","given","learnt","learned","passed","known","shown","worked","used","become","come","run","sent","spent","left","lost","met","paid","said","told","thought","brought","bought","taught","kept","felt","heard"]);
+const SPECIAL={"vb.net":["VB","dot","net"],"asp.net":["ASP","dot","net"],"e.g.":["for","example"]};
+
+
+const SETS=[
+ {base:["cats","chase","mice"],lines:[
+  ["*cats *chase *mice.","現在形"],
+  ["the *cats *chased the *mice.","過去形"],
+  ["the *cats were *chased by the *mice.","過去・受け身"],
+  ["the *cats have been *chas-ing the *mice.","現在完了進行形","the *cats~'ve been *chas-ing the *mice."],
+  ["the *cats would have been *chased by the *mice.","仮定・完了の受け身","the *cats would~'ve been *chased by the *mice."]]},
+ {base:["kids","love","games"],lines:[
+  ["*kids *love *games.","現在形"],
+  ["the *kids *loved the *games.","過去形"],
+  ["the *kids will *love the *games.","未来（will）","the *kids~'ll *love the *games."],
+  ["the *kids would have *loved the *games.","仮定・完了（would have）","the *kids would~'ve *loved the *games."],
+  ["the *kids would have been *lov-ing the *games.","仮定・完了進行","the *kids would~'ve been *lov-ing the *games."]]},
+ {base:["boss","read","notes"],q:true,lines:[
+  ["the *boss *reads the *notes.","現在形（平叙文）"],
+  ["did the *boss *read the *notes?","疑問文・過去"],
+  ["will the *boss have *read{red} the *notes?","疑問文・未来完了"],
+  ["has the *boss been *read-ing the *notes?","疑問文・現在完了進行"],
+  ["would the *boss have been *read-ing the *notes?","疑問文・仮定の完了進行"]]},
+ {base:["Bob","buy","food","shop"],lines:[
+  ["*bob *buys *food at the *shop.","現在形"],
+  ["*bob *bought some *food at the *shop.","過去形"],
+  ["*bob has *bought some *food at the *shop.","現在完了","*bob's *bought some *food at the *shop."],
+  ["*bob has been *buy-ing the *food at the *shop.","現在完了進行","*bob's been *buy-ing the *food at the *shop."],
+  ["and *bob should have been *buy-ing us some *food at the *shop.","後悔（should have been ~ing）","and *bob should~'ve been *buy-ing us some *food at the *shop."]]},
+ {base:["Kate","drink","tea","park"],lines:[
+  ["*kate *drinks *tea in the *park.","現在形"],
+  ["*kate *drank some *tea in the *park.","過去形"],
+  ["*kate was *drink-ing some *tea in the *park.","過去進行形"],
+  ["*kate had been *drink-ing her *tea in the *park.","過去完了進行","*kate~'d been *drink-ing her *tea in the *park."],
+  ["and *kate would have been *drink-ing her *tea in the *park.","仮定・完了進行","and *kate would~'ve been *drink-ing her *tea in the *park."]]},
+ {base:["who","take","dog","walk"],q:true,lines:[
+  ["*who *takes the *dog for a *walk?","疑問文・現在形"],
+  ["*who will *take the *dog for a *walk?","疑問文・未来（will）","*who'll *take the *dog for a *walk?"],
+  ["*who has been *tak-ing the *dog for a *walk?","疑問文・現在完了進行","*who's been *tak-ing the *dog for a *walk?"],
+  ["so *who should have been *tak-ing the *dog for a *walk?","疑問文・後悔（should have been ~ing）","so *who should~'ve been *tak-ing the *dog for a *walk?"],
+  ["*who is go~ing to be *tak-ing the *dog for a *walk?","疑問文・予定（be go~ing to be ~ing）","*who's gon-na be *tak-ing the *dog for a *walk?"]]},
+ {base:["Sam","make","lunch","kids","home"],lines:[
+  ["*sam *makes *lunch for the *kids at *home.","現在形"],
+  ["*sam *made some *lunch for the *kids at *home.","過去形"],
+  ["*sam was *mak-ing some *lunch for the *kids at *home.","過去進行形"],
+  ["*sam has been *mak-ing some *lunch for the *kids at their *home.","現在完了進行","*sam's been *mak-ing some *lunch for the *kids at their *home."],
+  ["and *sam should have been *mak-ing them some *lunch for the *kids at their *home.","後悔（should have been ~ing）","and *sam should~'ve been *mak-ing them some *lunch for the *kids at their *home."]]},
+ {base:["where","students","buy","books","town"],q:true,lines:[
+  ["*where do *stu-dents *buy *books in *town?","疑問文・現在形（冠詞なし）"],
+  ["*where do the *stu-dents *buy their *books in *town?","疑問文・現在形"],
+  ["*where have the *stu-dents been *buy-ing their *books in *town?","疑問文・現在完了進行"],
+  ["*where would the *stu-dents have been *buy-ing their *books in the *town?","疑問文・仮定の完了進行","*where would the *stu-dents~'ve been *buy-ing their *books in the *town?"],
+  ["*where are the *stu-dents go~ing to be *buy-ing their *books in the *town?","疑問文・予定（be go~ing to be ~ing）","*where are the *stu-dents gon-na be *buy-ing their *books in the *town?"]]},
+ {base:["Lucy","send","Mum","card","Rome","week"],lines:[
+  ["*lu-cy *sent *mum a *card from *rome last *week.","過去形（所有格なし）"],
+  ["*lu-cy *sent her *mum a *card from *rome last *week.","過去形"],
+  ["*lu-cy has *sent her *mum a *card from *rome this *week.","現在完了","*lu-cy's *sent her *mum a *card from *rome this *week."],
+  ["*lu-cy was go~ing to *send her *mum a *card from *rome last *week.","予定だった（was go~ing to）","*lu-cy was gon-na *send her *mum a *card from *rome last *week."],
+  ["and *lu-cy was go~ing to have *sent her *mum a *card from *rome by last *week.","予定だった・完了（was go~ing to have）","and *lu-cy was gon-na have *sent her *mum a *card from *rome by last *week."]]},
+ {base:["Jack","take","kids","school","car","every","day"],lines:[
+  ["*jack *takes *kids to *school by *car *ev-ery *day.","現在形（冠詞なし）"],
+  ["*jack *took the *kids to *school by *car *ev-ery *day.","過去形"],
+  ["*jack has *tak-en the *kids to the *school by *car *ev-ery *day.","現在完了","*jack's *tak-en the *kids to the *school by *car *ev-ery *day."],
+  ["*jack has been *tak-ing the *kids to the *school in his *car *ev-ery *day.","現在完了進行","*jack's been *tak-ing the *kids to the *school in his *car *ev-ery *day."],
+  ["and *jack was go~ing to be *tak-ing the *kids to the *school in the *car *ev-ery *day.","予定だった・進行（was go~ing to be ~ing）","and *jack was gon-na be *tak-ing the *kids to the *school in the *car *ev-ery *day."]]}
+ ,{base:["birds","sing","songs"],lines:[
+  ["*birds *sing *songs.","現在形"],
+  ["the *birds *sang the *songs.","過去形"],
+  ["the *birds were *sing-ing the *songs.","過去進行形"],
+  ["the *birds have been *sing-ing their *songs.","現在完了進行","the *birds~'ve been *sing-ing their *songs."],
+  ["the *birds would have been *sing-ing their *songs.","仮定・完了進行","the *birds would~'ve been *sing-ing their *songs."]]}
+ ,{base:["Mike","fix","bike"],lines:[
+  ["*mike *fix-es *bikes.","現在形"],
+  ["*mike has *fixed the *bike.","現在完了","*mike's *fixed the *bike."],
+  ["*mike will be *fix-ing the *bike.","未来進行","*mike~'ll be *fix-ing the *bike."],
+  ["*mike has been *fix-ing the *bike for us.","現在完了進行","*mike's been *fix-ing the *bike for us."],
+  ["*mike should have been *fix-ing the *bike for us.","後悔（should have been ~ing）","*mike should~'ve been *fix-ing the *bike for us."]]}
+ ,{base:["Tom","play","jazz"],q:true,lines:[
+  ["*tom *plays *jazz.","現在形（平叙文）"],
+  ["does *tom *play *jazz?","疑問文・現在"],
+  ["will *tom be *play-ing *jazz?","疑問文・未来進行"],
+  ["has *tom been *play-ing some *jazz?","疑問文・現在完了進行"],
+  ["would *tom have been *play-ing some *jazz?","疑問文・仮定の完了進行"]]}
+ ,{base:["nurse","help","man"],lines:[
+  ["*nurs-es *help *men.","現在形（冠詞なし）"],
+  ["the *nurse *helped the *man.","過去形"],
+  ["the *nurse was *help-ing the *man.","過去進行形"],
+  ["the *man was *helped by the *nurse.","受け身（主語を入れ替え）"],
+  ["the *man could have been *helped by the *nurse.","可能性・完了の受け身","the *man could~'ve been *helped by the *nurse."]]}
+ ,{base:["sun","melt","snow"],lines:[
+  ["the *sun *melts the *snow.","現在形"],
+  ["the *sun *melt-ed the *snow.","過去形"],
+  ["the *snow was *melt-ed by the *sun.","過去・受け身"],
+  ["the *snow has been *melt-ed by the *sun.","現在完了・受け身","the *snow's been *melt-ed by the *sun."],
+  ["the *snow will have been *melt-ed by the *sun.","未来完了・受け身","the *snow'll have been *melt-ed by the *sun."]]}
+ ,{base:["Ann","play","games","night"],lines:[
+  ["*ann *plays *games at *night.","現在形"],
+  ["*ann *played some *games at *night.","過去形"],
+  ["*ann was *play-ing some *games at *night.","過去進行形"],
+  ["*ann has been *play-ing some *games in the *night.","現在完了進行","*ann's been *play-ing some *games in the *night."],
+  ["and *ann would have been *play-ing some *games in the *night.","仮定・完了進行","and *ann would~'ve been *play-ing some *games in the *night."]]}
+ ,{base:["what","time","train","leave"],q:true,lines:[
+  ["*what *time do *trains *leave?","疑問文・現在（冠詞なし）"],
+  ["*what *time does the *train *leave?","疑問文・現在"],
+  ["*what *time will the *train be *leav-ing?","疑問文・未来進行"],
+  ["*what *time is the *train go~ing to *leave?","疑問文・予定（be go~ing to）","*what *time is the *train gon-na *leave?"],
+  ["*what *time would the *train have been *leav-ing?","疑問文・仮定の完了進行"]]}
+ ,{base:["Jane","lose","keys","work"],lines:[
+  ["*jane *lost her *keys at *work.","過去形"],
+  ["*jane has *lost her *keys at *work.","現在完了","*jane's *lost her *keys at *work."],
+  ["*jane must have *lost her *keys at *work.","推量（must have）","*jane must~'ve *lost her *keys at *work."],
+  ["*jane must have *lost her *keys at her *work.","推量（must have）＋所有格","*jane must~'ve *lost her *keys at her *work."],
+  ["and *jane must have *lost her *keys when she was at *work.","推量＋when節","and *jane must~'ve *lost her *keys when she was at *work."]]}
+ ,{base:["Dad","cook","dinner","tonight"],q:true,lines:[
+  ["*dad *cooks *din-ner to-*night.","現在形（平叙文）"],
+  ["will *dad *cook *din-ner to-*night?","疑問文・未来（will）"],
+  ["is *dad *cook-ing *din-ner to-*night?","疑問文・現在進行"],
+  ["is *dad go~ing to *cook us *din-ner to-*night?","疑問文・予定（be go~ing to）","is *dad gon-na *cook us *din-ner to-*night?"],
+  ["is *dad go~ing to be *cook-ing us *din-ner to-*night?","疑問文・予定の進行","is *dad gon-na be *cook-ing us *din-ner to-*night?"]]}
+ ,{base:["team","win","game","Sunday"],lines:[
+  ["the *team *won the *game on *sun-day.","過去形"],
+  ["the *team was *win-ning the *game on *sun-day.","過去進行形"],
+  ["the *team should have *won the *game on *sun-day.","後悔（should have）","the *team should~'ve *won the *game on *sun-day."],
+  ["the *team would have been *win-ning the *game on *sun-day.","仮定・完了進行","the *team would~'ve been *win-ning the *game on *sun-day."],
+  ["the *team was go~ing to be *win-ning the *game on *sun-day.","予定だった・進行（was go~ing to be ~ing）","the *team was gon-na be *win-ning the *game on *sun-day."]]}
+ ,{base:["Amy","read","books","bed","night"],lines:[
+  ["*a-my *reads *books in *bed at *night.","現在形"],
+  ["*a-my *read{red} some *books in *bed at *night.","過去形"],
+  ["*a-my was *read-ing some *books in her *bed at *night.","過去進行形"],
+  ["*a-my has been *read-ing some *books in her *bed at *night.","現在完了進行","*a-my's been *read-ing some *books in her *bed at *night."],
+  ["*a-my would have been *read-ing some *books in her *bed in the *night.","仮定・完了進行","*a-my would~'ve been *read-ing some *books in her *bed in the *night."]]}
+ ,{base:["when","parents","visit","friends","London"],q:true,lines:[
+  ["*when do *par-ents *vis-it *friends in *lon-don?","疑問文・現在（所有格なし）"],
+  ["*when do your *par-ents *vis-it their *friends in *lon-don?","疑問文・現在"],
+  ["*when are your *par-ents go~ing to *vis-it their *friends in *lon-don?","疑問文・予定（be go~ing to）","*when are your *par-ents gon-na *vis-it their *friends in *lon-don?"],
+  ["*when will your *par-ents be *vis-it-ing their *friends in *lon-don?","疑問文・未来進行"],
+  ["*when would your *par-ents have been *vis-it-ing their *friends in *lon-don?","疑問文・仮定の完了進行"]]}
+ ,{base:["Paul","walk","dog","park","dawn"],lines:[
+  ["*paul *walks his *dog in the *park at *dawn.","現在形"],
+  ["*paul was *walk-ing his *dog in the *park at *dawn.","過去進行形"],
+  ["*paul has been *walk-ing his *dog in the *park at *dawn.","現在完了進行","*paul's been *walk-ing his *dog in the *park at *dawn."],
+  ["*paul should have been *walk-ing his *dog in the *park at *dawn.","後悔（should have been ~ing）","*paul should~'ve been *walk-ing his *dog in the *park at *dawn."],
+  ["and *paul was go~ing to be *walk-ing his *dog in the *park at *dawn.","予定だった・進行","and *paul was gon-na be *walk-ing his *dog in the *park at *dawn."]]}
+ ,{base:["where","see","film","friends","Friday"],q:true,lines:[
+  ["*where did you *see the *film with *friends on *fri-day?","疑問文・過去（所有格なし）"],
+  ["*where did you *see the *film with your *friends on *fri-day?","疑問文・過去"],
+  ["*where would you have *seen the *film with your *friends on *fri-day?","疑問文・仮定の完了"],
+  ["*where are you go~ing to *see the *film with your *friends on *fri-day?","疑問文・予定（be go~ing to）","*where are you gon-na *see the *film with your *friends on *fri-day?"],
+  ["*where are you go~ing to be *see-ing the *film with your *friends on *fri-day?","疑問文・予定の進行","*where are you gon-na be *see-ing the *film with your *friends on *fri-day?"]]}
+ ,{base:["Tom","buy","wife","ring","shop","town"],lines:[
+  ["*tom *bought his *wife a *ring from a *shop in *town.","過去形"],
+  ["*tom has *bought his *wife a *ring from a *shop in *town.","現在完了","*tom's *bought his *wife a *ring from a *shop in *town."],
+  ["*tom should have *bought his *wife a *ring from the *shop in the *town.","後悔（should have）","*tom should~'ve *bought his *wife a *ring from the *shop in the *town."],
+  ["*tom was go~ing to *buy his *wife a *ring from the *shop in the *town.","予定だった（was go~ing to）","*tom was gon-na *buy his *wife a *ring from the *shop in the *town."],
+  ["and *tom was go~ing to have *bought his *wife a *ring from the *shop in the *town.","予定だった・完了","and *tom was gon-na have *bought his *wife a *ring from the *shop in the *town."]]}
+ ,{base:["what","doctor","say","Mum","phone","morning"],q:true,lines:[
+  ["*what did the *doc-tor *say to *mum on the *phone this *morn-ing?","疑問文・過去（所有格なし）"],
+  ["*what did the *doc-tor *say to your *mum on the *phone this *morn-ing?","疑問文・過去"],
+  ["*what has the *doc-tor *said to your *mum on the *phone this *morn-ing?","疑問文・現在完了"],
+  ["*what was the *doc-tor *say-ing to your *mum on the *phone this *morn-ing?","疑問文・過去進行"],
+  ["*what would the *doc-tor have *said to your *mum on the *phone this *morn-ing?","疑問文・仮定の完了"]]}
+ ,{base:["Sarah","teach","kids","maths","school","year"],lines:[
+  ["*sar-ah *taught *kids *maths at *school last *year.","過去形（冠詞なし）"],
+  ["*sar-ah *taught the *kids *maths at the *school last *year.","過去形"],
+  ["*sar-ah has been *teach-ing the *kids *maths at the *school this *year.","現在完了進行","*sar-ah's been *teach-ing the *kids *maths at the *school this *year."],
+  ["*sar-ah should have been *teach-ing the *kids some *maths at the *school last *year.","後悔（should have been ~ing）","*sar-ah should~'ve been *teach-ing the *kids some *maths at the *school last *year."],
+  ["*sar-ah was go~ing to be *teach-ing the *kids *maths at the *school last *year.","予定だった・進行","*sar-ah was gon-na be *teach-ing the *kids *maths at the *school last *year."]]}
+ ,{base:["Ken","meet","sister","friends","bar","centre","night"],lines:[
+  ["*ken *met his *sis-ter's *friends in a *bar in the *cen-tre last *night.","過去形"],
+  ["*ken was *meet-ing his *sis-ter's *friends in a *bar in the *cen-tre last *night.","過去進行形"],
+  ["*ken should have *met his *sis-ter's *friends in a *bar in the *cen-tre last *night.","後悔（should have）","*ken should~'ve *met his *sis-ter's *friends in a *bar in the *cen-tre last *night."],
+  ["*ken was go~ing to *meet his *sis-ter's *friends in a *bar in the *cen-tre last *night.","予定だった（was go~ing to）","*ken was gon-na *meet his *sis-ter's *friends in a *bar in the *cen-tre last *night."],
+  ["and *ken was go~ing to be *meet-ing his *sis-ter's *friends in a *bar in the *cen-tre last *night.","予定だった・進行","and *ken was gon-na be *meet-ing his *sis-ter's *friends in a *bar in the *cen-tre last *night."]]}
+ ,{base:["why","boss","cancel","meeting","team","two","Friday"],q:true,lines:[
+  ["*why did the *boss *can-cel the *meet-ing with the *team at *two on *fri-day?","疑問文・過去"],
+  ["*why has the *boss *can-celled the *meet-ing with the *team at *two on *fri-day?","疑問文・現在完了"],
+  ["*why would the *boss have *can-celled the *meet-ing with the *team at *two on *fri-day?","疑問文・仮定の完了"],
+  ["*why was the *boss go~ing to *can-cel the *meet-ing with the *team at *two on *fri-day?","疑問文・予定だった（was go~ing to）","*why was the *boss gon-na *can-cel the *meet-ing with the *team at *two on *fri-day?"],
+  ["*why is the *boss go~ing to be *can-cel-ling the *meet-ing with the *team at *two on *fri-day?","疑問文・予定の進行","*why is the *boss gon-na be *can-cel-ling the *meet-ing with the *team at *two on *fri-day?"]]}
+ ,{base:["Lily","fly","London","Paris","family","Friday","morning"],lines:[
+  ["*lil-y *flew from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing.","過去形"],
+  ["*lil-y was *fly-ing from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing.","過去進行形"],
+  ["*lil-y should have *flown from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing.","後悔（should have）","*lil-y should~'ve *flown from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing."],
+  ["*lil-y was go~ing to *fly from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing.","予定だった（was go~ing to）","*lil-y was gon-na *fly from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing."],
+  ["and *lil-y was go~ing to be *fly-ing from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing.","予定だった・進行","and *lil-y was gon-na be *fly-ing from *lon-don to *par-is with her *fam-i-ly on *fri-day *morn-ing."]]}
+ ,{scene:"biz",base:["send","report","today"],lines:[
+  ["*send the re-*port to-*day.","命令形"],
+  ["I'll *send the re-*port to-*day.","未来（I'll）"],
+  ["I'll *send you the re-*port to-*day.","未来＋相手（send you）"],
+  ["I'm go~ing to *send you the re-*port to-*day.","予定（go~ing to）","I'm gon-na *send you the re-*port to-*day."],
+  ["I'm go~ing to be *send-ing you the re-*port to-*day.","予定の進行","I'm gon-na be *send-ing you the re-*port to-*day."]]}
+ ,{scene:"biz",base:["check","file","today"],q:true,lines:[
+  ["*check the *file to-*day.","命令形"],
+  ["can you *check the *file to-*day?","依頼（can you）"],
+  ["could you *check the *file for me to-*day?","丁寧な依頼（could you ~ for me）"],
+  ["will you have *checked the *file by to-*day?","疑問文・未来完了（will you have）"],
+  ["would you be *check-ing the *file for us to-*day?","丁寧な確認（would you be ~ing）"]]}
+ ,{scene:"biz",base:["meeting","move","Monday","morning"],lines:[
+  ["the *meet-ing *moved to *mon-day *morn-ing.","過去形"],
+  ["the *meet-ing has *moved to *mon-day *morn-ing.","現在完了","the *meet-ing's *moved to *mon-day *morn-ing."],
+  ["the *meet-ing has been *moved to *mon-day *morn-ing.","現在完了・受け身","the *meet-ing's been *moved to *mon-day *morn-ing."],
+  ["the *meet-ing should have been *moved to *mon-day *morn-ing.","後悔・受け身","the *meet-ing should~'ve been *moved to *mon-day *morn-ing."],
+  ["the *meet-ing is go~ing to be *moved to *mon-day *morn-ing.","予定・受け身","the *meet-ing's gon-na be *moved to *mon-day *morn-ing."]]}
+ ,{scene:"biz",base:["when","team","finish","project"],q:true,lines:[
+  ["*when do *teams *fin-ish *proj-ects?","疑問文・現在（一般論）"],
+  ["*when will the *team *fin-ish the *proj-ect?","疑問文・未来（will）"],
+  ["*when will the *team have *fin-ished the *proj-ect?","疑問文・未来完了"],
+  ["*when is the *team go~ing to *fin-ish the *proj-ect?","疑問文・予定（go~ing to）","*when's the *team gon-na *fin-ish the *proj-ect?"],
+  ["*when is the *team go~ing to have *fin-ished the *proj-ect?","疑問文・予定の完了","*when's the *team gon-na have *fin-ished the *proj-ect?"]]}
+ ,{scene:"biz",base:["client","sign","contract","yesterday"],lines:[
+  ["the *cli-ent *signed the *con-tract *yes-ter-day.","過去形"],
+  ["the *cli-ent was *sign-ing the *con-tract *yes-ter-day.","過去進行形"],
+  ["the *cli-ent should have *signed the *con-tract *yes-ter-day.","後悔（should have）","the *cli-ent should~'ve *signed the *con-tract *yes-ter-day."],
+  ["the *cli-ent was go~ing to *sign the *con-tract *yes-ter-day.","予定だった（was go~ing to）","the *cli-ent was gon-na *sign the *con-tract *yes-ter-day."],
+  ["the *con-tract should have been *signed by the *cli-ent *yes-ter-day.","受け身・後悔（主語を入れ替え）","the *con-tract should~'ve been *signed by the *cli-ent *yes-ter-day."]]}
+ ,{scene:"biz",base:["send","agenda","before","meeting","Friday"],lines:[
+  ["*send the a-*gen-da be-*fore the *meet-ing on *fri-day.","命令形"],
+  ["I'll *send the a-*gen-da be-*fore the *meet-ing on *fri-day.","未来（I'll）"],
+  ["I'll *send you the a-*gen-da be-*fore the *meet-ing on *fri-day.","未来＋相手（send you）"],
+  ["I'll have *sent you the a-*gen-da be-*fore the *meet-ing on *fri-day.","未来完了（I'll have）"],
+  ["I'm go~ing to be *send-ing you the a-*gen-da be-*fore the *meet-ing on *fri-day.","予定の進行","I'm gon-na be *send-ing you the a-*gen-da be-*fore the *meet-ing on *fri-day."]]}
+ ,{scene:"biz",base:["share","slides","whole","team","afternoon"],q:true,lines:[
+  ["*share the *slides with the *whole *team this af-ter-*noon.","命令形"],
+  ["can you *share the *slides with the *whole *team this af-ter-*noon?","依頼（can you）"],
+  ["could you *share the *slides for me with the *whole *team this af-ter-*noon?","丁寧な依頼（could you ~ for me）"],
+  ["will you have *shared the *slides with the *whole *team by this af-ter-*noon?","疑問文・未来完了"],
+  ["would you be *shar-ing the *slides with the *whole *team this af-ter-*noon for me?","丁寧な確認（would you be ~ing）"]]}
+ ,{scene:"biz",base:["discuss","new","budget","manager","meeting","tomorrow"],lines:[
+  ["we'll dis-*cuss the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row.","未来（we'll）"],
+  ["we'll be dis-*cuss-ing the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row.","未来進行"],
+  ["we're go~ing to dis-*cuss the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row.","予定（go~ing to）","we're gon-na dis-*cuss the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row."],
+  ["we're go~ing to be dis-*cuss-ing the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row.","予定の進行","we're gon-na be dis-*cuss-ing the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row."],
+  ["and we're go~ing to be dis-*cuss-ing the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row.","予定の進行（and で始める）","and we're gon-na be dis-*cuss-ing the *new *budg-et with the *man-a-ger at the *meet-ing to-*mor-row."]]}
+ ,{scene:"biz",base:["when","send","invoice","new","client","week"],q:true,lines:[
+  ["*when did you *send the *in-voice to the *new *cli-ent last *week?","疑問文・過去"],
+  ["*when were you *send-ing the *in-voice to the *new *cli-ent last *week?","疑問文・過去進行"],
+  ["*when would you have *sent the *in-voice to the *new *cli-ent last *week?","疑問文・仮定の完了"],
+  ["*when were you go~ing to *send the *in-voice to the *new *cli-ent last *week?","疑問文・予定だった","*when were you gon-na *send the *in-voice to the *new *cli-ent last *week?"],
+  ["*when were you go~ing to be *send-ing the *in-voice to the *new *cli-ent last *week?","疑問文・予定だった進行","*when were you gon-na be *send-ing the *in-voice to the *new *cli-ent last *week?"]]}
+ ,{scene:"biz",base:["marketing","team","launch","new","product","Japan","month"],lines:[
+  ["the *mar-ket-ing *team *launched the *new *prod-uct in ja-*pan last *month.","過去形"],
+  ["the *mar-ket-ing *team will *launch the *new *prod-uct in ja-*pan next *month.","未来（will）","the *mar-ket-ing *team~'ll *launch the *new *prod-uct in ja-*pan next *month."],
+  ["the *mar-ket-ing *team will be *launch-ing the *new *prod-uct in ja-*pan next *month.","未来進行"],
+  ["the *mar-ket-ing *team is go~ing to *launch the *new *prod-uct in ja-*pan next *month.","予定（go~ing to）","the *mar-ket-ing *team's gon-na *launch the *new *prod-uct in ja-*pan next *month."],
+  ["the *mar-ket-ing *team is go~ing to be *launch-ing the *new *prod-uct in ja-*pan next *month.","予定の進行","the *mar-ket-ing *team's gon-na be *launch-ing the *new *prod-uct in ja-*pan next *month."]]}
+ ,{scene:"daily",base:["call","Mum","tonight"],lines:[
+  ["*call *mum to-*night.","命令形"],
+  ["I'll *call my *mum to-*night.","未来（I'll）"],
+  ["I'll have *called my *mum by to-*night.","未来完了（by tonight）"],
+  ["I'm go~ing to *call my *mum to-*night.","予定（go~ing to）","I'm gon-na *call my *mum to-*night."],
+  ["I'm go~ing to be *call-ing my *mum to-*night.","予定の進行","I'm gon-na be *call-ing my *mum to-*night."]]}
+ ,{scene:"daily",base:["what","do","weekend"],q:true,lines:[
+  ["*what did you *do at the week-*end?","疑問文・過去"],
+  ["*what are you *do-ing this week-*end?","疑問文・進行形の予定"],
+  ["*what have you been *do-ing this week-*end?","疑問文・現在完了進行","*what~'ve you been *do-ing this week-*end?"],
+  ["*what are you go~ing to *do this week-*end?","疑問文・予定（go~ing to）","*what are you gon-na *do this week-*end?"],
+  ["*what are you go~ing to be *do-ing this week-*end?","疑問文・予定の進行","*what are you gon-na be *do-ing this week-*end?"]]}
+ ,{scene:"daily",base:["food","really","good"],lines:[
+  ["the *food was *real-ly *good.","過去形"],
+  ["the *food has been *real-ly *good.","現在完了","the *food's been *real-ly *good."],
+  ["the *food would have been *real-ly *good.","仮定・完了","the *food would~'ve been *real-ly *good."],
+  ["the *food is go~ing to be *real-ly *good.","予定・予想（go~ing to be）","the *food's gon-na be *real-ly *good."],
+  ["and the *food is go~ing to be *real-ly *good for us.","予想＋for us","and the *food's gon-na be *real-ly *good for us."]]}
+ ,{scene:"daily",base:["get","home","late","night"],lines:[
+  ["*got *home *late last *night.","過去形（主語なし）"],
+  ["I *got *home *late last *night.","過去形"],
+  ["I was *get-ting *home *late last *night.","過去進行形"],
+  ["I must have *got *home *late last *night.","推量（must have）","I must~'ve *got *home *late last *night."],
+  ["I would have been *get-ting *home *late last *night.","仮定・完了進行","I would~'ve been *get-ting *home *late last *night."]]}
+ ,{scene:"daily",base:["how","trip","Spain","week"],q:true,lines:[
+  ["*how was the *trip to *spain last *week?","疑問文・過去"],
+  ["*how has the *trip to *spain been this *week?","疑問文・現在完了"],
+  ["*how would the *trip to *spain have been last *week?","疑問文・仮定の完了"],
+  ["*how is the *trip to *spain go~ing to be next *week?","疑問文・予想（go~ing to be）","*how's the *trip to *spain gon-na be next *week?"],
+  ["so *how is the *trip to *spain go~ing to be for you next *week?","疑問文・予想＋for you","so *how's the *trip to *spain gon-na be for you next *week?"]]}
+ ,{scene:"daily",base:["sister","work","home","Fridays"],lines:[
+  ["my *sis-ter *works from *home on *fri-days.","現在形"],
+  ["my *sis-ter has *worked from *home on *fri-days.","現在完了","my *sis-ter's *worked from *home on *fri-days."],
+  ["my *sis-ter has been *work-ing from *home on *fri-days.","現在完了進行","my *sis-ter's been *work-ing from *home on *fri-days."],
+  ["my *sis-ter is go~ing to *work from *home on *fri-days.","予定（go~ing to）","my *sis-ter's gon-na *work from *home on *fri-days."],
+  ["my *sis-ter is go~ing to be *work-ing from *home on *fri-days.","予定の進行","my *sis-ter's gon-na be *work-ing from *home on *fri-days."]]}
+ ,{scene:"daily",base:["go","beach","kids","ten","Saturday"],lines:[
+  ["we *went to the *beach with the *kids at *ten on *sat-ur-day.","過去形"],
+  ["we were *go-ing to the *beach with the *kids at *ten on *sat-ur-day.","過去進行形"],
+  ["we should have *gone to the *beach with the *kids at *ten on *sat-ur-day.","後悔（should have）","we should~'ve *gone to the *beach with the *kids at *ten on *sat-ur-day."],
+  ["we were go~ing to *go to the *beach with the *kids at *ten on *sat-ur-day.","予定だった（were go~ing to）","we were gon-na *go to the *beach with the *kids at *ten on *sat-ur-day."],
+  ["we were go~ing to be *go-ing to the *beach with the *kids at *ten on *sat-ur-day.","予定だった・進行","we were gon-na be *go-ing to the *beach with the *kids at *ten on *sat-ur-day."]]}
+ ,{scene:"daily",base:["see","new","film","cinema","town"],q:true,lines:[
+  ["did you *see the *new *film at the *cin-e-ma in *town?","疑問文・過去"],
+  ["have you *seen the *new *film at the *cin-e-ma in *town?","疑問文・現在完了"],
+  ["would you have *seen the *new *film at the *cin-e-ma in *town?","疑問文・仮定の完了"],
+  ["are you go~ing to *see the *new *film at the *cin-e-ma in *town?","疑問文・予定（go~ing to）","are you gon-na *see the *new *film at the *cin-e-ma in *town?"],
+  ["are you go~ing to be *see-ing the *new *film at the *cin-e-ma in *town?","疑問文・予定の進行","are you gon-na be *see-ing the *new *film at the *cin-e-ma in *town?"]]}
+ ,{scene:"daily",base:["leave","mobile","phone","table","kitchen","morning"],lines:[
+  ["I *left my *mo-bile *phone on the *ta-ble in the *kitch-en this *morn-ing.","過去形"],
+  ["I've *left my *mo-bile *phone on the *ta-ble in the *kitch-en this *morn-ing.","現在完了"],
+  ["I must have *left my *mo-bile *phone on the *ta-ble in the *kitch-en this *morn-ing.","推量（must have）","I must~'ve *left my *mo-bile *phone on the *ta-ble in the *kitch-en this *morn-ing."],
+  ["I must have *left my *mo-bile *phone on the *ta-ble that's in the *kitch-en this *morn-ing.","推量＋関係詞（that's）","I must~'ve *left my *mo-bile *phone on the *ta-ble that's in the *kitch-en this *morn-ing."],
+  ["and I must have *left my *mo-bile *phone on the *ta-ble that's in the *kitch-en this *morn-ing.","推量＋関係詞（and で始める）","and I must~'ve *left my *mo-bile *phone on the *ta-ble that's in the *kitch-en this *morn-ing."]]}
+ ,{scene:"daily",base:["what","time","train","get","London","tomorrow"],q:true,lines:[
+  ["*what *time does your *train *get to *lon-don to-*mor-row?","疑問文・現在（予定）"],
+  ["*what *time is your *train *get-ting to *lon-don to-*mor-row?","疑問文・進行形の予定"],
+  ["*what *time will your *train have *got to *lon-don to-*mor-row?","疑問文・未来完了"],
+  ["*what *time is your *train go~ing to *get to *lon-don to-*mor-row?","疑問文・予定（go~ing to）","*what *time's your *train gon-na *get to *lon-don to-*mor-row?"],
+  ["*what *time is your *train go~ing to be *get-ting to *lon-don to-*mor-row?","疑問文・予定の進行","*what *time's your *train gon-na be *get-ting to *lon-don to-*mor-row?"]]}
+ ,{scene:"daily",base:["Jess","friends","eat","nice","Italian","place","night"],lines:[
+  ["*jess and her *friends *ate at a *nice i-*tal-ian *place last *night.","過去形"],
+  ["*jess and her *friends were *eat-ing at a *nice i-*tal-ian *place last *night.","過去進行形"],
+  ["*jess and her *friends should have *eat-en at a *nice i-*tal-ian *place last *night.","後悔（should have）","*jess and her *friends should~'ve *eat-en at a *nice i-*tal-ian *place last *night."],
+  ["*jess and her *friends were go~ing to *eat at a *nice i-*tal-ian *place last *night.","予定だった（were go~ing to）","*jess and her *friends were gon-na *eat at a *nice i-*tal-ian *place last *night."],
+  ["*jess and her *friends were go~ing to be *eat-ing at a *nice i-*tal-ian *place last *night.","予定だった・進行","*jess and her *friends were gon-na be *eat-ing at a *nice i-*tal-ian *place last *night."]]}
+ ,{base:["Jack","sister","drive","coast","Dad's","car","early","Saturday"],lines:[
+  ["*jack and his *sis-ter *drove to the *coast in their *dad's *car *ear-ly on *sat-ur-day.","過去形"],
+  ["*jack and his *sis-ter were *driv-ing to the *coast in their *dad's *car *ear-ly on *sat-ur-day.","過去進行形"],
+  ["*jack and his *sis-ter should have *driv-en to the *coast in their *dad's *car *ear-ly on *sat-ur-day.","後悔（should have）","*jack and his *sis-ter should~'ve *driv-en to the *coast in their *dad's *car *ear-ly on *sat-ur-day."],
+  ["*jack and his *sis-ter were go~ing to *drive to the *coast in their *dad's *car *ear-ly on *sat-ur-day.","予定だった（were going to）","*jack and his *sis-ter were gon-na *drive to the *coast in their *dad's *car *ear-ly on *sat-ur-day."],
+  ["*jack and his *sis-ter were go~ing to be *driv-ing to the *coast in their *dad's *car *ear-ly on *sat-ur-day.","予定だった・進行","*jack and his *sis-ter were gon-na be *driv-ing to the *coast in their *dad's *car *ear-ly on *sat-ur-day."]]}
+ ,{base:["how","kids","get","new","school","city","centre","Monday"],q:true,lines:[
+  ["*how did the *kids *get to the *new *school in the *cit-y *cen-tre on *mon-day?","疑問文・過去"],
+  ["*how will the *kids have *got to the *new *school in the *cit-y *cen-tre on *mon-day?","疑問文・未来完了"],
+  ["*how are the *kids go~ing to *get to the *new *school in the *cit-y *cen-tre on *mon-day?","疑問文・予定（going to）","*how are the *kids gon-na *get to the *new *school in the *cit-y *cen-tre on *mon-day?"],
+  ["*how would the *kids have been *get-ting to the *new *school in the *cit-y *cen-tre on *mon-day?","疑問文・仮定の完了進行"],
+  ["*how are the *kids go~ing to be *get-ting to the *new *school in the *cit-y *cen-tre on *mon-day?","疑問文・予定の進行","*how are the *kids gon-na be *get-ting to the *new *school in the *cit-y *cen-tre on *mon-day?"]]}
+ ,{scene:"biz",base:["send","final","version","contract","legal","team","before","Friday"],lines:[
+  ["*send the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day.","命令形"],
+  ["I'll *send the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day.","未来（I'll）"],
+  ["I'll have *sent the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day.","未来完了（I'll have）"],
+  ["I'm go~ing to *send the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day.","予定（going to）","I'm gon-na *send the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day."],
+  ["I'm go~ing to be *send-ing the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day.","予定の進行","I'm gon-na be *send-ing the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day."]]}
+ ,{scene:"biz",base:["when","book","meeting","head","sales","discuss","new","budget"],q:true,lines:[
+  ["*when can we *book a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?","疑問文・依頼（can we）"],
+  ["*when should we have *booked a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?","疑問文・後悔（should have）"],
+  ["*when will we be *book-ing a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?","疑問文・未来進行"],
+  ["*when are we go~ing to *book a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?","疑問文・予定（going to）","*when are we gon-na *book a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?"],
+  ["*when are we go~ing to be *book-ing a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?","疑問文・予定の進行","*when are we gon-na be *book-ing a *meet-ing with the *head of *sales to dis-*cuss the *new *budg-et?"]]}
+ ,{scene:"daily",base:["after","work","go","pub","drink","old","friends","gym"],lines:[
+  ["*af-ter *work we *went to the *pub for a *drink with *old *friends from the *gym.","過去形"],
+  ["*af-ter *work we were *go-ing to the *pub for a *drink with some *old *friends from the *gym.","過去進行形"],
+  ["*af-ter *work we should have *gone to the *pub for a *drink with some *old *friends from the *gym.","後悔（should have）","*af-ter *work we should~'ve *gone to the *pub for a *drink with some *old *friends from the *gym."],
+  ["*af-ter *work we were go~ing to *go to the *pub for a *drink with some *old *friends from the *gym.","予定だった（were going to）","*af-ter *work we were gon-na *go to the *pub for a *drink with some *old *friends from the *gym."],
+  ["*af-ter *work we were go~ing to be *go-ing to the *pub for a *drink with some *old *friends from the *gym.","予定だった・進行","*af-ter *work we were gon-na be *go-ing to the *pub for a *drink with some *old *friends from the *gym."]]}
+];
+const IPA={"af-ter-noon":"ɑːf-tə-nuːn","a-gen-da":"ə-dʒen-də","a-my's":"eɪ-miz","a-my":"eɪ-mi","and":"ænd|ən","ann's":"ænz","ann":"æn","are":"ɑː|ə","ate":"eɪt","at":"æt|ət","a":"eɪ|ə","bar":"bɑː","beach":"biːtʃ","bed":"bed","been":"biːn|bɪn","be-fore":"bɪ-fɔː","be":"biː|bi","bikes":"baɪks","bike":"baɪk","birds":"bɜːdz","bob's":"bɒbz","bob":"bɒb","books":"bʊks","boss":"bɒs","bought":"bɔːt","budg-et":"bʌdʒ-ɪt","buy-ing":"baɪ-ɪŋ","buys":"baɪz","buy":"baɪ","by":"baɪ","called":"kɔːld","call-ing":"kɔːl-ɪŋ","call":"kɔːl","can-celled":"kæn-səld","can-cel-ling":"kæn-sə-lɪŋ","can-cel":"kæn-səl","can":"kæn|kən","card":"kɑːd","car":"kɑː","cats":"kæts","cen-tre":"sen-tə","chased":"tʃeɪst","chase":"tʃeɪs","chas-ing":"tʃeɪ-sɪŋ","checked":"tʃekt","check-ing":"tʃek-ɪŋ","check":"tʃek","cin-e-ma":"sɪn-ə-mə","cli-ent":"klaɪ-ənt","con-tract":"kɒn-trækt","cook-ing":"kʊk-ɪŋ","cooks":"kʊks","cook":"kʊk","could":"kʊd|kəd","dad":"dæd","dawn":"dɔːn","day":"deɪ","did":"dɪd","din-ner":"dɪn-ə","dis-cuss-ing":"dɪs-kʌs-ɪŋ","dis-cuss":"dɪs-kʌs","doc-tor":"dɒk-tə","does":"dʌz|dəz","dog":"dɒɡ","do-ing":"duː-ɪŋ","do":"duː|də","drank":"dræŋk","drink-ing":"drɪŋk-ɪŋ","drinks":"drɪŋks","eat-en":"iː-tən","eat-ing":"iː-tɪŋ","eat":"iːt","ev-ery":"ev-ri","fam-i-ly":"fæm-ə-li","file":"faɪl","film":"fɪlm","fin-ished":"fɪn-ɪʃt","fin-ish":"fɪn-ɪʃ","fixed":"fɪkst","fix-es":"fɪk-sɪz","fix-ing":"fɪk-sɪŋ","flew":"fluː","flown":"fləʊn","fly-ing":"flaɪ-ɪŋ","fly":"flaɪ","food's":"fuːdz","food":"fuːd","for":"fɔː|fə","fri-days":"fraɪ-deɪz","fri-day":"fraɪ-deɪ","friends":"frendz","from":"frɒm|frəm","games":"ɡeɪmz","game":"ɡeɪm","get-ting":"ɡet-ɪŋ","get":"ɡet","go-ing":"ɡəʊ-ɪŋ","gone":"ɡɒn","gon-na":"ɡə-nə","go":"ɡəʊ","good":"ɡʊd","got":"ɡɒt","had":"hæd|həd","has":"hæz|həz","have":"hæv|həv","helped":"helpt","help-ing":"help-ɪŋ","help":"help","her":"hɜː|hə","his":"hɪz|ɪz","home":"həʊm","how's":"haʊz","how":"haʊ","i'll":"aɪl","i'm":"aɪm","i've":"aɪv","i":"aɪ","in-voice":"ɪn-vɔɪs","in":"ɪn","is":"ɪz","i-tal-ian":"ɪ-tæl-jən","jack's":"dʒæks","jack":"dʒæk","jane's":"dʒeɪnz","jane":"dʒeɪn","ja-pan":"dʒə-pæn","jazz":"dʒæz","jess":"dʒes","kate":"keɪt","ken":"ken","keys":"kiːz","kids":"kɪdz","kitch-en":"kɪtʃ-ɪn","last":"lɑːst","late":"leɪt","launched":"lɔːntʃt","launch-ing":"lɔːntʃ-ɪŋ","launch":"lɔːntʃ","leave":"liːv","leav-ing":"liːv-ɪŋ","left":"left","lil-y":"lɪl-i","lon-don":"lʌn-dən","lost":"lɒst","loved":"lʌvd","love":"lʌv","lov-ing":"lʌv-ɪŋ","lu-cy's":"luː-siz","lu-cy":"luː-si","lunch":"lʌntʃ","made":"meɪd","makes":"meɪks","mak-ing":"meɪk-ɪŋ","man-a-ger":"mæn-ɪ-dʒə","man":"mæn","mar-ket-ing":"mɑː-kɪt-ɪŋ","maths":"mæθs","meet-ing's":"miːt-ɪŋz","meet-ing":"miːt-ɪŋ","meet":"miːt","melt-ed":"melt-ɪd","melts":"melts","men":"men","met":"met","me":"miː|mi","mice":"maɪs","mike's":"maɪks","mike":"maɪk","mo-bile":"məʊ-baɪl","mon-day":"mʌn-deɪ","month":"mʌnθ","morn-ing":"mɔːn-ɪŋ","moved":"muːvd","mum":"mʌm","must":"mʌst|məst","my":"maɪ","new":"njuː","next":"nekst","nice":"naɪs","night":"naɪt","notes":"nəʊts","nurs-es":"nɜːs-ɪz","nurse":"nɜːs","on":"ɒn","par-ents":"peə-rənts","par-is":"pær-ɪs","park":"pɑːk","paul's":"pɔːlz","paul":"pɔːl","phone":"fəʊn","place":"pleɪs","played":"pleɪd","play-ing":"pleɪ-ɪŋ","plays":"pleɪz","play":"pleɪ","prod-uct":"prɒd-ʌkt","proj-ects":"prɒdʒ-ekts","proj-ect":"prɒdʒ-ekt","read-ing":"riːd-ɪŋ","reads":"riːdz","read":"riːd","real-ly":"rɪə-li","re-port":"rɪ-pɔːt","ring":"rɪŋ","rome":"rəʊm","said":"sed","sam's":"sæmz","sam":"sæm","sang":"sæŋ","sar-ah's":"seə-rəz","sar-ah":"seə-rə","sat-ur-day":"sæt-ə-deɪ","say-ing":"seɪ-ɪŋ","say":"seɪ","school":"skuːl","see-ing":"siː-ɪŋ","seen":"siːn","see":"siː","send-ing":"send-ɪŋ","send":"send","sent":"sent","shared":"ʃeəd","share":"ʃeə","shar-ing":"ʃeə-rɪŋ","she":"ʃiː|ʃi","shop":"ʃɒp","should":"ʃʊd|ʃəd","signed":"saɪnd","sign-ing":"saɪn-ɪŋ","sign":"saɪn","sing-ing":"sɪŋ-ɪŋ","sing":"sɪŋ","sis-ter's":"sɪs-təz","sis-ter":"sɪs-tə","slides":"slaɪdz","snow'll":"snəʊl","snow's":"snəʊz","snow":"snəʊ","some":"sʌm|səm","songs":"sɒŋz","so":"səʊ","spain":"speɪn","stu-dents":"stjuː-dənts","sun-day":"sʌn-deɪ","sun":"sʌn","ta-ble":"teɪ-bəl","tak-en":"teɪk-ən","takes":"teɪks","take":"teɪk","tak-ing":"teɪk-ɪŋ","taught":"tɔːt","teach-ing":"tiːtʃ-ɪŋ","team's":"tiːmz","teams":"tiːmz","team":"tiːm","tea":"tiː","ten":"ten","that's":"ðæts","their":"ðeə|ðə","them":"ðem|ðəm","the":"ðiː|ðə","this":"ðɪs","time's":"taɪmz","time":"taɪm","to-day":"tə-deɪ","to-mor-row":"tə-mɒr-əʊ","to-night":"tə-naɪt","tom's":"tɒmz","tom":"tɒm","took":"tʊk","town":"taʊn","to":"tuː|tə","trains":"treɪnz","train":"treɪn","trip":"trɪp","two":"tuː","us":"ʌs|əs","vis-it-ing":"vɪz-ɪt-ɪŋ","vis-it":"vɪz-ɪt","walk-ing":"wɔːk-ɪŋ","walks":"wɔːks","walk":"wɔːk","was":"wɒz|wəz","we'll":"wiːl","we're":"wɪə","we":"wiː|wi","week-end":"wiːk-end","week":"wiːk","went":"went","were":"wɜː|wə","what":"wɒt","when's":"wenz","when":"wen","where":"weə","who'll":"huːl","who's":"huːz","whole":"həʊl","who":"huː","why":"waɪ","wife":"waɪf","will":"wɪl|əl","win-ning":"wɪn-ɪŋ","with":"wɪð","won":"wʌn","worked":"wɜːkt","work-ing":"wɜːk-ɪŋ","works":"wɜːks","work":"wɜːk","would":"wʊd|wəd","year":"jɪə","yes-ter-day":"jes-tə-deɪ","your":"jɔː|jə","you":"juː|ju","should-'ve":"ʃʊd-əv","would-'ve":"wʊd-əv","could-'ve":"kʊd-əv","must-'ve":"mʌst-əv","cats-'ve":"kæts-əv","birds-'ve":"bɜːdz-əv","stu-dents-'ve":"stjuː-dənts-əv","what-'ve":"wɒt-əv","kate-'d":"keɪt-əd","kids-'ll":"kɪdz-əl","mike-'ll":"maɪk-əl","team-'ll":"tiːm-əl","drove":"drəʊv","coast":"kəʊst","dad's":"dædz","ear-ly":"ɜː-li","driv-ing":"draɪv-ɪŋ","driv-en":"drɪv-ən","drive":"draɪv","cit-y":"sɪt-i","fi-nal":"faɪ-nəl","ver-sion":"vɜː-ʃən","le-gal":"liː-ɡəl","af-ter":"ɑːf-tə","pub":"pʌb","drink":"drɪŋk","old":"əʊld","gym":"dʒɪm","book":"bʊk","book-ing":"bʊk-ɪŋ","booked":"bʊkt","head":"hed","sales":"seɪlz","of":"ɒv|əv"};
+
+
+/* ---------- parse ---------- */
+const PROPER=new Set(["i"]); SETS.forEach(st=>st.base.forEach(b=>{ if(/^[A-Z]/.test(b)) PROPER.add(b.toLowerCase()); }));
+function parseMarkup(line){
+  const toks=line.trim().split(/\s+/);
+  const words=toks.map(tok=>{
+    const m=tok.match(/^(.*?)([.,!?]*)$/); let core=m[1]; const trail=m[2];
+    let over=null; const om=core.match(/\{(.*)\}$/); if(om){ over=om[1]; core=core.replace(/\{.*\}$/,""); }
+    const segs=[]; core.split("-").forEach(h=>h.split("~").forEach((p,j)=>segs.push({p,glue:j>0})));
+    const parts=segs.map(x=>x.p);
+    const clean=parts.map(p=>p.replace(/\*/g,""));
+    const low=clean.join("").toLowerCase();
+    const anyStar=parts.some(p=>p.startsWith("*"));
+    const syl=parts.map((p,k)=>({t:clean[k],s:p.startsWith("*")?1:0,glue:segs[k].glue}));
+    const ent=over||IPA[clean.map(x=>x.toLowerCase()).join("-")];
+    if(ent){ if(ent.includes("|")){ const [st,wk]=ent.split("|"); syl[0].ipa=syl[0].s?st:wk; } else { const ip=ent.split("-"); syl.forEach((x,k)=>x.ipa=ip[k]||""); } }
+    syl.forEach(x=>{ if(x.s&&x.ipa) x.ipa="ˈ"+x.ipa; });
+    if(low==="i") syl[0].t="I";
+    const fn=FN.hasOwnProperty(low)&&!anyStar;
+    return {t:clean.join(""),syl,fn,wf:fn?FN[low]:"",pause:/,/.test(trail),punct:trail.replace(/,/g,"")};
+  });
+  const cap=w=>{ w.syl[0].t=w.syl[0].t.charAt(0).toUpperCase()+w.syl[0].t.slice(1); w.t=w.t.charAt(0).toUpperCase()+w.t.slice(1); };
+  
+  words.forEach((w,i)=>{ if(i===0||PROPER.has(w.t.toLowerCase())) cap(w); });
+  const text=words.map(w=>w.t+(w.pause?",":"")+w.punct).join(" ");
+  return {text,words};
+}
+/* connected speech */
+const VOW="aeiouɑɒɔəɛɜɪʊʌæː";
+const bare=s=>s.replace(/^ˈ/,"");
+function firstCh(w){ const s=bare(w.syl[0].cipa); return s.charAt(0); }
+function lastCh(w){ const s=w.syl[w.syl.length-1].cipa; return s.charAt(s.length-1); }
+const isV=c=>!!c&&VOW.includes(c);
+function connect(words){
+  if(!words.every(w=>w.syl.every(x=>x.ipa))) return;
+  words.forEach(w=>{ w.syl.forEach(x=>x.cipa=x.ipa); w.link=false; });
+  const low=w=>w.t.toLowerCase();
+  const weak=w=>!w.syl.some(x=>x.s);
+  const last=w=>w.syl[w.syl.length-1];
+  // h-dropping in weak function words (not sentence-initial)
+  words.forEach((w,i)=>{ if(i>0&&weak(w)&&["have","has","had","his","her","him"].includes(low(w))&&!words[i-1].pause){ const s=w.syl[0]; if(s.cipa.startsWith("h")) s.cipa=s.cipa.slice(1); } });
+  for(let i=0;i<words.length-1;i++){
+    const a=words[i], b=words[i+1]; if(a.pause) continue;
+    const la=last(a), fb=b.syl[0];
+    // yod coalescence: d/t + you/your
+    if(["you","your"].includes(low(b))&&/[dt]$/.test(la.cipa)){
+      la.cipa=la.cipa.replace(/d$/,"dʒ").replace(/t$/,"tʃ"); fb.cipa=fb.cipa.replace(/^(ˈ?)j/,"$1"); b.link=true; continue;
+    }
+    const fc=firstCh(b), lc=lastCh(a);
+    // elision of t/d between consonants
+    const lcs=bare(la.cipa);
+    if(/[td]$/.test(lcs)&&lcs.length>=2&&!isV(lcs.charAt(lcs.length-2))&&!isV(fc)&&fc!=="j"&&fc!==lcs.charAt(lcs.length-1)){
+      la.cipa=la.cipa.slice(0,-1)+"("+lcs.slice(-1)+")"; continue;
+    }
+    // linking r
+    if(isV(lc)&&isV(fc)&&/r(e)?$/.test(low(a).replace(/'.*$/,""))){ la.cipa+="r"; b.link=true; continue; }
+    // consonant + vowel
+    if(!isV(lc)&&lc!==")"&&isV(fc)){ b.link=true; }
+  }
+}
+
+
+const DATA=SETS.map(st=>({base:st.base,q:!!st.q,scene:st.scene||"basic",lines:st.lines.map(l=>({full:parseMarkup(l[0]),short:l[2]?parseMarkup(l[2]):null,cue:l[1]}))}));
+DATA.forEach(d=>d.lines.forEach(L=>{ connect(L.full.words); if(L.short) connect(L.short.words); }));
+DATA.forEach(d=>{ d.nb=d.lines[0].full.words.reduce((a,w)=>a+w.syl.filter(s=>s.s).length,0); });
+
+/* ---------- state ---------- */
+const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"even",preset:"slow",bpm:60,autoBpm:true};
+let S=Object.assign({},DEF);
+function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(v&&typeof v==="object") S=Object.assign({},DEF,v); }catch(e){} if(!DATA[S.set]) S.set=0; if(!Array.isArray(S.order)||S.order.length!==DATA[S.set].lines.length) S.order=[0,1,2,3,4]; if(S.pos>=S.order.length) S.pos=0; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+let revealed=false;
+
+function lineAt(pos){ const d=DATA[S.set]; const L=d.lines[S.order[pos]]; return {L,sent:(S.contract&&L.short)?L.short:L.full,num:S.order[pos]}; }
+function makeOrder(){ const n=DATA[S.set].lines.length; const a=[...Array(n).keys()]; if(S.ord==="shuffle"){ for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } } S.order=a; }
+
+/* ---------- beats ---------- */
+function buildBeats(sent){
+  const items=[];
+  sent.words.forEach((w,wi)=>w.syl.forEach((sy,si)=>items.push({k:wi+":"+si,t:sy.t,s:!!sy.s,ws:si===0,hy:si<w.syl.length-1&&!w.syl[si+1].glue,wf:(si===w.syl.length-1&&w.fn)?w.wf:"",ipa:(S.conn&&sy.cipa!=null?sy.cipa:sy.ipa)||"",lk:S.conn&&si===0&&!!w.link})));
+  let pick=[]; const beats=[]; let cur=null;
+  items.forEach(it=>{ if(it.s){ cur={rest:false,items:[it]}; beats.push(cur); } else (cur?cur.items:pick).push(it); });
+  const n=beats.length; const nr=S.fillBar?(((4-n%4)%4)||4):1;
+  for(let r=0;r<nr;r++) beats.push({rest:true,items:[],first:r===0});
+  const allPick=pick; if(S.skipPick) pick=[];
+  return {pick,allPick,beats,n,syl:items.length-(S.skipPick?allPick.length:0)};
+}
+function suggest(){
+  const d=DATA[S.set]; let maxAvg=0;
+  d.lines.forEach(L=>{ const s=(S.contract&&L.short)?L.short:L.full; const b=buildBeats(s); maxAvg=Math.max(maxAvg,b.syl/b.n); });
+  let bpm=Math.round(60*PRESETS[S.preset]/maxAvg/2)*2; bpm=Math.max(40,Math.min(160,bpm));
+  return {bpm,maxAvg};
+}
+function applyAuto(){ if(S.autoBpm) S.bpm=suggest().bpm; }
+
+/* ---------- render ---------- */
+const lane=$("#lane");
+function hiddenMode(){ return S.mode==="build"&&!revealed; }
+function sylSpan(it,role){
+  const sp=el("span","syl "+(it.s?"s":"w")+(it.ws?" ws":"")+(it.lk?" lk":""));
+  sp.dataset.k=it.k;
+  let txt=it.t+(it.hy?"-":""); let ip=it.ipa; const hide=hiddenMode(), recallWeak=S.mode==="recall"&&!it.s;
+  if(S.disp==="ipa"&&ip) txt=ip;
+  if(hide){ txt=it.s?"●":""; ip=""; sp.classList.add("hid"); }
+  else if(recallWeak){ txt="·"; ip=""; }
+  if(S.disp==="both"){
+    sp.classList.add("col"); const a=el("span","tx"); a.textContent=txt; const b=el("span","ipa"); b.textContent=ip||"\u00a0"; sp.append(a,b);
+  } else {
+    sp.textContent=txt; if(S.disp==="ipa") sp.classList.add("ipaonly");
+    if(it.wf&&S.mode==="read"&&S.hints&&S.disp==="en"){ const i=el("i","wf"); i.textContent=it.wf; sp.append(i); }
+  }
+  return sp;
+}
+function makeCell(list,opt,bt){
+  const c=el("div","cell"+(opt.pick?" pick":"")+(bt&&bt.rest?" rest":""));
+  c.dataset.key=opt.key;
+  if(opt.pick){ const n=el("span","num"); n.textContent="and"; c.append(n); }
+  else { const n=el("span","num"); n.textContent=opt.num; const u=el("span","ura"); u.textContent="ウラ"; c.append(n,el("span","mid"),u); }
+  const inn=el("div","cin"), sg=el("span","sg"), wg=el("span","wg"), wi=el("span","wi"); wg.append(wi);
+  let weak=list;
+  if(!opt.pick&&bt&&!bt.rest){ sg.append(sylSpan(list[0])); weak=list.slice(1); }
+  else if(bt&&bt.rest){ const r=el("span","restmark"); r.textContent=bt.first?"息":"·"; sg.append(r); }
+  weak.forEach(it=>wi.append(sylSpan(it)));
+  inn.append(sg,wg); c.append(inn); return c;
+}
+function fitCells(){
+  lane.querySelectorAll(".cell").forEach(c=>{
+    const inn=c.querySelector(".cin"), sg=c.querySelector(".sg"), wg=c.querySelector(".wg"), wi=c.querySelector(".wi");
+    wi.style.transform=""; wg.style.width="";
+    const avail=inn.clientWidth, sgw=sg.offsetWidth, need=wi.scrollWidth;
+    if(!need){ wg.style.width="0px"; return; }
+    const room=Math.max(10,avail-sgw-6);
+    if(need>room){ const f=Math.max(.3,room/need); wi.style.transform="scaleX("+f.toFixed(3)+")"; wg.style.width=(need*f)+"px"; }
+    else wg.style.width=need+"px";
+  });
+}
+const CATS=[...new Set(DATA.map(d=>d.nb))].sort((a,b)=>a-b);
+const SCENES=[["all","すべて"],["basic","基本"],["biz","ビジネス"],["daily","日常会話"]];
+const SCENE_NAME={basic:"基本",biz:"ビジネス",daily:"日常会話"};
+const inScene=d=>S.scene==="all"||d.scene===S.scene;
+function renderChips(){
+  if(!SCENES.some(x=>x[0]===S.scene)) S.scene="all";
+  const avail=CATS.filter(c=>DATA.some(d=>d.nb===c&&inScene(d)));
+  if(!avail.includes(S.cat)) S.cat=avail[0];
+  const ss=$("#sceneSeg"); ss.innerHTML="";
+  SCENES.forEach(([k,label])=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-pressed",String(k===S.scene));
+    const n=DATA.filter(d=>k==="all"||d.scene===k).length; b.innerHTML=label+"<small>"+n+"セット</small>";
+    b.addEventListener("click",()=>{ S.scene=k; save(); renderChips(); }); ss.append(b); });
+  const seg=$("#catSeg"); seg.innerHTML="";
+  avail.forEach(c=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-pressed",String(c===S.cat));
+    const n=DATA.filter(d=>d.nb===c&&inScene(d)).length; b.innerHTML=c+"拍<small>"+n+"セット</small>";
+    b.addEventListener("click",()=>{ S.cat=c; save(); renderChips(); }); seg.append(b); });
+  const box=$("#chips"); box.innerHTML=""; let k=0;
+  DATA.forEach((d,i)=>{ if(d.nb!==S.cat||!inScene(d)) return; k++;
+    const b=el("button","chip"); b.type="button"; b.setAttribute("aria-pressed",String(i===S.set));
+    const t=el("span","t"); t.textContent=d.base.map(x=>x.toUpperCase()).join(" ");
+    const m=el("span","m"); m.textContent=(S.scene==="all"?SCENE_NAME[d.scene]+"・":"")+d.nb+"拍"+(d.q?"・疑問文":"");
+    b.append(t,m); b.addEventListener("click",()=>setSet(i)); box.append(b); });
+}
+function renderStage(){
+  const d=DATA[S.set]; const {L,sent,num}=lineAt(S.pos);
+  document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===S.mode)));
+  $("#pos").textContent="行 "+(S.pos+1)+" / "+S.order.length+(S.ord==="shuffle"?"（シャッフル）":"");
+  $("#cueBadge").textContent="レベル"+(num+1)+"・"+L.cue;
+  const build=S.mode==="build";
+  $("#prompt").hidden=!build;
+  $("#pbase").textContent=d.base.map(x=>x.toUpperCase()).join("  ·  ");
+  $("#pcue").textContent=L.cue+(S.contract&&L.short?"（短縮形で）":"");
+  $("#revealBtn").hidden=!build; $("#revealBtn").textContent=revealed?"答えを隠す":"答えを見る";
+  $("#fulltext").textContent=hiddenMode()?"":sent.text;
+  $("#tip").textContent=build?"●の位置がオモテです。材料と指示から文を組み立て、ビートに乗せて言ってみてください。1行終わると答えが出ます。":
+    S.mode==="recall"?"・はウラの音節の数です。何が入るかを思い出しながら言ってください。":
+    "太字がオモテ（拍の頭）、小さい字がウラです。";
+  lane.innerHTML="";
+  lane.classList.toggle("even",S.timing==="even");
+  const B=buildBeats(sent);
+  const w=lane.clientWidth||600; const bpr=w>=860?2:1; const pk=B.allPick.length>0;
+  const cw=Math.min(150,Math.floor((w-14)/(bpr*4+(pk?.62:0))));
+  lane.style.setProperty("--cellw",cw+"px");
+  lane.classList.toggle("pickoff",S.skipPick);
+  if(pk) lane.append(makeCell(B.allPick,{pick:true,key:"p"}));
+  for(let i=0;i<B.beats.length;i+=4){
+    const bar=el("div","bar"+(i+4>=B.beats.length?" lastbar":""));
+    B.beats.slice(i,i+4).forEach((bt,k)=>bar.append(makeCell(bt.items,{num:k+1,key:"b"+(i+k)},bt)));
+    lane.append(bar);
+  }
+  if(document.fonts&&document.fonts.status!=="loaded") document.fonts.ready.then(fitCells);
+  requestAnimationFrame(fitCells);
+}
+function renderList(){
+  const list=$("#list"); list.innerHTML="";
+  S.order.forEach((li_,p)=>{
+    const L=DATA[S.set].lines[li_]; const sent=(S.contract&&L.short)?L.short:L.full;
+    const li=el("li"), b=el("button","sent"+(p===S.pos?" on":"")); b.type="button";
+    const cue=el("span","cue"); cue.textContent="レベル"+(li_+1)+"・"+L.cue;
+    b.append(cue);
+    if(S.mode==="build"&&!(p===S.pos&&revealed)){ const h=el("span","hide"); h.textContent="（作るモードでは隠しています）"; b.append(h); }
+    else sent.words.forEach((w,wi)=>{
+      if(wi>0) b.append(document.createTextNode(S.conn&&w.link?"‿":" "));
+      w.syl.forEach(sy=>{ const sp=el("span",sy.s?"ls":""); sp.textContent=sy.t; b.append(sp); });
+      if(w.pause) b.append(document.createTextNode(","));
+      if(w.punct) b.append(document.createTextNode(w.punct));
+    });
+    if(!(S.mode==="build"&&!(p===S.pos&&revealed))&&S.disp!=="en"){ const il=el("span","ipaline"); il.textContent="/"+sent.words.map((w,wi)=>(wi?(S.conn&&w.link?"‿":" "):"")+w.syl.map(x=>(S.conn&&x.cipa!=null?x.cipa:x.ipa)||x.t).join("")).join("")+"/"; b.append(il); }
+    b.addEventListener("click",()=>select(p));
+    li.append(b); list.append(li);
+  });
+}
+function renderSettings(){
+  const pr=(sel,attr,val)=>document.querySelectorAll(sel+" button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset[attr]===String(val))));
+  pr("#presetSeg","p",S.preset); pr("#soundSeg","s",S.sound); pr("#dispSeg","d",S.disp);
+  const ks=$("#kitSeg"); if(!ks.childElementCount){ Object.entries(KITS).forEach(([k,v])=>{ const b=el("button"); b.type="button"; b.dataset.k=k; b.textContent=v.label; b.addEventListener("click",()=>{ S.kit=k; save(); renderSettings(); previewKit(); }); ks.append(b); }); }
+  if(!KITS[S.kit]) S.kit="tr808"; pr("#kitSeg","k",S.kit); $("#kitDesc").textContent=K().desc; pr("#sylSeg","y",S.sylSound?"on":"off"); pr("#timingSeg","t",S.timing); pr("#orderSeg","o",S.ord); pr("#repSeg","r",S.rep);
+  const sg=suggest();
+  $("#sugg").innerHTML="提案：<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">このセットで一番詰まっている行（1拍あたり "+sg.maxAvg.toFixed(1)+" 音節）でも目標の速さに収まるテンポです。</span>";
+  $("#bpmRange").value=S.bpm; $("#bpmOut").textContent=S.bpm+" BPM"; $("#autoBpm").checked=S.autoBpm;
+  renderSettingsHook();
+  ["contract","skipPick","hints","fillBar","countIn","autoNext","loopSet","conn"].forEach(id=>$("#"+id).checked=!!S[id]);
+}
+function renderAll(){ renderChips(); renderStage(); renderList(); renderSettings(); }
+function renderSettingsHook(){ if(typeof renderTransport==="function") renderTransport(); }
+function select(p){ if(p<0||p>=S.order.length) return; stopPlay(); S.pos=p; revealed=false; save(); renderStage(); renderList(); }
+function setSet(i){ stopPlay(); S.set=i; makeOrder(); S.pos=0; revealed=false; applyAuto(); save(); renderAll(); }
+function stageStatus(t){ $("#stageStatus").textContent=t||""; }
+
+/* ---------- audio ---------- */
+let ctx=null, nodes=[], raf=0, run=null, hl={cell:null,syl:null}, noiseBuf=null;
+let recState=null, rec=null, recSrc=null;
+function ensureCtx(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; ctx=new AC(); } if(ctx.state==="suspended") ctx.resume(); return true; }
+function reg(n,end){ n._end=end; nodes.push(n); }
+let OUT=null, NOISE=null;
+function out(){ if(!OUT){ const g=ctx.createGain(); g.gain.value=.8; const c=ctx.createDynamicsCompressor(); c.threshold.value=-10; c.ratio.value=4; g.connect(c); c.connect(ctx.destination); OUT=g; } return OUT; }
+function env(g,t,v,att,dec){ g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(v,t+att); g.gain.exponentialRampToValueAtTime(.0001,t+att+dec); }
+function noise(){ if(!NOISE){ NOISE=ctx.createBuffer(1,Math.round(ctx.sampleRate*.6),ctx.sampleRate); const d=NOISE.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; } return NOISE; }
+/* building blocks */
+function tone(t,{type="sine",f=440,f2=null,fT=.05,v=.5,att=.002,dec=.1,dest=null}){
+  const o=ctx.createOscillator(), g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(f,t);
+  if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+fT);
+  env(g,t,v,att,dec); o.connect(g); g.connect(dest||out()); o.start(t); o.stop(t+att+dec+.03); reg(o,t+att+dec+.03);
+}
+function nz(t,{v=.3,att=.001,dec=.05,hp=null,lp=null,bp=null,q=1}){
+  const s=ctx.createBufferSource(); s.buffer=noise(); let node=s;
+  const chain=f=>{ node.connect(f); node=f; };
+  if(hp){ const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=hp; chain(f); }
+  if(lp){ const f=ctx.createBiquadFilter(); f.type="lowpass"; f.frequency.value=lp; chain(f); }
+  if(bp){ const f=ctx.createBiquadFilter(); f.type="bandpass"; f.frequency.value=bp; f.Q.value=q; chain(f); }
+  const g=ctx.createGain(); env(g,t,v,att,dec); node.connect(g); g.connect(out());
+  s.start(t); s.stop(t+att+dec+.03); reg(s,t+att+dec+.03);
+}
+const HAT_RATIOS=[2,3,4.16,5.43,6.79,8.21];
+function metal(t,v,dec,base,bpF,hpF){
+  const bp=ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=bpF; bp.Q.value=.8;
+  const hp=ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=hpF;
+  const g=ctx.createGain(); env(g,t,v,.001,dec); bp.connect(hp); hp.connect(g); g.connect(out());
+  HAT_RATIOS.forEach(r=>{ const o=ctx.createOscillator(); o.type="square"; o.frequency.value=base*r; o.connect(bp); o.start(t); o.stop(t+dec+.03); reg(o,t+dec+.03); });
+}
+function cowbell(t,v){
+  const bp=ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=800; bp.Q.value=1.2;
+  const g=ctx.createGain(); g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(v,t+.002); g.gain.exponentialRampToValueAtTime(v*.35,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+.28);
+  bp.connect(g); g.connect(out());
+  [540,800].forEach(f=>{ const o=ctx.createOscillator(); o.type="square"; o.frequency.value=f; o.connect(bp); o.start(t); o.stop(t+.3); reg(o,t+.3); });
+}
+function rim(t,v,hi,lo){
+  const hp=ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=300;
+  const g=ctx.createGain(); env(g,t,v,.001,.03); hp.connect(g); g.connect(out());
+  [[hi||1667,1],[lo||455,.6]].forEach(([f,a])=>{ const o=ctx.createOscillator(), og=ctx.createGain(); o.type="sine"; o.frequency.value=f; og.gain.value=a; o.connect(og); og.connect(hp); o.start(t); o.stop(t+.05); reg(o,t+.05); });
+}
+function clap(t,v){ [0,.011,.022].forEach(d=>nz(t+d,{v:v*.8,dec:.012,bp:1200,q:1.4})); nz(t+.03,{v:v*.6,dec:.14,bp:1200,q:1.2}); }
+
+/* kits */
+const KITS={
+  orig:{label:"オリジナル",desc:"シンプルな電子音。拍＝低い電子音、オモテ＝ポン、ウラ＝チッ。",
+    kick:(t,v,d)=>tone(t,{f:140,f2:45,fT:.13,v:v*.95,dec:d*.5+.05}),
+    hat:(t,v)=>nz(t,{v:v*.85,dec:.05,hp:7000}),
+    strong:t=>tone(t,{type:"triangle",f:880,v:.55,dec:.16}),
+    weak:t=>tone(t,{f:1320,v:.13,dec:.05}),
+    count:t=>tone(t,{f:990,v:.35,dec:.055}), and:t=>tone(t,{f:880,v:.25,dec:.05}),
+    click:(t,lv)=>tone(t,{f:[1100,1320,1760][lv],v:[.22,.38,.5][lv],dec:.055})},
+  tr808:{label:"808",desc:"TR-808風。拍＝ブーンと伸びるキック、真ん中＝金属的なハット、オモテ＝カウベル、ウラ＝リムショット。",
+    kick:(t,v,d)=>{ tone(t,{f:160,f2:48,fT:.08,v,dec:d}); tone(t,{type:"triangle",f:1100,v:v*.25,att:.001,dec:.008}); },
+    hat:(t,v)=>metal(t,v,.045,40,10000,7000),
+    strong:t=>cowbell(t,.42), weak:t=>rim(t,.2),
+    count:t=>tone(t,{type:"triangle",f:2500,v:.45,att:.001,dec:.045}), and:t=>rim(t,.5),
+    click:(t,lv)=>tone(t,{type:"triangle",f:2500,v:[.2,.42,.6][lv],att:.001,dec:.045})},
+  tr909:{label:"909",desc:"TR-909風。拍＝パンチのあるキック、真ん中＝シャープなハット、オモテ＝クラップ、ウラ＝リムショット。",
+    kick:(t,v,d)=>{ tone(t,{f:230,f2:55,fT:.04,v,dec:d*.75}); nz(t,{v:v*.35,dec:.012,lp:3000}); },
+    hat:(t,v)=>{ metal(t,v*.6,.04,48,11000,8000); nz(t,{v:v*.5,dec:.035,hp:9000}); },
+    strong:t=>clap(t,.55), weak:t=>rim(t,.22,1900,520),
+    count:t=>rim(t,.5,1900,520), and:t=>nz(t,{v:.4,dec:.04,hp:9000}),
+    click:(t,lv)=>rim(t,[.22,.38,.55][lv],1900,520)},
+  cr78:{label:"CR-78",desc:"CompuRhythm CR-78風。やわらかいアナログ音。拍＝ポコッとしたキック、真ん中＝タンバリン、オモテ＝コンガ、ウラ＝ボンゴ。",
+    kick:(t,v,d)=>{ tone(t,{f:95,f2:60,fT:.05,v:v*.9,dec:Math.min(d,.3)*.7}); },
+    hat:(t,v)=>{ nz(t,{v:v*.55,dec:.06,bp:8500,q:2}); nz(t+.012,{v:v*.35,dec:.05,bp:8500,q:2}); },
+    strong:t=>tone(t,{f:360,f2:300,fT:.04,v:.55,dec:.2}),
+    weak:t=>tone(t,{f:700,f2:620,fT:.02,v:.16,dec:.06}),
+    count:t=>tone(t,{f:2000,v:.4,att:.001,dec:.04}), and:t=>nz(t,{v:.35,dec:.06,bp:8500,q:2}),
+    click:(t,lv)=>tone(t,{f:2000,v:[.2,.36,.5][lv],att:.001,dec:.04})},
+  linn:{label:"LinnDrum風",desc:"LinnDrum風。80年代ポップスのタイトな音。拍＝締まったキック、真ん中＝ハット、オモテ＝スネア、ウラ＝サイドスティック。",
+    kick:(t,v,d)=>{ tone(t,{f:120,f2:52,fT:.035,v,dec:Math.min(d,.32)*.8}); nz(t,{v:v*.25,dec:.008,lp:5000}); },
+    hat:(t,v)=>nz(t,{v:v*.8,dec:.045,hp:9000}),
+    strong:t=>{ tone(t,{type:"triangle",f:220,f2:180,fT:.03,v:.35,dec:.09}); nz(t,{v:.45,dec:.17,bp:3500,q:.7}); },
+    weak:t=>{ tone(t,{type:"triangle",f:900,v:.14,att:.001,dec:.025}); nz(t,{v:.1,dec:.02,bp:2500,q:2}); },
+    count:t=>{ tone(t,{type:"triangle",f:900,v:.4,att:.001,dec:.03}); nz(t,{v:.2,dec:.02,bp:2500,q:2}); },
+    and:t=>nz(t,{v:.35,dec:.05,hp:6000}),
+    click:(t,lv)=>{ tone(t,{type:"triangle",f:900,v:[.2,.34,.48][lv],att:.001,dec:.03}); nz(t,{v:[.1,.16,.24][lv],dec:.02,bp:2500,q:2}); }}
+};
+function K(){ return KITS[S.kit]||KITS.tr808; }
+function sylTone(t,strong){ if(strong) K().strong(t); else K().weak(t); }
+function previewKit(){ if(run||!ensureCtx()) return; const t=ctx.currentTime+.08, b=.28; const k=K();
+  k.kick(t,1,.45); k.strong(t); k.hat(t+b/2,.32); k.weak(t+b/2+.07); k.kick(t+b,.8,.35); k.hat(t+b*1.5,.32); k.strong(t+b*2); k.kick(t+b*2,.8,.35); }
+function sound(t,kind){
+  const k=K();
+  if(kind==="count") return k.count(t);
+  if(kind==="and") return k.and(t);
+  if(S.sound==="none") return;
+  if(S.sound==="drum"){
+    if(kind==="bar") k.kick(t,1,.55); else if(kind==="beat") k.kick(t,.8,.4); else if(kind==="rest") k.kick(t,.35,.3);
+    else if(kind==="off") k.hat(t,.32);
+  } else {
+    if(kind==="bar") k.click(t,2); else if(kind==="beat") k.click(t,1); else if(kind==="rest") k.click(t,0);
+    else if(kind==="off") k.hat(t,.14);
+  }
+}
+function schedule(pos,T,opt){
+  opt=opt||{}; const noSound=opt.clicks===false; const bpm=opt.bpm||S.bpm; const beat=60/bpm;
+  const {sent}=lineAt(pos); const B=buildBeats(sent); const ev=[]; const even=(opt.timing||S.timing)==="even";
+  nodes=nodes.filter(n=>n._end>ctx.currentTime);
+  const snd=(t,k)=>{ if(!noSound) sound(t,k); };
+  if(opt.countIn){
+    const c0=T-4*beat;
+    ["1","2","3"].forEach((c,k)=>{ snd(c0+k*beat,"count"); ev.push({t:c0+k*beat,count:c}); });
+    snd(T-.5*beat,"and"); ev.push({t:T-.5*beat,count:"and"});
+  }
+  const m=B.pick.length;
+  B.pick.forEach((it,k)=>ev.push({t:even?T-beat+(k+1)*beat/(m+1):T-.5*beat+k*(.5*beat/m),cell:"p",syl:it.k,s:false}));
+  B.beats.forEach((bt,j)=>{
+    const bs=T+j*beat;
+    snd(bs,j%4===0&&!bt.rest?"bar":(bt.rest?"rest":"beat")); if(!opt.countIn||true) snd(bs+beat/2,"off");
+    if(bt.rest){ ev.push({t:bs,cell:"b"+j,syl:null}); return; }
+    ev.push({t:bs,cell:"b"+j,syl:bt.items[0].k,s:true}); const weak=bt.items.slice(1), n=weak.length;
+    weak.forEach((it,k)=>ev.push({t:even?bs+beat*(k+1)/(n+1):bs+beat*(.5+k*.5/n),cell:"b"+j,syl:it.k,s:false}));
+  });
+  ev.sort((a,b)=>a.t-b.t);
+  if(!noSound&&S.sylSound) ev.forEach(e=>{ if(e.syl) sylTone(e.t,e.s); });
+  return {pos,ev,T,beat,rests:B.beats.map(b=>b.rest),end:T+B.beats.length*beat,p:-2,next:null,done:false,single:!!opt.single,rep:opt.rep||1};
+}
+function clearHL(){ if(hl.cell) hl.cell.classList.remove("now"); if(hl.syl) hl.syl.classList.remove("now"); hl={cell:null,syl:null}; $("#countBadge").hidden=true; }
+function applyHL(e){
+  clearHL(); if(!e) return;
+  if(e.count){ const c=$("#countBadge"); c.hidden=false; c.textContent=e.count==="and"?"and →":"カウント "+e.count; return; }
+  hl.cell=lane.querySelector('.cell[data-key="'+e.cell+'"]'); if(hl.cell) hl.cell.classList.add("now");
+  if(e.syl){ hl.syl=lane.querySelector('.syl[data-k="'+e.syl+'"]'); if(hl.syl) hl.syl.classList.add("now"); }
+}
+function nextOf(r){
+  if(r.single) return null;
+  if(S.rep==="inf"||r.rep<S.rep) return {pos:r.pos,rep:r.rep+1};
+  if(S.autoNext&&S.mode!=="build"){
+    if(r.pos<S.order.length-1) return {pos:r.pos+1,rep:1};
+    if(S.loopSet){ if(S.ord==="shuffle"){ const last=S.order[r.pos]; makeOrder(); if(S.order.length>1&&S.order[0]===last){ [S.order[0],S.order[1]]=[S.order[1],S.order[0]]; } } return {pos:0,rep:1,wrap:true}; }
+  }
+  return null;
+}
+function loop(){
+  raf=0; if(!run||!ctx) return;
+  const now=ctx.currentTime-(ctx.outputLatency||0);
+  if(!run.next&&!run.done&&ctx.currentTime>=run.end-run.beat-.4){ const nx=nextOf(run); if(nx){ run.next=schedule(nx.pos,run.end,{rep:nx.rep}); run.next.wrap=!!nx.wrap; } else run.done=true; }
+  const handoff=run.next?Math.min(run.end,run.next.ev.length?run.next.ev[0].t:run.end):run.end;
+  if(now>=handoff){
+    if(run.next){ const r=run.next; if(r.pos!==S.pos||r.wrap){ S.pos=r.pos; revealed=false; save(); renderStage(); renderList(); } run=r; run.p=-2; }
+    else { const wasBuild=S.mode==="build"&&!recState; stopPlay(); if(wasBuild){ revealed=true; renderStage(); renderList(); } return; }
+  }
+  let p=-1; for(let k=0;k<run.ev.length;k++){ if(run.ev[k].t<=now) p=k; else break; }
+  if(p!==run.p){ run.p=p; applyHL(p>=0?run.ev[p]:null); }
+  raf=requestAnimationFrame(loop);
+}
+function firstT(pos,countIn){ const beat=60/S.bpm; const B=buildBeats(lineAt(pos).sent); const t0=ctx.currentTime+.15; return countIn?t0+4*beat:t0+(B.pick.length?beat:0); }
+function play(){
+  { const au=document.getElementById("bgAudio"); if(au&&!au.paused){ au.pause(); document.getElementById("bgBtn").textContent="🎧 バックグラウンド再生"; } }
+  if(!ensureCtx()){ stageStatus("このブラウザでは音が出せません。"); return; }
+  stopPlay(); stageStatus("");
+  if(S.mode==="build"){ revealed=false; renderStage(); renderList(); }
+  run=schedule(S.pos,firstT(S.pos,S.countIn),{countIn:S.countIn,single:S.mode==="build"});
+  setPlaying(true); raf=requestAnimationFrame(loop);
+}
+function stopPlay(){
+  nodes.forEach(n=>{try{n.stop();}catch(e){}}); nodes=[];
+  if(recSrc){ try{recSrc.stop();}catch(e){} recSrc=null; }
+  run=null; if(raf) cancelAnimationFrame(raf); raf=0; clearHL();
+  if(recState) finishRecording();
+  setPlaying(false);
+}
+function setPlaying(on){
+  const b=$("#playBtn"); b.textContent=on?"■ 停止":"▶ 再生";
+  const r=$("#recBtn"); r.dataset.on=(on&&recState)?"1":""; r.textContent=(on&&recState)?"● 録音中":"● 録音して練習"; r.disabled=on&&!recState;
+}
+
+/* ---------- recording ---------- */
+async function recordPlay(){
+  if(recState){ stopPlay(); return; }
+  if(!ensureCtx()){ stageStatus("このブラウザでは音が出せません。"); return; }
+  stopPlay();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ stageStatus("この画面ではマイクが使えません。"); return; }
+  let stream;
+  try{ stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); }
+  catch(e){ const inClaude=/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)||window.top!==window.self; stageStatus(inClaude?"claude.aiの画面の中ではマイクが使えないため、録音できません。このHTMLファイルを自分のウェブサイトとして開くと録音できます。":e&&e.name==="NotAllowedError"?"マイクの使用が許可されませんでした。ブラウザの設定でこのサイトのマイクを許可すると録音できます。":"マイクを使えませんでした（"+((e&&e.name)||"不明")+"）。"); return; }
+  if(ctx.state==="suspended") await ctx.resume();
+  const r={stream,chunks:[],first:null};
+  r.src=ctx.createMediaStreamSource(stream); r.proc=ctx.createScriptProcessor(2048,1,1); r.mute=ctx.createGain(); r.mute.gain.value=0;
+  r.proc.onaudioprocess=e=>{ const d=e.inputBuffer.getChannelData(0); if(r.first===null) r.first=ctx.currentTime-e.inputBuffer.duration; r.chunks.push(new Float32Array(d)); };
+  r.src.connect(r.proc); r.proc.connect(r.mute); r.mute.connect(ctx.destination);
+  if(S.mode==="build"){ revealed=false; renderStage(); renderList(); }
+  const T=firstT(S.pos,true)+.2;
+  run=schedule(S.pos,T,{countIn:true,single:true});
+  Object.assign(r,{T,beat:run.beat,rests:run.rests,end:run.end,bpm:S.bpm,pos:S.pos,set:S.set,timing:S.timing});
+  recState=r; stageStatus("録音中：カウントのあと、ビートに合わせて言ってください。");
+  setPlaying(true); raf=requestAnimationFrame(loop);
+}
+function finishRecording(){
+  const r=recState; recState=null; if(!r) return;
+  try{ r.src.disconnect(); r.proc.disconnect(); r.mute.disconnect(); }catch(e){}
+  r.stream.getTracks().forEach(t=>t.stop());
+  const len=r.chunks.reduce((a,c)=>a+c.length,0);
+  if(!len||r.first===null){ stageStatus("録音できませんでした。もう一度試してください。"); return; }
+  const data=new Float32Array(len); let p=0; r.chunks.forEach(c=>{data.set(c,p); p+=c.length;});
+  const buf=ctx.createBuffer(1,len,ctx.sampleRate); buf.getChannelData(0).set(data);
+  rec={buf,data,sr:ctx.sampleRate,start:r.first,T:r.T,beat:r.beat,rests:r.rests,end:r.end,bpm:r.bpm,pos:r.pos,set:r.set,timing:r.timing,adj:0};
+  if(S.mode==="build"){ revealed=true; renderStage(); renderList(); }
+  stageStatus("録音しました。下の図で拍との重なりを確認できます。");
+  $("#recPanel").hidden=false; $("#recAdj").value=0; $("#recAdjOut").textContent="0 ms";
+  requestAnimationFrame(()=>{ drawRec(); $("#recPanel").scrollIntoView({block:"nearest",behavior:"smooth"}); });
+}
+function drawRec(){
+  if(!rec) return;
+  const cv=$("#recCanvas"); const w=cv.parentElement.clientWidth||600, h=150, dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.width=w+"px"; cv.style.height=h+"px";
+  const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
+  const cs=getComputedStyle(document.documentElement); const col=n=>cs.getPropertyValue(n).trim();
+  const from=-rec.beat, to=rec.end-rec.T; const X=t=>(t-from)/(to-from)*w;
+  const base=h-20, top=12;
+  const win=Math.max(1,Math.round(rec.sr*.01)); const env=[]; let max=1e-6;
+  for(let i=0;i<rec.data.length;i+=win){ let s=0; const e=Math.min(rec.data.length,i+win); for(let j=i;j<e;j++) s+=rec.data[j]*rec.data[j]; const v=Math.sqrt(s/(e-i)); env.push([i,v]); if(v>max) max=v; }
+  const off=rec.start+rec.adj/1000-rec.T;
+  g.fillStyle=col("--weak"); g.globalAlpha=.5; g.beginPath(); let started=false, lastX=0;
+  env.forEach(([i,v])=>{ const t=off+i/rec.sr; if(t<from||t>to) return; const x=X(t), y=base-(v/max)*(base-top);
+    if(!started){ g.moveTo(x,base); started=true; } g.lineTo(x,y); lastX=x; });
+  if(started){ g.lineTo(lastX,base); g.closePath(); g.fill(); }
+  g.globalAlpha=1;
+  const vline=(x,c,wd,dash)=>{ g.strokeStyle=c; g.lineWidth=wd; g.setLineDash(dash); g.beginPath(); g.moveTo(x,top-6); g.lineTo(x,base); g.stroke(); };
+  g.font="11px sans-serif";
+  rec.rests.forEach((rest,j)=>{
+    vline(X(j*rec.beat), rest?col("--line"):col("--strong"), rest?1:2, []);
+    vline(X((j+.5)*rec.beat), col("--line"), 1, [3,3]);
+    g.fillStyle=col("--muted"); g.fillText(rest?"休":String(j%4+1), X(j*rec.beat)+3, h-5);
+  });
+  g.setLineDash([]);
+}
+function playRec(){
+  if(!rec||!ensureCtx()) return;
+  stopPlay();
+  if(S.set!==rec.set||S.pos!==rec.pos){ S.set=rec.set; if(S.order.length!==DATA[S.set].lines.length) makeOrder(); S.pos=Math.min(rec.pos,S.order.length-1); renderAll(); }
+  const T=ctx.currentTime+.2+4*rec.beat;
+  run=schedule(S.pos,T,{countIn:true,single:true,bpm:rec.bpm,timing:rec.timing,clicks:$("#recClicks").checked});
+  const src=ctx.createBufferSource(); src.buffer=rec.buf; src.connect(ctx.destination);
+  const at=T+(rec.start-rec.T)+rec.adj/1000;
+  if(at<ctx.currentTime) src.start(ctx.currentTime,ctx.currentTime-at); else src.start(at);
+  recSrc=src; setPlaying(true); raf=requestAnimationFrame(loop);
+}
+
+
+/* ---------- background playback (pre-rendered audio file) ---------- */
+function wavBlob(buf){
+  const d=buf.getChannelData(0), n=d.length, sr=buf.sampleRate, ab=new ArrayBuffer(44+n*2), v=new DataView(ab);
+  const ws=(o,str)=>{ for(let i=0;i<str.length;i++) v.setUint8(o+i,str.charCodeAt(i)); };
+  ws(0,"RIFF"); v.setUint32(4,36+n*2,true); ws(8,"WAVE"); ws(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); ws(36,"data"); v.setUint32(40,n*2,true);
+  let o=44; for(let i=0;i<n;i++){ const x=Math.max(-1,Math.min(1,d[i])); v.setInt16(o,x<0?x*0x8000:x*0x7fff,true); o+=2; }
+  return new Blob([ab],{type:"audio/wav"});
+}
+let bgURL=null;
+async function renderBackground(){
+  const m=repMode(), loop=m!=="through", beat=60/S.bpm, n=S.order.length;
+  let seq=[];
+  if(m==="one") seq=[S.pos];
+  else { const from=m==="all"?0:S.pos; const reps=S.rep==="inf"?1:S.rep; for(let p=from;p<n;p++) for(let r=0;r<reps;r++) seq.push(p); }
+  const sr=22050, maxSec=600;
+  let est=loop?beat:4*beat+.1; for(const p of seq){ est+=buildBeats(lineAt(p).sent).beats.length*beat; }
+  const saved={ctx,OUT,NOISE,nodes}; const off=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,Math.ceil(Math.min(est+1,maxSec)*sr),sr);
+  let total=0;
+  try{
+    ctx=off; OUT=null; NOISE=null; nodes=[];
+    let T=loop?beat:4*beat+.1, first=true;
+    if(loop){ sound(0,"rest"); sound(beat/2,"off"); }
+    for(const p of seq){ const r=schedule(p,T,{countIn:first&&!loop}); first=false; T=r.end; if(T>maxSec-1) break; }
+    total=loop?T-beat:T+.4;
+  } finally { ctx=saved.ctx; OUT=saved.OUT; NOISE=saved.NOISE; nodes=saved.nodes; }
+  const full=await off.startRendering();
+  const len=Math.min(full.length,Math.round(total*sr));
+  const cut=(saved.ctx||new (window.AudioContext||window.webkitAudioContext)()).createBuffer(1,len,sr);
+  cut.getChannelData(0).set(full.getChannelData(0).subarray(0,len));
+  return {blob:wavBlob(cut),loop,secs:total,lines:seq.length};
+}
+async function toggleBackground(){
+  const au=$("#bgAudio"), btn=$("#bgBtn");
+  if(!au.paused){ au.pause(); au.currentTime=0; btn.textContent="🎧 バックグラウンド再生"; $("#bgStatus").textContent="バックグラウンド再生を止めました。"; return; }
+  stopPlay(); ensureCtx();
+  btn.disabled=true; btn.textContent="音声を作成中…"; $("#bgStatus").textContent="今の設定（セット・テンポ・音色・リピート）で音声ファイルを作っています。";
+  try{
+    const r=await renderBackground();
+    if(bgURL) URL.revokeObjectURL(bgURL); bgURL=URL.createObjectURL(r.blob);
+    au.src=bgURL; au.loop=r.loop;
+    if("mediaSession" in navigator){ try{ navigator.mediaSession.metadata=new MediaMetadata({title:"拍キープ・ドリル",artist:DATA[S.set].base.map(x=>x.toUpperCase()).join(" ")+"（"+S.bpm+" BPM）"}); }catch(e){} }
+    await au.play();
+    btn.textContent="■ バックグラウンド停止";
+    $("#bgStatus").textContent=(r.loop?"くり返し再生中":"再生中")+"（"+r.lines+"行・"+Math.round(r.secs)+"秒"+(r.loop?"で1周":"")+"）。画面を消しても流れ続けるはずです。設定を変えたら、止めてもう一度押してください。";
+  }catch(e){
+    btn.textContent="🎧 バックグラウンド再生"; $("#bgStatus").textContent="作成または再生に失敗しました（"+((e&&e.name)||"不明")+"）。この画面では使えない場合があります。";
+  }finally{ btn.disabled=false; }
+}
+/* ---------- wiring ---------- */
+load(); applyAuto();
+document.querySelectorAll("#modeSeg button").forEach(b=>b.addEventListener("click",()=>{ stopPlay(); S.mode=b.dataset.m; revealed=false; save(); renderStage(); renderList(); }));
+document.querySelectorAll("#presetSeg button").forEach(b=>b.addEventListener("click",()=>{ S.preset=b.dataset.p; applyAuto(); save(); renderSettings(); }));
+document.querySelectorAll("#soundSeg button").forEach(b=>b.addEventListener("click",()=>{ S.sound=b.dataset.s; save(); renderSettings(); }));
+document.querySelectorAll("#dispSeg button").forEach(b=>b.addEventListener("click",()=>{ S.disp=b.dataset.d; save(); renderStage(); renderList(); renderSettings(); }));
+document.querySelectorAll("#sylSeg button").forEach(b=>b.addEventListener("click",()=>{ S.sylSound=b.dataset.y==="on"; save(); renderSettings(); }));
+document.querySelectorAll("#timingSeg button").forEach(b=>b.addEventListener("click",()=>{ stopPlay(); S.timing=b.dataset.t; save(); renderStage(); renderSettings(); }));
+document.querySelectorAll("#orderSeg button").forEach(b=>b.addEventListener("click",()=>{ stopPlay(); S.ord=b.dataset.o; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); }));
+document.querySelectorAll("#repSeg button").forEach(b=>b.addEventListener("click",()=>{ S.rep=b.dataset.r==="inf"?"inf":Number(b.dataset.r); save(); renderSettings(); }));
+["contract","skipPick","hints","fillBar","countIn","autoNext","loopSet","conn"].forEach(id=>$("#"+id).addEventListener("change",e=>{ stopPlay(); S[id]=e.target.checked; if(["contract","skipPick"].includes(id)) applyAuto(); save(); renderStage(); renderList(); renderSettings(); }));
+$("#autoBpm").addEventListener("change",e=>{ S.autoBpm=e.target.checked; applyAuto(); save(); renderSettings(); });
+function setBpm(v){ S.bpm=Math.max(40,Math.min(160,Math.round(v))); S.autoBpm=false; save(); renderSettings(); }
+$("#bpmRange").addEventListener("input",e=>setBpm(+e.target.value));
+$("#bpmDown").addEventListener("click",()=>setBpm(S.bpm-2));
+$("#bpmUp").addEventListener("click",()=>setBpm(S.bpm+2));
+$("#playBtn").addEventListener("click",()=>{ if(run) stopPlay(); else play(); });
+$("#prevBtn").addEventListener("click",()=>select(S.pos-1));
+$("#nextBtn").addEventListener("click",()=>select(S.pos+1));
+$("#revealBtn").addEventListener("click",()=>{ revealed=!revealed; renderStage(); renderList(); });
+$("#recBtn").addEventListener("click",recordPlay);
+$("#bgBtn").addEventListener("click",toggleBackground);
+$("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent="🎧 バックグラウンド再生"; $("#bgStatus").textContent="バックグラウンド再生が終わりました。"; });
+function repMode(){ if(S.rep==="inf") return "one"; if(S.autoNext&&S.loopSet) return "all"; return "through"; }
+const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで1回"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"全レベルを無限にくり返し"}};
+function renderTransport(){
+  const sb=$("#shufBtn"); sb.setAttribute("aria-pressed",String(S.ord==="shuffle")); sb.title=S.ord==="shuffle"?"シャッフル：オン":"シャッフル：オフ";
+  const m=repMode(), rb=$("#repBtn"); $("#repBadge").textContent=REPMODES[m].badge; rb.classList.toggle("on",m!=="through"); rb.title=REPMODES[m].label; rb.setAttribute("aria-label","くり返し："+REPMODES[m].label);
+}
+$("#shufBtn").addEventListener("click",()=>{ stopPlay(); S.ord=S.ord==="shuffle"?"seq":"shuffle"; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); stageStatus(S.ord==="shuffle"?"シャッフル：オン（行の順番をランダムにしました）":"シャッフル：オフ（レベル順に戻しました）"); });
+$("#repBtn").addEventListener("click",()=>{
+  const next={through:"one",one:"all",all:"through"}[repMode()];
+  if(next==="through"){ S.rep=1; S.autoNext=true; S.loopSet=false; }
+  else if(next==="one"){ S.rep="inf"; }
+  else { S.rep=1; S.autoNext=true; S.loopSet=true; }
+  save(); renderSettings(); stageStatus("くり返し："+REPMODES[next].label+(S.mode==="build"&&next!=="one"?"（「作る」モードでは1行ずつ止まります）":""));
+});
+$("#recPlay").addEventListener("click",playRec);
+$("#recAdj").addEventListener("input",e=>{ if(!rec) return; rec.adj=+e.target.value; $("#recAdjOut").textContent=rec.adj+" ms"; drawRec(); });
+document.addEventListener("keydown",e=>{
+  const tag=(e.target.tagName||"").toLowerCase(); if(tag==="input"||tag==="textarea"||tag==="select") return;
+  if(e.key===" "){ e.preventDefault(); if(run) stopPlay(); else play(); }
+  else if(e.key==="ArrowLeft") select(S.pos-1);
+  else if(e.key==="ArrowRight") select(S.pos+1);
+});
+let rt=0; window.addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(!run) renderStage(); else fitCells(); drawRec(); },150); });
+renderAll();
+})();
+
+</script>
+</body>
+</html>
