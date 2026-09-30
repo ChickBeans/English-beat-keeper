@@ -992,7 +992,21 @@ const KITS={
     weak:t=>{ tone(t,{type:"triangle",f:900,v:.14,att:.001,dec:.025}); nz(t,{v:.1,dec:.02,bp:2500,q:2}); },
     count:t=>{ tone(t,{type:"triangle",f:900,v:.4,att:.001,dec:.03}); nz(t,{v:.2,dec:.02,bp:2500,q:2}); },
     and:t=>nz(t,{v:.35,dec:.05,hp:6000}),
-    click:(t,lv)=>{ tone(t,{type:"triangle",f:900,v:[.2,.34,.48][lv],att:.001,dec:.03}); nz(t,{v:[.1,.16,.24][lv],dec:.02,bp:2500,q:2}); }}
+    click:(t,lv)=>{ tone(t,{type:"triangle",f:900,v:[.2,.34,.48][lv],att:.001,dec:.03}); nz(t,{v:[.1,.16,.24][lv],dec:.02,bp:2500,q:2}); }},
+  lofi:{label:"SP-1200風",desc:"E-mu SP-1200風。90年代ヒップホップの、低くこもった温かい音。拍＝太く丸いキック、真ん中＝こもったハット、オモテ＝低いスネア、ウラ＝柔らかいクリック。",
+    kick:(t,v,d)=>tone(t,{f:110,f2:42,fT:.09,v,dec:Math.max(d,.45)}),
+    hat:(t,v)=>nz(t,{v:v*.55,dec:.05,bp:3000,q:.9}),
+    strong:t=>{ tone(t,{type:"triangle",f:170,f2:130,fT:.05,v:.42,dec:.14}); nz(t,{v:.28,dec:.14,lp:1800}); },
+    weak:t=>tone(t,{type:"triangle",f:320,v:.15,att:.002,dec:.04}),
+    count:t=>tone(t,{type:"triangle",f:420,v:.4,dec:.06}), and:t=>nz(t,{v:.3,dec:.05,bp:2500,q:1}),
+    click:(t,lv)=>tone(t,{type:"triangle",f:[300,360,420][lv],v:[.25,.4,.55][lv],dec:.06})},
+  low808:{label:"808ロー",desc:"TR-808の低い音だけで組んだキット。拍＝深く伸びるキック、真ん中＝柔らかいシェイカー、オモテ＝ロータム、ウラ＝ローコンガ。",
+    kick:(t,v,d)=>tone(t,{f:120,f2:40,fT:.1,v,dec:d+.2}),
+    hat:(t,v)=>nz(t,{v:v*.45,dec:.06,bp:5000,q:.7}),
+    strong:t=>tone(t,{type:"triangle",f:150,f2:110,fT:.08,v:.62,dec:.3}),
+    weak:t=>tone(t,{type:"triangle",f:260,f2:225,fT:.02,v:.2,dec:.07}),
+    count:t=>tone(t,{type:"triangle",f:200,f2:170,fT:.04,v:.5,dec:.15}), and:t=>nz(t,{v:.3,dec:.06,bp:5000,q:.7}),
+    click:(t,lv)=>tone(t,{type:"triangle",f:[170,190,210][lv],v:[.3,.45,.6][lv],dec:.12})}
 };
 function K(){ return KITS[S.kit]||KITS.tr808; }
 function sylTone(t,strong){ if(strong) K().strong(t); else K().weak(t); }
