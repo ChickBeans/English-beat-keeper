@@ -1183,7 +1183,9 @@ function stageStatus(t){ $("#stageStatus").textContent=t||""; }
 /* ---------- audio ---------- */
 let ctx=null, nodes=[], raf=0, run=null, hl={cell:null,syl:null}, noiseBuf=null;
 let recState=null, rec=null, recSrc=null;
-function ensureCtx(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; ctx=new AC(); } if(ctx.state==="suspended") ctx.resume(); return true; }
+function setSession(t){ try{ if(navigator.audioSession&&navigator.audioSession.type!==t) navigator.audioSession.type=t; }catch(e){} }
+function resetAudio(){ try{ if(ctx) ctx.close(); }catch(e){} ctx=null; OUT=null; NOISE=null; nodes=[]; }
+function ensureCtx(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; if(!recState) setSession("playback"); ctx=new AC(); } if(ctx.state==="suspended") ctx.resume(); return true; }
 function reg(n,end){ n._end=end; nodes.push(n); }
 let OUT=null, NOISE=null;
 function out(){ if(!OUT){ const g=ctx.createGain(); g.gain.value=.8; const c=ctx.createDynamicsCompressor(); c.threshold.value=-10; c.ratio.value=4; g.connect(c); c.connect(ctx.destination); OUT=g; } return OUT; }
@@ -1386,8 +1388,9 @@ async function recordPlay(){
   stopPlay();
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ stageStatus(tr("この画面ではマイクが使えません。","The microphone isn't available here.")); return; }
   let stream;
+  setSession("play-and-record");
   try{ stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); }
-  catch(e){ const inClaude=/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)||window.top!==window.self; stageStatus(inClaude?tr("claude.aiの画面の中ではマイクが使えないため、録音できません。このHTMLファイルを自分のウェブサイトとして開くと録音できます。","The microphone isn't available inside claude.ai. Open this HTML file as your own website to record."):e&&e.name==="NotAllowedError"?tr("マイクの使用が許可されませんでした。ブラウザの設定でこのサイトのマイクを許可すると録音できます。","Microphone access was denied. Allow the microphone for this site in your browser settings."):tr("マイクを使えませんでした（","Couldn't use the microphone (")+((e&&e.name)||tr("不明","unknown"))+tr("）。",").")); return; }
+  catch(e){ setSession("playback"); const inClaude=/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)||window.top!==window.self; stageStatus(inClaude?tr("claude.aiの画面の中ではマイクが使えないため、録音できません。このHTMLファイルを自分のウェブサイトとして開くと録音できます。","The microphone isn't available inside claude.ai. Open this HTML file as your own website to record."):e&&e.name==="NotAllowedError"?tr("マイクの使用が許可されませんでした。ブラウザの設定でこのサイトのマイクを許可すると録音できます。","Microphone access was denied. Allow the microphone for this site in your browser settings."):tr("マイクを使えませんでした（","Couldn't use the microphone (")+((e&&e.name)||tr("不明","unknown"))+tr("）。",").")); return; }
   if(ctx.state==="suspended") await ctx.resume();
   const r={stream,chunks:[],first:null};
   r.src=ctx.createMediaStreamSource(stream); r.proc=ctx.createScriptProcessor(2048,1,1); r.mute=ctx.createGain(); r.mute.gain.value=0;
@@ -1397,13 +1400,14 @@ async function recordPlay(){
   const T=firstT(S.pos,true)+.2;
   run=schedule(S.pos,T,{countIn:true,single:true});
   Object.assign(r,{T,beat:run.beat,rests:run.rests,end:run.end,bpm:S.bpm,pos:S.pos,set:S.set,timing:S.timing});
-  recState=r; stageStatus(tr("録音中：カウントのあと、ビートに合わせて言ってください。","Recording: after the count, speak along with the beat."));
+  recState=r; stageStatus(tr("録音中：カウントのあと、ビートに合わせて言ってください。録音中は音が小さくなることがあります（イヤホン推奨）。","Recording: after the count, speak along with the beat. Playback may be quieter while recording (earphones recommended)."));
   setPlaying(true); raf=requestAnimationFrame(loop);
 }
 function finishRecording(){
   const r=recState; recState=null; if(!r) return;
   try{ r.src.disconnect(); r.proc.disconnect(); r.mute.disconnect(); }catch(e){}
   r.stream.getTracks().forEach(t=>t.stop());
+  setTimeout(()=>{ if(!run&&!recState){ resetAudio(); setSession("playback"); } },250);
   const len=r.chunks.reduce((a,c)=>a+c.length,0);
   if(!len||r.first===null){ stageStatus(tr("録音できませんでした。もう一度試してください。","Couldn't record. Please try again.")); return; }
   const data=new Float32Array(len); let p=0; r.chunks.forEach(c=>{data.set(c,p); p+=c.length;});
@@ -1445,7 +1449,7 @@ function playRec(){
   if(S.set!==rec.set||S.pos!==rec.pos){ S.set=rec.set; if(S.order.length!==DATA[S.set].lines.length) makeOrder(); S.pos=Math.min(rec.pos,S.order.length-1); renderAll(); }
   const T=ctx.currentTime+.2+4*rec.beat;
   run=schedule(S.pos,T,{countIn:true,single:true,bpm:rec.bpm,timing:rec.timing,clicks:$("#recClicks").checked});
-  const src=ctx.createBufferSource(); src.buffer=rec.buf; src.connect(ctx.destination);
+  const src=ctx.createBufferSource(); const pb=ctx.createBuffer(1,rec.data.length,rec.sr); pb.getChannelData(0).set(rec.data); src.buffer=pb; src.connect(ctx.destination);
   const at=T+(rec.start-rec.T)+rec.adj/1000;
   if(at<ctx.currentTime) src.start(ctx.currentTime,ctx.currentTime-at); else src.start(at);
   recSrc=src; setPlaying(true); raf=requestAnimationFrame(loop);
