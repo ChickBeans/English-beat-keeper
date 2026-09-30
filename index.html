@@ -186,6 +186,9 @@ select{font:inherit;font-size:.95rem;padding:6px 10px;border-radius:10px;border:
 .rbadge{position:absolute;right:-6px;top:-6px;min-width:20px;height:18px;padding:0 4px;border-radius:9px;background:var(--strong);color:var(--panel);font-size:.66rem;font-weight:700;line-height:18px;text-align:center}
 
 [hidden]{display:none!important}
+#kitSeg{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:6px;border:none;border-radius:0;overflow:visible;width:100%}
+#kitSeg button{border:1.5px solid var(--line)!important;border-radius:12px;padding:8px 6px}
+#kitSeg button[aria-pressed="true"]{border-color:var(--btn)!important}
 :root[data-skin="score"][data-skin]{--bg:#F4F1EA;--panel:#FFFFFF;--ink:#1B1B1F;--muted:#66666E;--line:#D8D2C4;--strong:#C0392B;--weak:#7C7C84;--now:#FFD24A;--nowInk:#1B1B1F;--wash:rgba(255,210,74,.22);--btn:#1B1B1F;--btnInk:#FFFFFF;color-scheme:light}
 :root[data-skin="neon"][data-skin]{--bg:#07060B;--panel:#13111C;--ink:#F2EEFF;--muted:#9A92B8;--line:#2A2540;--strong:#FF3EA5;--weak:#8C86A8;--now:#2FF3E0;--nowInk:#051312;--wash:rgba(47,243,224,.14);--btn:#F2EEFF;--btnInk:#07060B;color-scheme:dark}
 :root[data-skin="forest"][data-skin]{--bg:#0F1A16;--panel:#16241F;--ink:#E4EFE9;--muted:#8FA89C;--line:#28392F;--strong:#7FD6A8;--weak:#86998F;--now:#F2B84B;--nowInk:#1A1200;--wash:rgba(242,184,75,.15);--btn:#E4EFE9;--btnInk:#0F1A16;color-scheme:dark}
@@ -279,7 +282,7 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
 .onbdots{display:flex;gap:8px;justify-content:center;margin:12px 0}
 .onbdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
 .onbdots i.on{background:var(--strong)}
-.onbbtns{display:flex;justify-content:space-between;padding:0 24px}
+.onbbtns{display:flex;justify-content:space-between;gap:8px;padding:0 24px}
 @media (prefers-reduced-motion: reduce){ .pulse.go,.pulse.go.soft,.countbig.pop,.syl.s.now{animation:none} .sheet{transition:none} }
 </style>
 </head>
@@ -434,6 +437,11 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
 
     <h3 class="ghead">表示</h3>
     <div class="group checks">
+      <div class="status sublabel">言語 / Language</div>
+      <div class="seg full" role="group" aria-label="Language" id="langSeg">
+        <button type="button" data-l="ja">日本語</button>
+        <button type="button" data-l="en">English</button>
+      </div>
       <div class="status sublabel">デザインテーマ</div>
       <div class="seg full" role="group" aria-label="デザインテーマ" id="skinSeg">
         <button type="button" data-k="auto"><span class="swatch" style="background:#90AAFF"></span>標準</button>
@@ -521,7 +529,7 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
       </div>
     </div>
     <div class="onbdots" id="onbDots"><i></i><i></i><i></i></div>
-    <div class="onbbtns"><button type="button" id="onbSkip">スキップ</button><button type="button" class="primary" id="onbNext">次へ</button></div>
+    <div class="onbbtns"><button type="button" id="onbSkip">スキップ</button><button type="button" id="onbLang">English</button><button type="button" class="primary" id="onbNext">次へ</button></div>
   </div>
 </div>
 
@@ -947,12 +955,12 @@ function connect(words){
 }
 
 
-const DATA=SETS.map(st=>({base:st.base,q:!!st.q,scene:st.scene||"basic",lines:st.lines.map(l=>({full:parseMarkup(l[0]),short:l[2]?parseMarkup(l[2]):null,cue:l[1]}))}));
+const DATA=SETS.map(st=>({base:st.base,q:!!st.q,scene:st.scene||"basic",lines:st.lines.map(l=>({full:parseMarkup(l[0]),short:l[2]?parseMarkup(l[2]):null,cue:l[1].replace(/go~ing/g,"going")}))}));
 DATA.forEach(d=>d.lines.forEach(L=>{ connect(L.full.words); if(L.short) connect(L.short.words); }));
 DATA.forEach(d=>{ d.nb=d.lines[0].full.words.reduce((a,w)=>a+w.syl.filter(s=>s.s).length,0); });
 
 /* ---------- state ---------- */
-const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,skin:"auto",disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"even",preset:"slow",bpm:60,autoBpm:true};
+const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,lang:null,skin:"auto",disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"even",preset:"slow",bpm:60,autoBpm:true};
 let S=Object.assign({},DEF);
 var firstVisit=true;
 function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) firstVisit=false; const v=JSON.parse(raw||"null"); if(v&&typeof v==="object") S=Object.assign({},DEF,v); }catch(e){} if(!DATA[S.set]) S.set=0; if(!Array.isArray(S.order)||S.order.length!==DATA[S.set].lines.length) S.order=[0,1,2,3,4]; if(S.pos>=S.order.length) S.pos=0; }
@@ -1003,11 +1011,11 @@ function makeCell(list,opt,bt){
   const c=el("div","cell"+(opt.pick?" pick":"")+(bt&&bt.rest?" rest":""));
   c.dataset.key=opt.key;
   if(opt.pick){ const n=el("span","num"); n.textContent="and"; c.append(n); }
-  else { const n=el("span","num"); n.textContent=opt.num; const u=el("span","ura"); u.textContent="ウラ"; c.append(n,el("span","mid"),u); }
+  else { const n=el("span","num"); n.textContent=opt.num; const u=el("span","ura"); u.textContent=tr("ウラ","off"); c.append(n,el("span","mid"),u); }
   const inn=el("div","cin"), sg=el("span","sg"), wg=el("span","wg"), wi=el("span","wi"); wg.append(wi);
   let weak=list;
   if(!opt.pick&&bt&&!bt.rest){ sg.append(sylSpan(list[0])); weak=list.slice(1); }
-  else if(bt&&bt.rest){ const r=el("span","restmark"); r.textContent=bt.first?"息":"·"; sg.append(r); }
+  else if(bt&&bt.rest){ const r=el("span","restmark"); r.textContent=bt.first?tr("息","breathe"):"·"; sg.append(r); }
   weak.forEach(it=>wi.append(sylSpan(it)));
   inn.append(sg,wg); c.append(inn); return c;
 }
@@ -1032,17 +1040,17 @@ function renderChips(){
   if(!avail.includes(S.cat)) S.cat=avail[0];
   const ss=$("#sceneSeg"); ss.innerHTML="";
   SCENES.forEach(([k,label])=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-pressed",String(k===S.scene));
-    const n=DATA.filter(d=>k==="all"||d.scene===k).length; b.innerHTML=label+"<small>"+n+"セット</small>";
+    const n=DATA.filter(d=>k==="all"||d.scene===k).length; b.innerHTML=(S.lang==="en"?SC_EN[k]:label)+"<small>"+n+tr("セット"," sets")+"</small>";
     b.addEventListener("click",()=>{ S.scene=k; save(); renderChips(); }); ss.append(b); });
   const seg=$("#catSeg"); seg.innerHTML="";
   avail.forEach(c=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-pressed",String(c===S.cat));
-    const n=DATA.filter(d=>d.nb===c&&inScene(d)).length; b.innerHTML=c+"拍<small>"+n+"</small>";
+    const n=DATA.filter(d=>d.nb===c&&inScene(d)).length; b.innerHTML=c+tr("拍","")+"<small>"+n+"</small>";
     b.addEventListener("click",()=>{ S.cat=c; save(); renderChips(); }); seg.append(b); });
   const box=$("#chips"); box.innerHTML=""; let k=0;
   DATA.forEach((d,i)=>{ if(d.nb!==S.cat||!inScene(d)) return; k++;
     const b=el("button","chip"); b.type="button"; b.setAttribute("aria-pressed",String(i===S.set));
     const t=el("span","t"); t.textContent=d.base.map(x=>x.toUpperCase()).join(" ");
-    const m=el("span","m"); m.textContent=(S.scene==="all"?SCENE_NAME[d.scene]+"・":"")+d.nb+"拍"+(d.q?"・疑問文":"");
+    const m=el("span","m"); m.textContent=(S.scene==="all"?(S.lang==="en"?SC_EN[d.scene]:SCENE_NAME[d.scene])+tr("・"," · "):"")+d.nb+tr("拍"," beats")+(d.q?tr("・疑問文"," · questions"):"");
     const pd=el("span","pd"); const dn=(S.done&&S.done[i])||[]; for(let q=0;q<d.lines.length;q++){ const ii=el("i"); if(dn.includes(q)) ii.className="on"; pd.append(ii); }
     b.append(t,m,pd); b.addEventListener("click",()=>{ setSet(i); showTab("practice"); }); box.append(b); });
 }
@@ -1059,7 +1067,7 @@ function renderNext(){
   const box=$("#nextLine"); if(!box) return;
   const nx=nextPreviewPos(); if(!nx){ box.hidden=true; return; }
   const {L,sent,num}=lineAt(nx.pos); box.hidden=false; box.innerHTML="";
-  const lab=el("span","nl-label"); lab.textContent=nx.same?"次 ▸ もう一度":(nx.wrap?(S.ord==="shuffle"?"次の周 ▸ シャッフル":"次の周 ▸ レベル"+(num+1)):"次 ▸ レベル"+(num+1));
+  const lab=el("span","nl-label"); lab.textContent=nx.same?tr("次 ▸ もう一度","Next ▸ again"):(nx.wrap?(S.ord==="shuffle"?tr("次の周 ▸ シャッフル","Next round ▸ shuffled"):tr("次の周 ▸ レベル","Next round ▸ Level ")+(num+1)):tr("次 ▸ レベル","Next ▸ Level ")+(num+1));
   box.append(lab);
   if(nx.wrap&&S.ord==="shuffle") return;
   const tx=el("span","nl-text");
@@ -1074,20 +1082,20 @@ function renderNext(){
 function renderStage(){
   const d=DATA[S.set]; const {L,sent,num}=lineAt(S.pos);
   document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===S.mode)));
-  $("#pos").textContent=S.ord==="shuffle"?"シャッフル "+(S.pos+1)+" / "+S.order.length:""; $("#pos").hidden=S.ord!=="shuffle";
+  $("#pos").textContent=S.ord==="shuffle"?tr("シャッフル ","Shuffle ")+(S.pos+1)+" / "+S.order.length:""; $("#pos").hidden=S.ord!=="shuffle";
   $("#setName").textContent=d.base.map(x=>x.toUpperCase()).join(" ");
   renderDots();
-  $("#cueBadge").textContent="レベル"+(num+1)+"・"+L.cue;
+  $("#cueBadge").textContent=tr("レベル","Level ")+(num+1)+tr("・"," · ")+TC(L.cue);
   const build=S.mode==="build";
   $("#prompt").hidden=!build;
   $("#pbase").textContent=d.base.map(x=>x.toUpperCase()).join("  ·  ");
-  $("#pcue").textContent=L.cue+(S.contract&&L.short?"（短縮形で）":"");
-  $("#revealBtn").hidden=!build; $("#revealBtn").textContent=revealed?"答えを隠す":"答えを見る";
+  $("#pcue").textContent=TC(L.cue)+(S.contract&&L.short?tr("（短縮形で）"," (with contractions)"):"");
+  $("#revealBtn").hidden=!build; $("#revealBtn").textContent=revealed?tr("答えを隠す","Hide answer"):tr("答えを見る","Show answer");
   $("#fulltext").textContent=hiddenMode()?"":sent.text;
   $("#tip").hidden=!build;
-  $("#tip").textContent=build?"●の位置がオモテです。材料と指示から文を組み立て、ビートに乗せて言ってみてください。1行終わると答えが出ます。":
-    S.mode==="recall"?"・はウラの音節の数です。何が入るかを思い出しながら言ってください。":
-    "太字がオモテ（拍の頭）、小さい字がウラです。";
+  $("#tip").textContent=build?tr("●の位置がオモテです。材料と指示から文を組み立て、ビートに乗せて言ってみてください。1行終わると答えが出ます。","● marks each beat. Build the sentence from the words and the instruction, and say it on the beat. The answer appears after the line."):
+    S.mode==="recall"?tr("・はウラの音節の数です。何が入るかを思い出しながら言ってください。","Each · is a weak syllable. Say the line while recalling what goes there."):
+    tr("太字がオモテ（拍の頭）、小さい字がウラです。","Bold = on the beat, small = weak syllables.");
   lane.innerHTML="";
   lane.classList.toggle("even",S.timing==="even");
   const B=buildBeats(sent);
@@ -1109,9 +1117,9 @@ function renderList(){
   S.order.forEach((li_,p)=>{
     const L=DATA[S.set].lines[li_]; const sent=(S.contract&&L.short)?L.short:L.full;
     const li=el("li"), b=el("button","sent"+(p===S.pos?" on":"")); b.type="button";
-    const cue=el("span","cue"); cue.textContent="レベル"+(li_+1)+"・"+L.cue;
+    const cue=el("span","cue"); cue.textContent=tr("レベル","Level ")+(li_+1)+tr("・"," · ")+TC(L.cue);
     b.append(cue);
-    if(S.mode==="build"&&!(p===S.pos&&revealed)){ const h=el("span","hide"); h.textContent="（作るモードでは隠しています）"; b.append(h); }
+    if(S.mode==="build"&&!(p===S.pos&&revealed)){ const h=el("span","hide"); h.textContent=tr("（作るモードでは隠しています）","(hidden in Build mode)"); b.append(h); }
     else sent.words.forEach((w,wi)=>{
       if(wi>0) b.append(document.createTextNode(S.conn&&w.link?"‿":" "));
       w.syl.forEach(sy=>{ const sp=el("span",sy.s?"ls":""); sp.textContent=sy.t; b.append(sp); });
@@ -1126,12 +1134,12 @@ function renderList(){
 function renderSettings(){
   const pr=(sel,attr,val)=>document.querySelectorAll(sel+" button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset[attr]===String(val))));
   pr("#presetSeg","p",S.preset); pr("#soundSeg","s",S.sound); pr("#dispSeg","d",S.disp);
-  const ks=$("#kitSeg"); if(!ks.childElementCount){ Object.entries(KITS).forEach(([k,v])=>{ const b=el("button"); b.type="button"; b.dataset.k=k; b.textContent=v.label; b.addEventListener("click",()=>{ S.kit=k; save(); renderSettings(); previewKit(); }); ks.append(b); }); }
-  if(!KITS[S.kit]) S.kit="tr808"; pr("#kitSeg","k",S.kit); $("#kitDesc").textContent=K().desc; pr("#sylSeg","y",S.sylSound?"on":"off"); pr("#timingSeg","t",S.timing); pr("#orderSeg","o",S.ord); pr("#repSeg","r",S.rep);
+  const ks=$("#kitSeg"); if(!ks.childElementCount){ Object.entries(KITS).forEach(([k,v])=>{ const b=el("button"); b.type="button"; b.dataset.k=k; b.textContent=kitLabel(k); b.addEventListener("click",()=>{ S.kit=k; save(); renderSettings(); previewKit(); }); ks.append(b); }); }
+  if(!KITS[S.kit]) S.kit="tr808"; pr("#kitSeg","k",S.kit); $("#kitDesc").textContent=kitDescT(S.kit); pr("#sylSeg","y",S.sylSound?"on":"off"); pr("#timingSeg","t",S.timing); pr("#orderSeg","o",S.ord); pr("#repSeg","r",S.rep);
   const sg=suggest();
-  $("#sugg").innerHTML="提案：<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">このセットで一番詰まっている行（1拍あたり "+sg.maxAvg.toFixed(1)+" 音節）でも目標の速さに収まるテンポです。</span>";
+  $("#sugg").innerHTML=tr("提案：","Suggested: ")+"<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">"+tr("このセットで一番詰まっている行（1拍あたり "+sg.maxAvg.toFixed(1)+" 音節）でも目標の速さに収まるテンポです。","Even the densest line in this set ("+sg.maxAvg.toFixed(1)+" syllables per beat) fits your target speed.")+"</span>";
   $("#bpmRange").value=S.bpm; $("#bpmOut").textContent=S.bpm+" BPM"; $("#autoBpm").checked=S.autoBpm;
-  $("#bpmPill").textContent="♩ "+S.bpm+" BPM"; $("#kitPill").textContent="🥁 "+K().label;
+  $("#bpmPill").textContent="♩ "+S.bpm+" BPM"; $("#kitPill").textContent="🥁 "+kitLabel(S.kit);
   renderSettingsHook();
   ["contract","skipPick","hints","fillBar","countIn","autoNext","loopSet","conn"].forEach(id=>$("#"+id).checked=!!S[id]);
 }
@@ -1309,8 +1317,8 @@ function loop(){
 }
 function firstT(pos,countIn){ const beat=60/S.bpm; const B=buildBeats(lineAt(pos).sent); const t0=ctx.currentTime+.15; return countIn?t0+4*beat:t0+(B.pick.length?beat:0); }
 function play(){
-  { const au=document.getElementById("bgAudio"); if(au&&!au.paused){ au.pause(); document.getElementById("bgBtn").textContent="🎧 BG再生"; } }
-  if(!ensureCtx()){ stageStatus("このブラウザでは音が出せません。"); return; }
+  { const au=document.getElementById("bgAudio"); if(au&&!au.paused){ au.pause(); document.getElementById("bgBtn").textContent=tr("🎧 BG再生","🎧 BG play"); } }
+  if(!ensureCtx()){ stageStatus(tr("このブラウザでは音が出せません。","This browser can't play audio.")); return; }
   stopPlay(); stageStatus("");
   if(S.mode==="build"){ revealed=false; renderStage(); renderList(); }
   run=schedule(S.pos,firstT(S.pos,S.countIn),{countIn:S.countIn,single:S.mode==="build"});
@@ -1335,19 +1343,19 @@ async function keepAwake(on){
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&run) keepAwake(true); });
 function setPlaying(on){
   keepAwake(!!on);
-  const b=$("#playBtn"); b.innerHTML=on?ICON_STOP:ICON_PLAY; b.setAttribute("aria-label",on?"停止":"再生");
-  const r=$("#recBtn"); r.dataset.on=(on&&recState)?"1":""; r.textContent=(on&&recState)?"● 録音中":"● 録音"; r.disabled=on&&!recState;
+  const b=$("#playBtn"); b.innerHTML=on?ICON_STOP:ICON_PLAY; b.setAttribute("aria-label",on?tr("停止","Stop"):tr("再生","Play"));
+  const r=$("#recBtn"); r.dataset.on=(on&&recState)?"1":""; r.textContent=(on&&recState)?tr("● 録音中","● Recording"):tr("● 録音","● Rec"); r.disabled=on&&!recState;
 }
 
 /* ---------- recording ---------- */
 async function recordPlay(){
   if(recState){ stopPlay(); return; }
-  if(!ensureCtx()){ stageStatus("このブラウザでは音が出せません。"); return; }
+  if(!ensureCtx()){ stageStatus(tr("このブラウザでは音が出せません。","This browser can't play audio.")); return; }
   stopPlay();
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ stageStatus("この画面ではマイクが使えません。"); return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ stageStatus(tr("この画面ではマイクが使えません。","The microphone isn't available here.")); return; }
   let stream;
   try{ stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); }
-  catch(e){ const inClaude=/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)||window.top!==window.self; stageStatus(inClaude?"claude.aiの画面の中ではマイクが使えないため、録音できません。このHTMLファイルを自分のウェブサイトとして開くと録音できます。":e&&e.name==="NotAllowedError"?"マイクの使用が許可されませんでした。ブラウザの設定でこのサイトのマイクを許可すると録音できます。":"マイクを使えませんでした（"+((e&&e.name)||"不明")+"）。"); return; }
+  catch(e){ const inClaude=/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)||window.top!==window.self; stageStatus(inClaude?tr("claude.aiの画面の中ではマイクが使えないため、録音できません。このHTMLファイルを自分のウェブサイトとして開くと録音できます。","The microphone isn't available inside claude.ai. Open this HTML file as your own website to record."):e&&e.name==="NotAllowedError"?tr("マイクの使用が許可されませんでした。ブラウザの設定でこのサイトのマイクを許可すると録音できます。","Microphone access was denied. Allow the microphone for this site in your browser settings."):tr("マイクを使えませんでした（","Couldn't use the microphone (")+((e&&e.name)||tr("不明","unknown"))+tr("）。",").")); return; }
   if(ctx.state==="suspended") await ctx.resume();
   const r={stream,chunks:[],first:null};
   r.src=ctx.createMediaStreamSource(stream); r.proc=ctx.createScriptProcessor(2048,1,1); r.mute=ctx.createGain(); r.mute.gain.value=0;
@@ -1357,7 +1365,7 @@ async function recordPlay(){
   const T=firstT(S.pos,true)+.2;
   run=schedule(S.pos,T,{countIn:true,single:true});
   Object.assign(r,{T,beat:run.beat,rests:run.rests,end:run.end,bpm:S.bpm,pos:S.pos,set:S.set,timing:S.timing});
-  recState=r; stageStatus("録音中：カウントのあと、ビートに合わせて言ってください。");
+  recState=r; stageStatus(tr("録音中：カウントのあと、ビートに合わせて言ってください。","Recording: after the count, speak along with the beat."));
   setPlaying(true); raf=requestAnimationFrame(loop);
 }
 function finishRecording(){
@@ -1365,12 +1373,12 @@ function finishRecording(){
   try{ r.src.disconnect(); r.proc.disconnect(); r.mute.disconnect(); }catch(e){}
   r.stream.getTracks().forEach(t=>t.stop());
   const len=r.chunks.reduce((a,c)=>a+c.length,0);
-  if(!len||r.first===null){ stageStatus("録音できませんでした。もう一度試してください。"); return; }
+  if(!len||r.first===null){ stageStatus(tr("録音できませんでした。もう一度試してください。","Couldn't record. Please try again.")); return; }
   const data=new Float32Array(len); let p=0; r.chunks.forEach(c=>{data.set(c,p); p+=c.length;});
   const buf=ctx.createBuffer(1,len,ctx.sampleRate); buf.getChannelData(0).set(data);
   rec={buf,data,sr:ctx.sampleRate,start:r.first,T:r.T,beat:r.beat,rests:r.rests,end:r.end,bpm:r.bpm,pos:r.pos,set:r.set,timing:r.timing,adj:0};
   if(S.mode==="build"){ revealed=true; renderStage(); renderList(); }
-  stageStatus("録音しました。下の図で拍との重なりを確認できます。");
+  stageStatus(tr("録音しました。下の図で拍との重なりを確認できます。","Recorded. See the chart to check how you lined up with the beat."));
   $("#recPanel").hidden=false; $("#recEmpty").hidden=true; $("#recAdj").value=0; $("#recAdjOut").textContent="0 ms";
   showTab("record"); requestAnimationFrame(drawRec);
 }
@@ -1395,7 +1403,7 @@ function drawRec(){
   rec.rests.forEach((rest,j)=>{
     vline(X(j*rec.beat), rest?col("--line"):col("--strong"), rest?1:2, []);
     vline(X((j+.5)*rec.beat), col("--line"), 1, [3,3]);
-    g.fillStyle=col("--muted"); g.fillText(rest?"休":String(j%4+1), X(j*rec.beat)+3, h-5);
+    g.fillStyle=col("--muted"); g.fillText(rest?tr("休","R"):String(j%4+1), X(j*rec.beat)+3, h-5);
   });
   g.setLineDash([]);
 }
@@ -1446,20 +1454,57 @@ async function renderBackground(){
 }
 async function toggleBackground(){
   const au=$("#bgAudio"), btn=$("#bgBtn");
-  if(!au.paused){ au.pause(); au.currentTime=0; btn.textContent="🎧 BG再生"; $("#bgStatus").textContent="バックグラウンド再生を止めました。"; return; }
+  if(!au.paused){ au.pause(); au.currentTime=0; btn.textContent=tr("🎧 BG再生","🎧 BG play"); $("#bgStatus").textContent=tr("バックグラウンド再生を止めました。","Background playback stopped."); return; }
   stopPlay(); ensureCtx();
-  btn.disabled=true; btn.textContent="音声を作成中…"; $("#bgStatus").textContent="今の設定（セット・テンポ・音色・リピート）で音声ファイルを作っています。";
+  btn.disabled=true; btn.textContent=tr("音声を作成中…","Rendering…"); $("#bgStatus").textContent=tr("今の設定（セット・テンポ・音色・リピート）で音声ファイルを作っています。","Rendering audio with your current settings (set, tempo, kit, repeat).");
   try{
     const r=await renderBackground();
     if(bgURL) URL.revokeObjectURL(bgURL); bgURL=URL.createObjectURL(r.blob);
     au.src=bgURL; au.loop=r.loop;
-    if("mediaSession" in navigator){ try{ navigator.mediaSession.metadata=new MediaMetadata({title:"拍キープ・ドリル",artist:DATA[S.set].base.map(x=>x.toUpperCase()).join(" ")+"（"+S.bpm+" BPM）"}); }catch(e){} }
+    if("mediaSession" in navigator){ try{ navigator.mediaSession.metadata=new MediaMetadata({title:tr("拍キープ・ドリル","Beat Keeper Drill"),artist:DATA[S.set].base.map(x=>x.toUpperCase()).join(" ")+"（"+S.bpm+" BPM）"}); }catch(e){} }
     await au.play();
-    btn.textContent="■ BG停止";
-    $("#bgStatus").textContent=(r.loop?"くり返し再生中":"再生中")+"（"+r.lines+"行・"+Math.round(r.secs)+"秒"+(r.loop?"で1周":"")+"）。画面を消しても流れ続けるはずです。設定を変えたら、止めてもう一度押してください。";
+    btn.textContent=tr("■ BG停止","■ BG stop");
+    $("#bgStatus").textContent=(r.loop?tr("くり返し再生中","Looping"):tr("再生中","Playing"))+tr("（"," (")+r.lines+tr("行・"," lines · ")+Math.round(r.secs)+tr("秒","s")+(r.loop?tr("で1周"," per loop"):"")+tr("）。画面を消しても流れ続けるはずです。設定を変えたら、止めてもう一度押してください。","). It should keep playing with the screen off. If you change settings, stop and tap again.");
   }catch(e){
-    btn.textContent="🎧 BG再生"; $("#bgStatus").textContent="作成または再生に失敗しました（"+((e&&e.name)||"不明")+"）。この画面では使えない場合があります。";
+    btn.textContent=tr("🎧 BG再生","🎧 BG play"); $("#bgStatus").textContent=tr("作成または再生に失敗しました（","Couldn't render or play (")+((e&&e.name)||tr("不明","unknown"))+tr("）。この画面では使えない場合があります。","). This may not work in this view.");
   }finally{ btn.disabled=false; }
+}
+
+
+/* ---------- i18n ---------- */
+const EN_STATIC={"0分": "0 min", "2.5音節/秒": "2.5 syll/s", "3.5音節/秒": "3.5 syll/s", "4.5音節/秒": "4.5 syll/s", "BPMを上げる": "Increase BPM", "BPMを下げる": "Decrease BPM", "have been → 've been、going to → gonna など。": "have been → 've been, going to → gonna, etc.", "‿ ＝ つなげて読む／(t) ＝ ほぼ発音しない／dɪdʒu ＝ did you のように音が変わる。": "‿ = link the words / (t) = barely pronounced / dɪdʒu = sounds merge, as in \"did you\".", "▶で再生。「1, 2, 3, and」のあと、光る文字に合わせて言います。慣れたら「思い出す」「作る」モードへ。録音すると、拍に乗れているかを図で確認できます。": "Tap ▶. After \"1, 2, 3, and\", say the words as they light up. Then move on to Recall and Build modes. Record yourself to see if you're on the beat.", "● 録音": "● Rec", "「作る」モードでは1行ずつ止まります。": "In Build mode, playback stops after each line.", "あり": "On", "くり返し": "Repeat", "この7日間": "Last 7 days", "このセットの行": "Lines in this set", "ずれ補正：": "Offset:", "その他": "Other", "つながりを表示（連結・脱落・同化）": "Show connected speech (linking, elision, assimilation)", "なし": "Off", "ふつう": "Normal", "まだ録音がありません。練習画面の「● 録音」で1行を録音すると、ここに声と拍の重なりが表示されます。": "No recordings yet. Record a line with \"● Rec\" on the Practice screen and your voice will be plotted against the beat here.", "ウラの流し方": "Weak-syllable timing", "オモテの数はずっと同じ": "The number of beats never changes", "オモテ大・ウラ小": "Loud on beat, soft off beat", "クリック": "Click", "シャッフル": "Shuffle", "スキップ": "Skip", "セット": "Sets", "セットや速さを変えたら提案BPMに合わせる": "Use the suggested BPM when the set or speed changes", "セットを無限にくり返す": "Loop the whole set", "テンポ": "Tempo", "デザインテーマ": "Theme", "ドラム": "Drums", "ネオン": "Neon", "ビートも鳴らす": "Play the beat too", "レベル": "Levels", "今日": "Today", "作る": "Build", "使い方をもう一度見る": "Show the tutorial again", "光る文字に合わせて声に出す": "Speak along with the highlighted words", "再生": "Play", "前の行": "Previous line", "厳密": "Strict", "各セットはレベル1〜5。下のレベルほどウラが増えますが、オモテの数とテンポは変わりません。同じテンポのまま最後まで言えたら合格です。": "Each set has levels 1–5. Higher levels add more weak syllables, but the number of beats and the tempo stay the same. Get through level 5 without losing the beat and you've got it.", "各行1回": "Once per line", "各行2回": "Twice per line", "同じ行を無限": "Loop one line", "場面": "Scene", "太い縦線が拍の頭（オモテ）、点線が拍の真ん中です。灰色の山が声の大きさ。強い音節の山が太い線のすぐあとに来ていれば、拍に乗れています。": "Thick lines mark the beats, dotted lines the half-beats. The grey shape is your voice. If each stressed syllable peaks just after a thick line, you're on the beat.", "小節の区切りまで休む": "Rest until the end of the bar", "弱形のヒント": "Weak-form hints", "弱起を省く": "Skip the pickup", "思い出す": "Recall", "拍の後半に詰める": "Pack into the off-beat", "拍の音": "Beat sound", "拍全体に均等": "Spread across the beat", "拍数": "Beats", "指示": "Instruction", "文字の表示": "Text display", "文頭のウラ（The、and など）を抜いて、最初のオモテから入ります。": "Leave out the unstressed start (The, and…) and come in on the first beat.", "日本語は1音ずつ同じ長さで話します。英語は、強い音（オモテ）を一定の間隔で打ち、弱い音（ウラ）をその間に詰め込みます。": "Some languages give every syllable the same length. English hits stressed syllables at regular intervals and squeezes the weak ones in between.", "最初に「1, 2, 3, and」のカウント": "Count in with \"1, 2, 3, and\"", "材料": "Words", "森": "Forest", "楽譜": "Score", "標準": "Default", "次の行": "Next line", "次へ": "Next", "流し方": "Playback", "画面": "Screens", "目標の話す速さ": "Target speaking speed", "短縮形で読む": "Use contractions", "答えを見る": "Show answer", "終わったら次の行へ進む": "Move on to the next line", "練習": "Practice", "練習の記録をリセット": "Reset practice history", "練習モード": "Practice mode", "練習時間": "Practice time", "自然": "Natural", "英語": "Text", "英語は「拍」で話す言語": "English is spoken on the beat", "英語＋発音記号": "Text + IPA", "行の順番": "Line order", "表示": "Display", "表示が「英語」のとき、the → ðə のような弱い音を表示します。": "With plain text display, shows weak forms such as the → ðə.", "言い切った行": "Lines completed", "記号のみ": "IPA only", "記録": "Stats", "設定": "Settings", "読む": "Read", "録音": "Recording", "録音を聞く": "Play recording", "閉じる": "Close", "音": "Sound", "音節の音": "Syllable sound", "音節の音（文字と一緒に鳴る）": "Syllable sound (plays with each word)", "音色": "Kit", "音色（名機を再現した合成音）": "Kit (synthesised classic drum machines)", "順番どおり": "In order", "🎧 BG再生": "🎧 BG play", "言語": "Language"};
+const EN_CUE={"丁寧な依頼（could you ~ for me）": "Polite request (could you ~ for me)", "丁寧な確認（would you be ~ing）": "Polite check (would you be ~ing)", "予定だった・完了": "Was going to · perfect", "予定だった・完了（was going to have）": "Was going to · perfect (was going to have)", "予定だった・進行": "Was going to · continuous", "予定だった・進行（was going to be ~ing）": "Was going to · continuous (was going to be ~ing)", "予定だった（was going to）": "Was going to", "予定だった（were going to）": "Was going to (were going to)", "予定の進行": "Future plan · continuous", "予定の進行（and で始める）": "Future plan · continuous (starts with \"and\")", "予定・予想（going to be）": "Plan / prediction (going to be)", "予定・受け身": "Future plan · passive", "予定（going to）": "Future plan (going to)", "予想＋for us": "Prediction + for us", "仮定・完了": "Hypothetical · perfect", "仮定・完了の受け身": "Hypothetical · perfect passive", "仮定・完了進行": "Hypothetical · perfect continuous", "仮定・完了（would have）": "Hypothetical · perfect (would have)", "依頼（can you）": "Request (can you)", "受け身・後悔（主語を入れ替え）": "Passive · regret (subject swapped)", "受け身（主語を入れ替え）": "Passive (subject swapped)", "可能性・完了の受け身": "Possibility · perfect passive", "命令形": "Imperative", "後悔・受け身": "Regret · passive", "後悔（should have been ~ing）": "Regret (should have been ~ing)", "後悔（should have）": "Regret (should have)", "推量（must have）": "Deduction (must have)", "推量（must have）＋所有格": "Deduction (must have) + possessive", "推量＋when節": "Deduction + when-clause", "推量＋関係詞（and で始める）": "Deduction + relative clause (starts with \"and\")", "推量＋関係詞（that's）": "Deduction + relative clause (that's)", "未来完了・受け身": "Future perfect · passive", "未来完了（I'll have）": "Future perfect (I'll have)", "未来完了（by tonight）": "Future perfect (by tonight)", "未来進行": "Future continuous", "未来（I'll）": "Future (I'll)", "未来（we'll）": "Future (we'll)", "未来（will）": "Future (will)", "未来＋相手（send you）": "Future + object (send you)", "現在完了": "Present perfect", "現在完了・受け身": "Present perfect · passive", "現在完了進行": "Present perfect continuous", "現在完了進行形": "Present perfect continuous", "現在形": "Present simple", "現在形（冠詞なし）": "Present simple (no articles)", "現在形（平叙文）": "Present simple (statement)", "疑問文・予定だった": "Question · was going to", "疑問文・予定だった進行": "Question · was going to · continuous", "疑問文・予定だった（was going to）": "Question · was going to", "疑問文・予定の完了": "Question · future plan · perfect", "疑問文・予定の進行": "Question · future plan · continuous", "疑問文・予定（be going to be ~ing）": "Question · future plan (be going to be ~ing)", "疑問文・予定（be going to）": "Question · future plan (be going to)", "疑問文・予定（going to）": "Question · future plan (going to)", "疑問文・予想（going to be）": "Question · prediction (going to be)", "疑問文・予想＋for you": "Question · prediction + for you", "疑問文・仮定の完了": "Question · hypothetical perfect", "疑問文・仮定の完了進行": "Question · hypothetical perfect continuous", "疑問文・依頼（can we）": "Question · request (can we)", "疑問文・後悔（should have been ~ing）": "Question · regret (should have been ~ing)", "疑問文・後悔（should have）": "Question · regret (should have)", "疑問文・未来完了": "Question · future perfect", "疑問文・未来完了（will you have）": "Question · future perfect (will you have)", "疑問文・未来進行": "Question · future continuous", "疑問文・未来（will）": "Question · future (will)", "疑問文・現在": "Question · present", "疑問文・現在完了": "Question · present perfect", "疑問文・現在完了進行": "Question · present perfect continuous", "疑問文・現在形": "Question · present simple", "疑問文・現在形（冠詞なし）": "Question · present simple (no articles)", "疑問文・現在進行": "Question · present continuous", "疑問文・現在（一般論）": "Question · present (general)", "疑問文・現在（予定）": "Question · present (timetable)", "疑問文・現在（冠詞なし）": "Question · present (no articles)", "疑問文・現在（所有格なし）": "Question · present (no possessive)", "疑問文・進行形の予定": "Question · present continuous for arrangements", "疑問文・過去": "Question · past", "疑問文・過去進行": "Question · past continuous", "疑問文・過去（所有格なし）": "Question · past (no possessive)", "過去・受け身": "Past · passive", "過去完了進行": "Past perfect continuous", "過去形": "Past simple", "過去形（主語なし）": "Past simple (no subject)", "過去形（冠詞なし）": "Past simple (no articles)", "過去形（所有格なし）": "Past simple (no possessive)", "過去進行形": "Past continuous"};
+function tr(ja,en){ return S.lang==="en"?en:ja; }
+function TC(c){ return S.lang==="en"?(EN_CUE[c]||c):c; }
+const SC_EN={all:"All",basic:"Basic",biz:"Business",daily:"Daily"};
+const TAB_EN={practice:"Practice",sets:"Sets",record:"Stats",settings:"Settings"};
+const REP_EN={through:"Play once to the end",one:"Loop this line",all:"Loop all levels"};
+const KIT_EN={orig:["Original","Simple electronic tones. Beat = low tone, stressed = pop, weak = tick."],
+ tr808:["808","TR-808 style. Beat = long booming kick, half-beat = metallic hi-hat, stressed = cowbell, weak = rimshot."],
+ tr909:["909","TR-909 style. Beat = punchy kick, half-beat = crisp hi-hat, stressed = clap, weak = rimshot."],
+ cr78:["CR-78","CompuRhythm CR-78 style. Soft analogue sounds. Beat = round kick, half-beat = tambourine, stressed = conga, weak = bongo."],
+ linn:["LinnDrum-ish","LinnDrum style. Tight 80s pop sounds. Beat = tight kick, half-beat = hi-hat, stressed = snare, weak = side-stick."],
+ lofi:["SP-1200-ish","E-mu SP-1200 style. Warm, muffled 90s hip-hop sounds. Beat = fat round kick, half-beat = dull hat, stressed = low snare, weak = soft click."],
+ low808:["808 Low","A kit built only from the TR-808's low sounds. Beat = deep kick, half-beat = soft shaker, stressed = low tom, weak = low conga."]};
+function kitLabel(k){ k=KITS[k]?k:"tr808"; return S.lang==="en"&&KIT_EN[k]?KIT_EN[k][0]:KITS[k].label; }
+function kitDescT(k){ k=KITS[k]?k:"tr808"; return S.lang==="en"&&KIT_EN[k]?KIT_EN[k][1]:KITS[k].desc; }
+function repLabel(m){ return tr(REPMODES[m].label,REP_EN[m]); }
+const JA_RE=/[\u3040-\u30ff\u4e00-\u9fff]/;
+let staticTexts=[], staticAttrs=[];
+function captureStatic(){
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>(n.parentElement&&!/^(SCRIPT|STYLE)$/.test(n.parentElement.tagName)&&JA_RE.test(n.nodeValue))?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
+  let n; while((n=w.nextNode())) staticTexts.push({n,ja:n.nodeValue});
+  document.querySelectorAll("[aria-label],[title],[placeholder]").forEach(e=>["aria-label","title","placeholder"].forEach(a=>{ const v=e.getAttribute(a); if(v&&JA_RE.test(v)) staticAttrs.push({e,a,ja:v}); }));
+}
+function trJa(ja){ const t=ja.trim(); const en=EN_STATIC[t]; return en==null?ja:ja.replace(t,en); }
+function applyLang(){
+  const en=S.lang==="en";
+  document.documentElement.lang=en?"en":"ja"; document.title=tr("拍キープ・ドリル","Beat Keeper Drill");
+  staticTexts.forEach(x=>{ x.n.nodeValue=en?trJa(x.ja):x.ja; });
+  staticAttrs.forEach(x=>{ x.e.setAttribute(x.a,en?trJa(x.ja):x.ja); });
+  const ks=$("#kitSeg"); if(ks) ks.innerHTML="";
+  document.querySelectorAll("#langSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.l===S.lang)));
+  const ol=$("#onbLang"); if(ol) ol.textContent=en?"日本語":"English";
 }
 
 /* ---------- app shell: progress, stats, tabs, sheets, onboarding ---------- */
@@ -1470,18 +1515,18 @@ function trackTime(){ const t=performance.now(); if(lastTick){ const dt=Math.min
 function renderDots(){
   const box=$("#levelDots"); if(!box) return; box.innerHTML="";
   const d=DATA[S.set], dn=(S.done&&S.done[S.set])||[], curNum=S.order[S.pos];
-  d.lines.forEach((L,i)=>{ const b=el("button","dot"+(dn.includes(i)?" done":"")+(i===curNum?" cur":"")); b.type="button"; b.textContent=i+1; b.setAttribute("aria-label","レベル"+(i+1)+(dn.includes(i)?"（言い切った）":""));
+  d.lines.forEach((L,i)=>{ const b=el("button","dot"+(dn.includes(i)?" done":"")+(i===curNum?" cur":"")); b.type="button"; b.textContent=i+1; b.setAttribute("aria-label",tr("レベル","Level ")+(i+1)+(dn.includes(i)?tr("（言い切った）"," (completed)"):""));
     b.addEventListener("click",()=>{ const p=S.order.indexOf(i); if(p>=0) select(p); }); box.append(b); });
-  const c=$("#cueBadge"); if(c){ const L=d.lines[curNum]; c.textContent=L?("レベル"+(curNum+1)+"・"+L.cue):""; }
+  const c=$("#cueBadge"); if(c){ const L_=d.lines[curNum]; c.textContent=L_?(tr("レベル","Level ")+(curNum+1)+tr("・"," · ")+TC(L_.cue)):""; }
 }
 function renderStats(){
   const st=S.stats||{}; const days=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d); }
   const vals=days.map(d=>st[dayKey(d)]||0), max=Math.max(60,...vals);
-  $("#statToday").textContent=Math.round(vals[6]/60)+"分"; $("#statWeek").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/60)+"分";
-  let n=0; Object.values(S.done||{}).forEach(a=>n+=a.length); $("#statDone").textContent=n+"行";
+  $("#statToday").textContent=Math.round(vals[6]/60)+tr("分"," min"); $("#statWeek").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/60)+tr("分"," min");
+  let n=0; Object.values(S.done||{}).forEach(a=>n+=a.length); $("#statDone").textContent=n+tr("行","");
   const wb=$("#weekBars"); wb.innerHTML="";
-  days.forEach((d,i)=>{ const c=el("div","wb"); const b=el("div","bar"); b.style.height=Math.max(3,Math.round(vals[i]/max*90))+"px"; b.title=Math.round(vals[i]/60)+"分";
-    const l=el("div","wd"); l.textContent=i===6?"今日":"日月火水木金土"[d.getDay()]; c.append(b,l); wb.append(c); });
+  days.forEach((d,i)=>{ const c=el("div","wb"); const b=el("div","bar"); b.style.height=Math.max(3,Math.round(vals[i]/max*90))+"px"; b.title=Math.round(vals[i]/60)+tr("分"," min");
+    const l=el("div","wd"); l.textContent=i===6?tr("今日","Today"):tr("日月火水木金土","SMTWTFS")[d.getDay()]; c.append(b,l); wb.append(c); });
 }
 const TABNAMES={practice:"練習",sets:"セット",record:"記録",settings:"設定"};
 let curTab="practice";
@@ -1489,7 +1534,7 @@ function showTab(name){
   closeSheet(); curTab=name;
   Object.keys(TABNAMES).forEach(k=>{ $("#view-"+k).hidden=k!==name; });
   document.querySelectorAll(".tabbar button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===name)));
-  $("#tbTitle").textContent=TABNAMES[name];
+  $("#tbTitle").textContent=tr(TABNAMES[name],TAB_EN[name]);
   if(name==="practice") renderStage();
   if(name==="sets") renderChips();
   if(name==="record"){ renderStats(); requestAnimationFrame(drawRec); }
@@ -1509,7 +1554,7 @@ function closeSheet(){
 }
 function openOnb(){ const o=$("#onb"); o.hidden=false; $("#onbSlides").scrollLeft=0; onbDots(0); }
 function onbIndex(){ const sl=$("#onbSlides"); return Math.round(sl.scrollLeft/Math.max(1,sl.clientWidth)); }
-function onbDots(i){ document.querySelectorAll("#onbDots i").forEach((d,k)=>d.classList.toggle("on",k===i)); $("#onbNext").textContent=i>=2?"はじめる":"次へ"; }
+function onbDots(i){ document.querySelectorAll("#onbDots i").forEach((d,k)=>d.classList.toggle("on",k===i)); $("#onbNext").textContent=i>=2?tr("はじめる","Start"):tr("次へ","Next"); }
 function closeOnb(){ $("#onb").hidden=true; S.onboarded=true; save(); }
 /* ---------- wiring ---------- */
 load(); applyAuto();
@@ -1533,7 +1578,7 @@ $("#nextBtn").addEventListener("click",()=>select(S.pos+1));
 $("#revealBtn").addEventListener("click",()=>{ revealed=!revealed; renderStage(); renderList(); });
 $("#recBtn").addEventListener("click",recordPlay);
 $("#bgBtn").addEventListener("click",toggleBackground);
-$("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent="🎧 BG再生"; $("#bgStatus").textContent="バックグラウンド再生が終わりました。"; });
+$("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent=tr("🎧 BG再生","🎧 BG play"); $("#bgStatus").textContent=tr("バックグラウンド再生が終わりました。","Background playback finished."); });
 function repMode(){ if(S.rep==="inf") return "one"; if(S.autoNext&&S.loopSet) return "all"; return "through"; }
 const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで1回"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"全レベルを無限にくり返し"}};
 const LOOP='<path d="M5.5 11a6.5 6.5 0 0 1 11.3-4.4M17 3.3v3.8h-3.8M18.5 13a6.5 6.5 0 0 1-11.3 4.4M7 20.7v-3.8h3.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
@@ -1544,16 +1589,16 @@ const REPICONS={
 };
 function toast(t){ const el_=$("#toast"); el_.textContent=t; el_.hidden=false; el_.classList.remove("show"); void el_.offsetWidth; el_.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>{ el_.hidden=true; },1900); }
 function renderTransport(){
-  const sb=$("#shufBtn"); sb.setAttribute("aria-pressed",String(S.ord==="shuffle")); sb.title=S.ord==="shuffle"?"シャッフル：オン":"シャッフル：オフ";
-  const m=repMode(), rb=$("#repBtn"); rb.innerHTML=REPICONS[m]; rb.classList.toggle("on",m!=="through"); rb.title=REPMODES[m].label; rb.setAttribute("aria-label","くり返し："+REPMODES[m].label);
+  const sb=$("#shufBtn"); sb.setAttribute("aria-pressed",String(S.ord==="shuffle")); sb.title=S.ord==="shuffle"?tr("シャッフル：オン","Shuffle: on"):tr("シャッフル：オフ","Shuffle: off");
+  const m=repMode(), rb=$("#repBtn"); rb.innerHTML=REPICONS[m]; rb.classList.toggle("on",m!=="through"); rb.title=repLabel(m); rb.setAttribute("aria-label",tr("くり返し：","Repeat: ")+repLabel(m));
 }
-$("#shufBtn").addEventListener("click",()=>{ stopPlay(); S.ord=S.ord==="shuffle"?"seq":"shuffle"; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); toast(S.ord==="shuffle"?"シャッフル：オン":"シャッフル：オフ"); });
+$("#shufBtn").addEventListener("click",()=>{ stopPlay(); S.ord=S.ord==="shuffle"?"seq":"shuffle"; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); toast(S.ord==="shuffle"?tr("シャッフル：オン","Shuffle: on"):tr("シャッフル：オフ","Shuffle: off")); });
 $("#repBtn").addEventListener("click",()=>{
   const next={through:"one",one:"all",all:"through"}[repMode()];
   if(next==="through"){ S.rep=1; S.autoNext=true; S.loopSet=false; }
   else if(next==="one"){ S.rep="inf"; }
   else { S.rep=1; S.autoNext=true; S.loopSet=true; }
-  save(); renderSettings(); toast(REPMODES[next].label); if(S.mode==="build"&&next!=="one") stageStatus("「作る」モードでは1行ずつ止まります");
+  save(); renderSettings(); toast(repLabel(next)); if(S.mode==="build"&&next!=="one") stageStatus(tr("「作る」モードでは1行ずつ止まります","Build mode stops after each line"));
 });
 $("#recPlay").addEventListener("click",playRec);
 $("#recAdj").addEventListener("input",e=>{ if(!rec) return; rec.adj=+e.target.value; $("#recAdjOut").textContent=rec.adj+" ms"; drawRec(); });
@@ -1581,12 +1626,16 @@ $("#kitPill").addEventListener("click",()=>openSheet("grpSound"));
 $("#sheetClose").addEventListener("click",closeSheet);
 $("#sheetBack").addEventListener("click",closeSheet);
 $("#showOnb").addEventListener("click",openOnb);
-$("#resetProgress").addEventListener("click",()=>{ if(confirm("練習時間と「言い切った行」の記録を消しますか？")){ S.done={}; S.stats={}; save(); renderStats(); renderDots(); renderChips(); } });
+$("#resetProgress").addEventListener("click",()=>{ if(confirm(tr("練習時間と「言い切った行」の記録を消しますか？","Clear your practice time and completed lines?"))){ S.done={}; S.stats={}; save(); renderStats(); renderDots(); renderChips(); } });
 $("#onbSlides").addEventListener("scroll",()=>onbDots(onbIndex()),{passive:true});
 $("#onbNext").addEventListener("click",()=>{ const i=onbIndex(); if(i>=2) closeOnb(); else { const sl=$("#onbSlides"); sl.scrollTo({left:(i+1)*sl.clientWidth,behavior:"smooth"}); } });
 $("#onbSkip").addEventListener("click",closeOnb);
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeSheet(); });
-applySkin(); renderAll(); showTab("practice"); setPlaying(false); if(firstVisit) openOnb(); save();
+
+function setLang(l){ S.lang=l; save(); applyLang(); renderAll(); showTab(curTab); onbDots(onbIndex()); setPlaying(!!run); const au=$("#bgAudio"); $("#bgBtn").textContent=(au&&!au.paused)?tr("■ BG停止","■ BG stop"):tr("🎧 BG再生","🎧 BG play"); }
+document.querySelectorAll("#langSeg button").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.l)));
+$("#onbLang").addEventListener("click",()=>setLang(S.lang==="en"?"ja":"en"));
+if(!S.lang) S.lang=/^ja/i.test(navigator.language||"")?"ja":"en"; captureStatic(); applyLang(); applySkin(); renderAll(); showTab("practice"); setPlaying(false); if(firstVisit) openOnb(); save();
 })();
 
 
