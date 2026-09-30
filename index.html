@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>拍キープ・ドリル</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="拍キープ">
+<meta name="theme-color" content="#10151C">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADJElEQVR4nO3csW5TVxzAYUP7BCxkpUNnnqoSnTrAyNSxDEytxFN1ZmDnISp1iBRZOL/Wzjnn4uR+30bi3Ps/uT9ObMv2sxc3rw5wn+ffewCulzhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0o9bnuz9xy/1rd9/+2nLSY6Zqjx7cfNq9Tn+Y52nNlu5qf7X2jguWuqxpcs21ZkW3ud48GoHf3bdkfc21ao4xidesWZTXWRJHLNmnbtmU11qfhx7+N097anuTI5jP7vuU53q2Mw49nZ/7elN9Y1pcaxb7cjxTTXC0+ekOXGs/q/wsLOYapCdgyQO0oQ4ttknLz2XqcbPZecgiYMkDpI4SOIgiYO06QuMZ/nl13fH//z05x+nX9l2osPhWqcaMeE1pFs+dj8cDl8//3XOzV7+/Gb1JMeuc6rBl5dO+LOy5ev3z7wGF91y3HVONX5dHtN9jkt/s9tcieucaorHFAcbmxPHd3xnGPeackXsHKRpcazePB52fFONmLlzrFvz7ZEvfZ7g9vb7nGqKyX9WVqz5+JjnX4njW+5zqnHz73PMne/0aKdX4pyv7HOqQaveZT/ladPpqzXVRVY9Whmf9Tp33f1MdVj6UHZk4uu8v7a3qXyyz1n2OdUWcdy5hs+5OmWqsmkcPC6ePieJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgzThY5/+/vDP+EFY4fXbH0Z+3M5BEgdJHCRxkLxvhWTnIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEj/AqU3D/z0vAHAAAAAAElFTkSuQmCC">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADJElEQVR4nO3csW5TVxzAYUP7BCxkpUNnnqoSnTrAyNSxDEytxFN1ZmDnISp1iBRZOL/Wzjnn4uR+30bi3Ps/uT9ObMv2sxc3rw5wn+ffewCulzhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0o9bnuz9xy/1rd9/+2nLSY6Zqjx7cfNq9Tn+Y52nNlu5qf7X2jguWuqxpcs21ZkW3ud48GoHf3bdkfc21ao4xidesWZTXWRJHLNmnbtmU11qfhx7+N097anuTI5jP7vuU53q2Mw49nZ/7elN9Y1pcaxb7cjxTTXC0+ekOXGs/q/wsLOYapCdgyQO0oQ4ttknLz2XqcbPZecgiYMkDpI4SOIgiYO06QuMZ/nl13fH//z05x+nX9l2osPhWqcaMeE1pFs+dj8cDl8//3XOzV7+/Gb1JMeuc6rBl5dO+LOy5ev3z7wGF91y3HVONX5dHtN9jkt/s9tcieucaorHFAcbmxPHd3xnGPeackXsHKRpcazePB52fFONmLlzrFvz7ZEvfZ7g9vb7nGqKyX9WVqz5+JjnX4njW+5zqnHz73PMne/0aKdX4pyv7HOqQaveZT/ladPpqzXVRVY9Whmf9Tp33f1MdVj6UHZk4uu8v7a3qXyyz1n2OdUWcdy5hs+5OmWqsmkcPC6ePieJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgzThY5/+/vDP+EFY4fXbH0Z+3M5BEgdJHCRxkLxvhWTnIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEj/AqU3D/z0vAHAAAAAAElFTkSuQmCC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Charis+SIL&display=swap" rel="stylesheet">
@@ -177,159 +184,326 @@ select{font:inherit;font-size:.95rem;padding:6px 10px;border-radius:10px;border:
 .icon.mode{position:relative;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);border-color:var(--line)}
 .icon.mode[aria-pressed="true"],.icon.mode.on{color:var(--strong);border-color:var(--strong);background:rgba(120,140,255,.12)}
 .rbadge{position:absolute;right:-6px;top:-6px;min-width:20px;height:18px;padding:0 4px;border-radius:9px;background:var(--strong);color:var(--panel);font-size:.66rem;font-weight:700;line-height:18px;text-align:center}
+
+[hidden]{display:none!important}
+html,body{height:100%}
+body{padding-bottom:0}
+.topbar{position:sticky;top:0;z-index:6;background:var(--bg);padding:10px 18px 8px;border-bottom:1px solid var(--line)}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){ .topbar,.tabbar,.player{-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)} .topbar{background:color-mix(in srgb,var(--bg) 82%,transparent)} }
+.tb-title{font-size:1.25rem;font-weight:700;text-align:center}
+main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.view[hidden]{display:none!important}
+.ghead{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.06em;margin:18px 6px 8px}
+.ghead:first-child{margin-top:4px}
+.group{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:6px}
+.sublabel{margin:12px 0 6px}
+.sublabel:first-child{margin-top:0}
+.seg.full{display:flex;width:100%}
+.seg.full button{flex:1;padding:8px 6px}
+.setline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.setname{border:none;padding:4px 0;font-weight:700;font-size:1.15rem;letter-spacing:.03em;text-align:left;background:none}
+.setname::after{content:" ›";color:var(--muted)}
+.dots{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.dot{width:32px;height:32px;padding:0;border-radius:50%;border:2px solid var(--line);font-size:.8rem;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
+.dot.done{background:var(--strong);border-color:var(--strong);color:var(--panel)}
+.dot.cur{box-shadow:0 0 0 3px var(--now)}
+.stagecard{position:relative;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px;margin-top:12px}
+.stagecard>*:not(.pulse):not(.countbig){position:relative;z-index:1}
+.pulse{position:absolute;left:50%;top:58%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:var(--strong);opacity:0;pointer-events:none;z-index:0}
+.pulse.go{animation:pulse .55s ease-out}
+.pulse.go.soft{animation:pulsesoft .5s ease-out}
+@keyframes pulse{0%{transform:scale(.5);opacity:.28}100%{transform:scale(8);opacity:0}}
+@keyframes pulsesoft{0%{transform:scale(.5);opacity:.1}100%{transform:scale(5);opacity:0}}
+.countbig{position:absolute;inset:0;z-index:4!important;display:flex;align-items:center;justify-content:center;font-size:5.5rem;font-weight:700;color:var(--strong);pointer-events:none;background:color-mix(in srgb,var(--panel) 72%,transparent)}
+.countbig.pop{animation:cpop .32s ease-out}
+@keyframes cpop{0%{transform:scale(1.35);opacity:.3}100%{transform:scale(1);opacity:1}}
+.syl.s.now{animation:spop .2s ease-out}
+@keyframes spop{0%{transform:translateY(0) scale(1)}40%{transform:translateY(-4px) scale(1.12)}100%{transform:none}}
+.fulltext{margin:.4rem 0 .9rem}
+.lines{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 16px}
+.lines summary{font-size:.95rem}
+.lines .slist{margin-top:8px}
+.player{position:sticky;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:5;margin-top:14px;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line);border-radius:24px;padding:12px 10px 10px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.player .trow{gap:14px}
+.play{width:66px;height:66px;min-width:66px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.play svg{width:28px;height:28px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+.pill{font-size:.8rem;padding:6px 10px;border-color:var(--line);white-space:nowrap}
+.pill.rec{border-color:#C8323A;color:#C8323A}
+.pill.rec[data-on="1"]{background:#C8323A;color:#fff}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(4,1fr);background:color-mix(in srgb,var(--panel) 88%,transparent);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar button{border:none;border-radius:12px;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;color:var(--muted);font-size:.7rem}
+.tabbar button[aria-selected="true"]{color:var(--strong);font-weight:700}
+.chips{margin-top:16px}
+.chip .pd{display:flex;gap:4px;margin-top:4px}
+.chip .pd i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.chip .pd i.on{background:var(--strong)}
+.chip[aria-pressed="true"] .pd i{background:color-mix(in srgb,var(--btnInk) 22%,transparent)}
+.chip[aria-pressed="true"] .pd i.on{background:var(--now)}
+.statrow{display:flex;justify-content:space-around;text-align:center}
+.statnum{font-size:1.5rem;font-weight:700}
+.weekbars{display:flex;align-items:flex-end;gap:8px;height:110px;margin-top:14px}
+.weekbars .wb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.weekbars .bar{width:100%;border-radius:6px 6px 2px 2px;background:var(--strong);min-height:3px;border:none}
+.weekbars .wd{font-size:.7rem;color:var(--muted)}
+.bpmbox.big{justify-content:center;margin:6px 0}
+.bpmbox.big output{font-size:1.3rem}
+.sheetback{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.42)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:82vh;overflow:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .26s ease}
+.sheet.open{transform:none}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 6px}
+.sheetclose{width:100%;margin-top:12px}
+.onb{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0px)) 0 calc(20px + env(safe-area-inset-bottom,0px))}
+.onbslides{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.onbslides::-webkit-scrollbar{display:none}
+.onbslide{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;justify-content:center;padding:0 30px;max-width:100%}
+.onbslide h2{font-size:1.5rem;margin:24px 0 10px}
+.onbslide p{color:var(--muted);line-height:1.7;margin:0}
+.onbart{display:flex;align-items:center;justify-content:center;gap:10px;font-size:3rem;color:var(--strong);min-height:120px}
+.onbart .w{font-size:1.6rem;color:var(--weak)}
+.onbart.small{flex-direction:column;gap:10px;font-size:1.05rem;color:var(--weak)}
+.onbart.small b{color:var(--strong)}
+.onbdots{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.onbdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.onbdots i.on{background:var(--strong)}
+.onbbtns{display:flex;justify-content:space-between;padding:0 24px}
+@media (prefers-reduced-motion: reduce){ .pulse.go,.pulse.go.soft,.countbig.pop,.syl.s.now{animation:none} .sheet{transition:none} }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>拍キープ・ドリル</h1>
-    <p>オモテ（強い音節）の数は最後まで同じ。下の行ほどウラの音節が増えます。文が長くなっても、同じテンポのまま拍に乗せ続けられるかを練習します。</p>
+<div class="app">
+  <header class="topbar">
+    <div class="tb-title" id="tbTitle">練習</div>
   </header>
 
-  <section class="panel">
-    <h2>セット</h2>
-    <div class="seg" role="group" aria-label="場面" id="sceneSeg" style="margin-bottom:10px"></div>
-    <div class="seg" role="group" aria-label="拍数" id="catSeg" style="margin-bottom:12px"></div>
+  <main>
+  <!-- ===== 練習 ===== -->
+  <section class="view" id="view-practice">
+    <div class="setline">
+      <button type="button" class="setname" id="setName">—</button>
+      <span class="badge" id="cueBadge"></span>
+    </div>
+    <div class="dots" id="levelDots" aria-label="レベル"></div>
+    <div class="seg full" role="group" aria-label="練習モード" id="modeSeg">
+      <button type="button" data-m="read">読む</button>
+      <button type="button" data-m="recall">思い出す</button>
+      <button type="button" data-m="build">作る</button>
+    </div>
+
+    <div class="stagecard" id="stage">
+      <div class="pulse" id="pulse" aria-hidden="true"></div>
+      <div class="countbig" id="countBig" hidden aria-hidden="true"></div>
+      <div class="stagehead">
+        <span class="pos" id="pos">—</span>
+        <span class="badge count" id="countBadge" hidden></span>
+      </div>
+      <div class="prompt" id="prompt" hidden>
+        <div class="plabel">材料</div>
+        <div class="pbase" id="pbase"></div>
+        <div class="plabel">指示</div>
+        <div class="pcue" id="pcue"></div>
+      </div>
+      <p class="fulltext" id="fulltext"></p>
+      <div class="lane" id="lane"></div>
+      <div class="row"><button type="button" id="revealBtn" hidden>答えを見る</button></div>
+      <p class="stageStatus" id="stageStatus" role="status"></p>
+      <p class="stageStatus" id="bgStatus" role="status"></p>
+      <p class="tip" id="tip"></p>
+    </div>
+
+    <details class="lines">
+      <summary>このセットの行</summary>
+      <ol class="slist" id="list"></ol>
+    </details>
+
+    <div class="player">
+      <div class="trow">
+        <button class="icon mode" id="shufBtn" type="button" aria-label="シャッフル" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 4.8C14.3 16 15.5 17 17.5 17H21M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M14.2 8.4c.9-.9 1.9-1.4 3.3-1.4H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon" id="prevBtn" type="button" aria-label="前の行">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M18 5v14l-10-7zM6 5v14" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="primary play" id="playBtn" type="button" aria-label="再生"></button>
+        <button class="icon" id="nextBtn" type="button" aria-label="次の行">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 5v14l10-7zM18 5v14" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon mode" id="repBtn" type="button" aria-label="くり返し">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 11V9a3 3 0 0 1 3-3h12M16 3l3 3-3 3M20 13v2a3 3 0 0 1-3 3H5M8 21l-3-3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="rbadge" id="repBadge">→5</span>
+        </button>
+      </div>
+      <div class="pills">
+        <button type="button" class="pill" id="bpmPill">— BPM</button>
+        <button type="button" class="pill" id="kitPill">音色</button>
+        <button type="button" id="recBtn" class="pill rec">● 録音</button>
+        <button type="button" id="bgBtn" class="pill">🎧 BG再生</button>
+        <audio id="bgAudio" playsinline preload="none"></audio>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== セット ===== -->
+  <section class="view" id="view-sets" hidden>
+    <h3 class="ghead">場面</h3>
+    <div class="seg full" role="group" aria-label="場面" id="sceneSeg"></div>
+    <h3 class="ghead">拍数</h3>
+    <div class="seg full" role="group" aria-label="拍数" id="catSeg"></div>
     <div class="chips" id="chips"></div>
   </section>
 
-  <section class="panel" id="stage">
-    <div class="seg" role="group" aria-label="練習モード" id="modeSeg">
-      <button type="button" data-m="read">読む<small>全文を見る</small></button>
-      <button type="button" data-m="recall">思い出す<small>オモテだけ見る</small></button>
-      <button type="button" data-m="build">作る<small>指示から組み立てる</small></button>
+  <!-- ===== 記録 ===== -->
+  <section class="view" id="view-record" hidden>
+    <h3 class="ghead">練習時間</h3>
+    <div class="group">
+      <div class="statrow"><div><div class="statnum" id="statToday">0分</div><div class="status">今日</div></div><div><div class="statnum" id="statWeek">0分</div><div class="status">この7日間</div></div><div><div class="statnum" id="statDone">0</div><div class="status">言い切った行</div></div></div>
+      <div class="weekbars" id="weekBars"></div>
     </div>
-    <div class="stagehead" style="margin-top:14px">
-      <span class="pos" id="pos">—</span>
-      <span class="badge" id="cueBadge"></span>
-      <span class="badge count" id="countBadge" hidden></span>
-    </div>
-    <div class="prompt" id="prompt" hidden>
-      <div class="plabel">材料</div>
-      <div class="pbase" id="pbase"></div>
-      <div class="plabel">指示</div>
-      <div class="pcue" id="pcue"></div>
-    </div>
-    <p class="fulltext" id="fulltext"></p>
-    <div class="lane" id="lane"></div>
-    <div class="row">
-      <button type="button" id="revealBtn" hidden>答えを見る</button>
-    </div>
-    <p class="stageStatus" id="stageStatus" role="status"></p>
-    <p class="stageStatus" id="bgStatus" role="status"></p>
-    <p class="tip" id="tip"></p>
-  </section>
-
-  <section class="panel" id="recPanel" hidden>
-    <h2>録音の確認</h2>
-    <p class="note" style="margin-top:0">太い縦線が拍の頭（オモテ）、点線が拍の真ん中です。灰色の山が声の大きさ。強い音節の山が太い線のすぐあとに来ていれば、拍に乗れています。</p>
-    <div class="canvasWrap"><canvas id="recCanvas"></canvas></div>
-    <div class="row">
-      <button type="button" id="recPlay" class="primary">録音を聞く</button>
-      <label class="inline status"><input type="checkbox" id="recClicks" checked style="accent-color:var(--strong)"> ビートも鳴らす</label>
-    </div>
-    <div style="margin-top:10px">
-      <label class="status" for="recAdj">ずれ補正（全体がずれて見えるときに調整）：<output id="recAdjOut">0 ms</output></label>
-      <input type="range" id="recAdj" min="-300" max="300" step="5" value="0">
+    <h3 class="ghead">録音</h3>
+    <div class="group">
+      <p class="note" id="recEmpty" style="margin:0">まだ録音がありません。練習画面の「● 録音」で1行を録音すると、ここに声と拍の重なりが表示されます。</p>
+      <div id="recPanel" hidden>
+        <p class="note" style="margin-top:0">太い縦線が拍の頭（オモテ）、点線が拍の真ん中です。灰色の山が声の大きさ。強い音節の山が太い線のすぐあとに来ていれば、拍に乗れています。</p>
+        <div class="canvasWrap"><canvas id="recCanvas"></canvas></div>
+        <div class="row">
+          <button type="button" id="recPlay" class="primary">録音を聞く</button>
+          <label class="inline status"><input type="checkbox" id="recClicks" checked style="accent-color:var(--strong)"> ビートも鳴らす</label>
+        </div>
+        <div style="margin-top:10px">
+          <label class="status" for="recAdj">ずれ補正：<output id="recAdjOut">0 ms</output></label>
+          <input type="range" id="recAdj" min="-300" max="300" step="5" value="0">
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="panel">
-    <h2>このセットの行</h2>
-    <ol class="slist" id="list"></ol>
-  </section>
+  <!-- ===== 設定 ===== -->
+  <section class="view" id="view-settings" hidden>
+    <div id="grpTempo">
+      <h3 class="ghead">テンポ</h3>
+      <div class="group">
+        <div class="seg full" role="group" aria-label="目標の話す速さ" id="presetSeg">
+          <button type="button" data-p="slow">練習<small>2.5音節/秒</small></button>
+          <button type="button" data-p="mid">ふつう<small>3.5音節/秒</small></button>
+          <button type="button" data-p="fast">自然<small>4.5音節/秒</small></button>
+        </div>
+        <p class="sugg" id="sugg"></p>
+        <div class="bpmbox big">
+          <button type="button" id="bpmDown" aria-label="BPMを下げる">−</button>
+          <output id="bpmOut">— BPM</output>
+          <button type="button" id="bpmUp" aria-label="BPMを上げる">＋</button>
+        </div>
+        <input type="range" id="bpmRange" min="40" max="160" step="1" aria-label="BPM">
+        <div class="checks"><label><input type="checkbox" id="autoBpm"><span>セットや速さを変えたら提案BPMに合わせる</span></label></div>
+      </div>
+    </div>
 
-  <div class="grid">
-    <section class="panel">
-      <h2>テンポ</h2>
-      <div class="seg" role="group" aria-label="目標の話す速さ" id="presetSeg">
-        <button type="button" data-p="slow">練習<small>2.5音節/秒</small></button>
-        <button type="button" data-p="mid">ふつう<small>3.5音節/秒</small></button>
-        <button type="button" data-p="fast">自然<small>4.5音節/秒</small></button>
+    <div id="grpSound">
+      <h3 class="ghead">音</h3>
+      <div class="group">
+        <div class="status sublabel">音色（名機を再現した合成音）</div>
+        <div class="seg" role="group" aria-label="音色" id="kitSeg"></div>
+        <p class="note" id="kitDesc"></p>
+        <div class="status sublabel">拍の音</div>
+        <div class="seg full" role="group" aria-label="拍の音" id="soundSeg">
+          <button type="button" data-s="drum">ドラム</button>
+          <button type="button" data-s="click">クリック</button>
+          <button type="button" data-s="none">なし</button>
+        </div>
+        <div class="status sublabel">音節の音（文字と一緒に鳴る）</div>
+        <div class="seg full" role="group" aria-label="音節の音" id="sylSeg">
+          <button type="button" data-y="on">あり<small>オモテ大・ウラ小</small></button>
+          <button type="button" data-y="off">なし</button>
+        </div>
       </div>
-      <p class="sugg" id="sugg"></p>
-      <div class="checks" style="margin-top:6px">
-        <label><input type="checkbox" id="autoBpm"><span>セットや速さを変えたら提案BPMに合わせる</span></label>
-      </div>
-      <label for="bpmRange" class="status">BPM</label>
-      <input type="range" id="bpmRange" min="40" max="160" step="1">
-    </section>
+    </div>
 
-    <section class="panel checks">
-      <h2>音と流し方</h2>
-      <div class="status" style="margin-bottom:4px">音色（名機を再現した合成音）</div>
-      <div class="seg" role="group" aria-label="音色" id="kitSeg" style="margin-bottom:6px"></div>
-      <p class="note" id="kitDesc" style="margin:0 0 10px"></p>
-      <div class="status" style="margin-bottom:4px">拍の音</div>
-      <div class="seg" role="group" aria-label="拍の音" id="soundSeg" style="margin-bottom:10px">
-        <button type="button" data-s="drum">ドラム</button>
-        <button type="button" data-s="click">クリック</button>
-        <button type="button" data-s="none">なし</button>
+    <h3 class="ghead">表示</h3>
+    <div class="group checks">
+      <div class="seg full" role="group" aria-label="表示" id="dispSeg">
+        <button type="button" data-d="en">英語</button>
+        <button type="button" data-d="both">英語＋発音記号</button>
+        <button type="button" data-d="ipa">記号のみ</button>
       </div>
-      <div class="status" style="margin-bottom:4px">音節の音（文字と一緒に鳴る）</div>
-      <div class="seg" role="group" aria-label="音節の音" id="sylSeg" style="margin-bottom:6px">
-        <button type="button" data-y="on">あり<small>オモテ大・ウラ小</small></button>
-        <button type="button" data-y="off">なし</button>
-      </div>
-      <p class="note" style="margin:0 0 10px">音節の音ありで耳でリズムをつかみ、なしで自分の声だけで再現する、の往復がおすすめです。「拍の音：なし」にすると音節の音だけを聞けます。</p>
-      <div class="seg" role="group" aria-label="ウラの流し方" id="timingSeg" style="margin-bottom:8px">
+      <label><input type="checkbox" id="conn"><span>つながりを表示（連結・脱落・同化）<small>‿ ＝ つなげて読む／(t) ＝ ほぼ発音しない／dɪdʒu ＝ did you のように音が変わる。</small></span></label>
+      <label><input type="checkbox" id="hints"><span>弱形のヒント<small>表示が「英語」のとき、the → ðə のような弱い音を表示します。</small></span></label>
+    </div>
+
+    <h3 class="ghead">流し方</h3>
+    <div class="group checks">
+      <div class="status sublabel">ウラの流し方</div>
+      <div class="seg full" role="group" aria-label="ウラの流し方" id="timingSeg">
         <button type="button" data-t="even">自然<small>拍全体に均等</small></button>
         <button type="button" data-t="strict">厳密<small>拍の後半に詰める</small></button>
       </div>
-      <div class="seg" role="group" aria-label="行の順番" id="orderSeg" style="margin-bottom:8px">
+      <div class="status sublabel">行の順番</div>
+      <div class="seg full" role="group" aria-label="行の順番" id="orderSeg">
         <button type="button" data-o="seq">順番どおり</button>
         <button type="button" data-o="shuffle">シャッフル</button>
       </div>
-      <div class="seg" role="group" aria-label="くり返し" id="repSeg" style="margin-bottom:8px">
+      <div class="status sublabel">くり返し</div>
+      <div class="seg full" role="group" aria-label="くり返し" id="repSeg">
         <button type="button" data-r="1">各行1回</button>
         <button type="button" data-r="2">各行2回</button>
         <button type="button" data-r="inf">同じ行を無限</button>
       </div>
-      <label><input type="checkbox" id="contract"><span>短縮形で読む<small>have been → 've been のように、ネイティブの詰め込み方で読みます。</small></span></label>
+      <label><input type="checkbox" id="contract"><span>短縮形で読む<small>have been → 've been、going to → gonna など。</small></span></label>
       <label><input type="checkbox" id="skipPick"><span>弱起を省く<small>文頭のウラ（The、and など）を抜いて、最初のオモテから入ります。</small></span></label>
-      <div class="status" style="margin:6px 0 4px">表示</div>
-      <div class="seg" role="group" aria-label="表示" id="dispSeg" style="margin-bottom:8px">
-        <button type="button" data-d="en">英語</button>
-        <button type="button" data-d="both">英語＋発音記号</button>
-        <button type="button" data-d="ipa">発音記号のみ</button>
-      </div>
-      <label><input type="checkbox" id="conn"><span>つながりを表示（連結・脱落・同化）<small>‿ ＝ 前の語とつなげて読む／(t) ＝ ほぼ発音しない／dɪdʒu ＝ did you のように音が変わる。弱い have・has・his・her の h も落とします。</small></span></label>
-      <p class="note" style="margin:0 0 8px">発音記号はイギリス英語（標準的な発音）。ウラの機能語は弱形（the → ðə など）で表示しています。ˈ はオモテの印です。</p>
-      <label><input type="checkbox" id="hints"><span>弱形のヒント<small>表示が「英語」のとき、the → ðə のような弱い音を表示します。</small></span></label>
-      <label><input type="checkbox" id="fillBar"><span>小節の区切りまで休む<small>行の終わりを4拍の区切りまで休みで埋めて、次の行に入りやすくします。</small></span></label>
+      <label><input type="checkbox" id="fillBar"><span>小節の区切りまで休む</span></label>
       <label><input type="checkbox" id="countIn"><span>最初に「1, 2, 3, and」のカウント</span></label>
       <label><input type="checkbox" id="autoNext"><span>終わったら次の行へ進む<small>「作る」モードでは1行ずつ止まります。</small></span></label>
-      <label><input type="checkbox" id="loopSet"><span>セットを無限にくり返す<small>最後の行のあと、ビートを止めずに最初の行へ戻ります。シャッフル中は毎周、順番が変わります。</small></span></label>
-    </section>
-  </div>
-</div>
+      <label><input type="checkbox" id="loopSet"><span>セットを無限にくり返す</span></label>
+    </div>
 
-<div class="transport">
-  <div class="tin">
-    <div class="trow">
-    <button class="icon mode" id="shufBtn" type="button" aria-label="シャッフル" aria-pressed="false">
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 4.8C14.3 16 15.5 17 17.5 17H21M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M14.2 8.4c.9-.9 1.9-1.4 3.3-1.4H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-    <button class="icon" id="prevBtn" type="button" aria-label="前の行">◀</button>
-    <button class="primary play" id="playBtn" type="button">▶ 再生</button>
-    <button class="icon" id="nextBtn" type="button" aria-label="次の行">▶</button>
-    <button class="icon mode" id="repBtn" type="button" aria-label="くり返し">
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 11V9a3 3 0 0 1 3-3h12M16 3l3 3-3 3M20 13v2a3 3 0 0 1-3 3H5M8 21l-3-3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span class="rbadge" id="repBadge">→5</span>
-    </button>
+    <h3 class="ghead">その他</h3>
+    <div class="group">
+      <div class="row" style="margin-top:0">
+        <button type="button" id="showOnb">使い方をもう一度見る</button>
+        <button type="button" id="resetProgress">練習の記録をリセット</button>
+      </div>
     </div>
-    <div class="bpmbox">
-      <button type="button" id="bpmDown" aria-label="BPMを下げる">−</button>
-      <output id="bpmOut">— BPM</output>
-      <button type="button" id="bpmUp" aria-label="BPMを上げる">＋</button>
+  </section>
+  </main>
+
+  <nav class="tabbar" role="tablist" aria-label="画面">
+    <button type="button" role="tab" data-tab="practice"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg><span>練習</span></button>
+    <button type="button" role="tab" data-tab="sets"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="2" fill="currentColor"/><rect x="4" y="13" width="7" height="7" rx="2" fill="currentColor"/><rect x="13" y="13" width="7" height="7" rx="2" fill="currentColor"/></svg><span>セット</span></button>
+    <button type="button" role="tab" data-tab="record"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 19V11M10 19V5M15 19v-6M20 19V8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg><span>記録</span></button>
+    <button type="button" role="tab" data-tab="settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="16" cy="7" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="17" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>設定</span></button>
+  </nav>
+
+  <div class="sheetback" id="sheetBack" hidden></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="grab"></div>
+    <div id="sheetBody"></div>
+    <button type="button" class="primary sheetclose" id="sheetClose">閉じる</button>
+  </div>
+
+  <div class="onb" id="onb" hidden>
+    <div class="onbslides" id="onbSlides">
+      <div class="onbslide">
+        <div class="onbart"><span class="b">●</span><span class="w">·</span><span class="b">●</span><span class="w">··</span><span class="b">●</span></div>
+        <h2>英語は「拍」で話す言語</h2>
+        <p>日本語は1音ずつ同じ長さで話します。英語は、強い音（オモテ）を一定の間隔で打ち、弱い音（ウラ）をその間に詰め込みます。</p>
+      </div>
+      <div class="onbslide">
+        <div class="onbart small"><div><b>CATS</b> ｜ <b>CHASE</b> ｜ <b>MICE</b></div><div>The <b>CATS</b> would have been ｜ <b>CHASED</b> by the ｜ <b>MICE</b></div></div>
+        <h2>オモテの数はずっと同じ</h2>
+        <p>各セットはレベル1〜5。下のレベルほどウラが増えますが、オモテの数とテンポは変わりません。同じテンポのまま最後まで言えたら合格です。</p>
+      </div>
+      <div class="onbslide">
+        <div class="onbart"><span class="b">▶</span></div>
+        <h2>光る文字に合わせて声に出す</h2>
+        <p>▶で再生。「1, 2, 3, and」のあと、光る文字に合わせて言います。慣れたら「思い出す」「作る」モードへ。録音すると、拍に乗れているかを図で確認できます。</p>
+      </div>
     </div>
-    <button type="button" id="recBtn" class="rec">● 録音して練習</button>
-    <button type="button" id="bgBtn">🎧 バックグラウンド再生</button>
-    <audio id="bgAudio" playsinline preload="none"></audio>
+    <div class="onbdots" id="onbDots"><i></i><i></i><i></i></div>
+    <div class="onbbtns"><button type="button" id="onbSkip">スキップ</button><button type="button" class="primary" id="onbNext">次へ</button></div>
   </div>
 </div>
 
 <script>
+
 (function(){
 "use strict";
 const $=s=>document.querySelector(s);
@@ -838,19 +1012,22 @@ function renderChips(){
     b.addEventListener("click",()=>{ S.scene=k; save(); renderChips(); }); ss.append(b); });
   const seg=$("#catSeg"); seg.innerHTML="";
   avail.forEach(c=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-pressed",String(c===S.cat));
-    const n=DATA.filter(d=>d.nb===c&&inScene(d)).length; b.innerHTML=c+"拍<small>"+n+"セット</small>";
+    const n=DATA.filter(d=>d.nb===c&&inScene(d)).length; b.innerHTML=c+"拍<small>"+n+"</small>";
     b.addEventListener("click",()=>{ S.cat=c; save(); renderChips(); }); seg.append(b); });
   const box=$("#chips"); box.innerHTML=""; let k=0;
   DATA.forEach((d,i)=>{ if(d.nb!==S.cat||!inScene(d)) return; k++;
     const b=el("button","chip"); b.type="button"; b.setAttribute("aria-pressed",String(i===S.set));
     const t=el("span","t"); t.textContent=d.base.map(x=>x.toUpperCase()).join(" ");
     const m=el("span","m"); m.textContent=(S.scene==="all"?SCENE_NAME[d.scene]+"・":"")+d.nb+"拍"+(d.q?"・疑問文":"");
-    b.append(t,m); b.addEventListener("click",()=>setSet(i)); box.append(b); });
+    const pd=el("span","pd"); const dn=(S.done&&S.done[i])||[]; for(let q=0;q<d.lines.length;q++){ const ii=el("i"); if(dn.includes(q)) ii.className="on"; pd.append(ii); }
+    b.append(t,m,pd); b.addEventListener("click",()=>{ setSet(i); showTab("practice"); }); box.append(b); });
 }
 function renderStage(){
   const d=DATA[S.set]; const {L,sent,num}=lineAt(S.pos);
   document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===S.mode)));
   $("#pos").textContent="行 "+(S.pos+1)+" / "+S.order.length+(S.ord==="shuffle"?"（シャッフル）":"");
+  $("#setName").textContent=d.base.map(x=>x.toUpperCase()).join(" ");
+  renderDots();
   $("#cueBadge").textContent="レベル"+(num+1)+"・"+L.cue;
   const build=S.mode==="build";
   $("#prompt").hidden=!build;
@@ -904,13 +1081,14 @@ function renderSettings(){
   const sg=suggest();
   $("#sugg").innerHTML="提案：<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">このセットで一番詰まっている行（1拍あたり "+sg.maxAvg.toFixed(1)+" 音節）でも目標の速さに収まるテンポです。</span>";
   $("#bpmRange").value=S.bpm; $("#bpmOut").textContent=S.bpm+" BPM"; $("#autoBpm").checked=S.autoBpm;
+  $("#bpmPill").textContent="♩ "+S.bpm+" BPM"; $("#kitPill").textContent="🥁 "+K().label;
   renderSettingsHook();
   ["contract","skipPick","hints","fillBar","countIn","autoNext","loopSet","conn"].forEach(id=>$("#"+id).checked=!!S[id]);
 }
 function renderAll(){ renderChips(); renderStage(); renderList(); renderSettings(); }
 function renderSettingsHook(){ if(typeof renderTransport==="function") renderTransport(); }
 function select(p){ if(p<0||p>=S.order.length) return; stopPlay(); S.pos=p; revealed=false; save(); renderStage(); renderList(); }
-function setSet(i){ stopPlay(); S.set=i; makeOrder(); S.pos=0; revealed=false; applyAuto(); save(); renderAll(); }
+function setSet(i){ stopPlay(); lastTick=0; S.set=i; makeOrder(); S.pos=0; revealed=false; applyAuto(); save(); renderAll(); }
 function stageStatus(t){ $("#stageStatus").textContent=t||""; }
 
 /* ---------- audio ---------- */
@@ -1040,18 +1218,20 @@ function schedule(pos,T,opt){
   B.beats.forEach((bt,j)=>{
     const bs=T+j*beat;
     snd(bs,j%4===0&&!bt.rest?"bar":(bt.rest?"rest":"beat")); if(!opt.countIn||true) snd(bs+beat/2,"off");
-    if(bt.rest){ ev.push({t:bs,cell:"b"+j,syl:null}); return; }
-    ev.push({t:bs,cell:"b"+j,syl:bt.items[0].k,s:true}); const weak=bt.items.slice(1), n=weak.length;
+    if(bt.rest){ ev.push({t:bs,cell:"b"+j,syl:null,bs:1,rest:1}); return; }
+    ev.push({t:bs,cell:"b"+j,syl:bt.items[0].k,s:true,bs:1}); const weak=bt.items.slice(1), n=weak.length;
     weak.forEach((it,k)=>ev.push({t:even?bs+beat*(k+1)/(n+1):bs+beat*(.5+k*.5/n),cell:"b"+j,syl:it.k,s:false}));
   });
   ev.sort((a,b)=>a.t-b.t);
   if(!noSound&&S.sylSound) ev.forEach(e=>{ if(e.syl) sylTone(e.t,e.s); });
   return {pos,ev,T,beat,rests:B.beats.map(b=>b.rest),end:T+B.beats.length*beat,p:-2,next:null,done:false,single:!!opt.single,rep:opt.rep||1};
 }
-function clearHL(){ if(hl.cell) hl.cell.classList.remove("now"); if(hl.syl) hl.syl.classList.remove("now"); hl={cell:null,syl:null}; $("#countBadge").hidden=true; }
+function clearHL(){ if(hl.cell) hl.cell.classList.remove("now"); if(hl.syl) hl.syl.classList.remove("now"); hl={cell:null,syl:null}; $("#countBadge").hidden=true; $("#countBig").hidden=true; }
+function pulse(soft){ const p=$("#pulse"); p.classList.remove("go","soft"); void p.offsetWidth; p.classList.add("go"); if(soft) p.classList.add("soft"); }
 function applyHL(e){
   clearHL(); if(!e) return;
-  if(e.count){ const c=$("#countBadge"); c.hidden=false; c.textContent=e.count==="and"?"and →":"カウント "+e.count; return; }
+  if(e.count){ const c=$("#countBig"); c.hidden=false; c.textContent=e.count; c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop"); if(e.count!=="and") pulse(true); return; }
+  if(e.bs) pulse(!!e.rest);
   hl.cell=lane.querySelector('.cell[data-key="'+e.cell+'"]'); if(hl.cell) hl.cell.classList.add("now");
   if(e.syl){ hl.syl=lane.querySelector('.syl[data-k="'+e.syl+'"]'); if(hl.syl) hl.syl.classList.add("now"); }
 }
@@ -1065,13 +1245,13 @@ function nextOf(r){
   return null;
 }
 function loop(){
-  raf=0; if(!run||!ctx) return;
+  raf=0; if(!run||!ctx) return; trackTime();
   const now=ctx.currentTime-(ctx.outputLatency||0);
   if(!run.next&&!run.done&&ctx.currentTime>=run.end-run.beat-.4){ const nx=nextOf(run); if(nx){ run.next=schedule(nx.pos,run.end,{rep:nx.rep}); run.next.wrap=!!nx.wrap; } else run.done=true; }
   const handoff=run.next?Math.min(run.end,run.next.ev.length?run.next.ev[0].t:run.end):run.end;
   if(now>=handoff){
-    if(run.next){ const r=run.next; if(r.pos!==S.pos||r.wrap){ S.pos=r.pos; revealed=false; save(); renderStage(); renderList(); } run=r; run.p=-2; }
-    else { const wasBuild=S.mode==="build"&&!recState; stopPlay(); if(wasBuild){ revealed=true; renderStage(); renderList(); } return; }
+    if(run.next){ markDone(run.pos); const r=run.next; if(r.pos!==S.pos||r.wrap){ S.pos=r.pos; revealed=false; save(); renderStage(); renderList(); } run=r; run.p=-2; }
+    else { const wasBuild=S.mode==="build"&&!recState; if(!recState) markDone(run.pos); stopPlay(); if(wasBuild){ revealed=true; renderStage(); renderList(); } return; }
   }
   let p=-1; for(let k=0;k<run.ev.length;k++){ if(run.ev[k].t<=now) p=k; else break; }
   if(p!==run.p){ run.p=p; applyHL(p>=0?run.ev[p]:null); }
@@ -1079,7 +1259,7 @@ function loop(){
 }
 function firstT(pos,countIn){ const beat=60/S.bpm; const B=buildBeats(lineAt(pos).sent); const t0=ctx.currentTime+.15; return countIn?t0+4*beat:t0+(B.pick.length?beat:0); }
 function play(){
-  { const au=document.getElementById("bgAudio"); if(au&&!au.paused){ au.pause(); document.getElementById("bgBtn").textContent="🎧 バックグラウンド再生"; } }
+  { const au=document.getElementById("bgAudio"); if(au&&!au.paused){ au.pause(); document.getElementById("bgBtn").textContent="🎧 BG再生"; } }
   if(!ensureCtx()){ stageStatus("このブラウザでは音が出せません。"); return; }
   stopPlay(); stageStatus("");
   if(S.mode==="build"){ revealed=false; renderStage(); renderList(); }
@@ -1087,15 +1267,17 @@ function play(){
   setPlaying(true); raf=requestAnimationFrame(loop);
 }
 function stopPlay(){
+  lastTick=0;
   nodes.forEach(n=>{try{n.stop();}catch(e){}}); nodes=[];
   if(recSrc){ try{recSrc.stop();}catch(e){} recSrc=null; }
   run=null; if(raf) cancelAnimationFrame(raf); raf=0; clearHL();
   if(recState) finishRecording();
   setPlaying(false);
 }
+const ICON_PLAY='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>', ICON_STOP='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
 function setPlaying(on){
-  const b=$("#playBtn"); b.textContent=on?"■ 停止":"▶ 再生";
-  const r=$("#recBtn"); r.dataset.on=(on&&recState)?"1":""; r.textContent=(on&&recState)?"● 録音中":"● 録音して練習"; r.disabled=on&&!recState;
+  const b=$("#playBtn"); b.innerHTML=on?ICON_STOP:ICON_PLAY; b.setAttribute("aria-label",on?"停止":"再生");
+  const r=$("#recBtn"); r.dataset.on=(on&&recState)?"1":""; r.textContent=(on&&recState)?"● 録音中":"● 録音"; r.disabled=on&&!recState;
 }
 
 /* ---------- recording ---------- */
@@ -1130,8 +1312,8 @@ function finishRecording(){
   rec={buf,data,sr:ctx.sampleRate,start:r.first,T:r.T,beat:r.beat,rests:r.rests,end:r.end,bpm:r.bpm,pos:r.pos,set:r.set,timing:r.timing,adj:0};
   if(S.mode==="build"){ revealed=true; renderStage(); renderList(); }
   stageStatus("録音しました。下の図で拍との重なりを確認できます。");
-  $("#recPanel").hidden=false; $("#recAdj").value=0; $("#recAdjOut").textContent="0 ms";
-  requestAnimationFrame(()=>{ drawRec(); $("#recPanel").scrollIntoView({block:"nearest",behavior:"smooth"}); });
+  $("#recPanel").hidden=false; $("#recEmpty").hidden=true; $("#recAdj").value=0; $("#recAdjOut").textContent="0 ms";
+  showTab("record"); requestAnimationFrame(drawRec);
 }
 function drawRec(){
   if(!rec) return;
@@ -1205,7 +1387,7 @@ async function renderBackground(){
 }
 async function toggleBackground(){
   const au=$("#bgAudio"), btn=$("#bgBtn");
-  if(!au.paused){ au.pause(); au.currentTime=0; btn.textContent="🎧 バックグラウンド再生"; $("#bgStatus").textContent="バックグラウンド再生を止めました。"; return; }
+  if(!au.paused){ au.pause(); au.currentTime=0; btn.textContent="🎧 BG再生"; $("#bgStatus").textContent="バックグラウンド再生を止めました。"; return; }
   stopPlay(); ensureCtx();
   btn.disabled=true; btn.textContent="音声を作成中…"; $("#bgStatus").textContent="今の設定（セット・テンポ・音色・リピート）で音声ファイルを作っています。";
   try{
@@ -1214,12 +1396,62 @@ async function toggleBackground(){
     au.src=bgURL; au.loop=r.loop;
     if("mediaSession" in navigator){ try{ navigator.mediaSession.metadata=new MediaMetadata({title:"拍キープ・ドリル",artist:DATA[S.set].base.map(x=>x.toUpperCase()).join(" ")+"（"+S.bpm+" BPM）"}); }catch(e){} }
     await au.play();
-    btn.textContent="■ バックグラウンド停止";
+    btn.textContent="■ BG停止";
     $("#bgStatus").textContent=(r.loop?"くり返し再生中":"再生中")+"（"+r.lines+"行・"+Math.round(r.secs)+"秒"+(r.loop?"で1周":"")+"）。画面を消しても流れ続けるはずです。設定を変えたら、止めてもう一度押してください。";
   }catch(e){
-    btn.textContent="🎧 バックグラウンド再生"; $("#bgStatus").textContent="作成または再生に失敗しました（"+((e&&e.name)||"不明")+"）。この画面では使えない場合があります。";
+    btn.textContent="🎧 BG再生"; $("#bgStatus").textContent="作成または再生に失敗しました（"+((e&&e.name)||"不明")+"）。この画面では使えない場合があります。";
   }finally{ btn.disabled=false; }
 }
+
+/* ---------- app shell: progress, stats, tabs, sheets, onboarding ---------- */
+function dayKey(d){ d=d||new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function markDone(pos){ const num=S.order[pos]; if(num==null) return; S.done=S.done||{}; const a=S.done[S.set]||(S.done[S.set]=[]); if(!a.includes(num)){ a.push(num); save(); renderDots(); } }
+var lastTick=0, unsaved=0;
+function trackTime(){ const t=performance.now(); if(lastTick){ const dt=Math.min(1,(t-lastTick)/1000); S.stats=S.stats||{}; const k=dayKey(); S.stats[k]=(S.stats[k]||0)+dt; unsaved+=dt; if(unsaved>5){ unsaved=0; save(); } } lastTick=t; }
+function renderDots(){
+  const box=$("#levelDots"); if(!box) return; box.innerHTML="";
+  const d=DATA[S.set], dn=(S.done&&S.done[S.set])||[], curNum=S.order[S.pos];
+  d.lines.forEach((L,i)=>{ const b=el("button","dot"+(dn.includes(i)?" done":"")+(i===curNum?" cur":"")); b.type="button"; b.textContent=i+1; b.setAttribute("aria-label","レベル"+(i+1)+(dn.includes(i)?"（言い切った）":""));
+    b.addEventListener("click",()=>{ const p=S.order.indexOf(i); if(p>=0) select(p); }); box.append(b); });
+  const c=$("#cueBadge"); if(c){ const L=d.lines[curNum]; c.textContent=L?("レベル"+(curNum+1)+"・"+L.cue):""; }
+}
+function renderStats(){
+  const st=S.stats||{}; const days=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d); }
+  const vals=days.map(d=>st[dayKey(d)]||0), max=Math.max(60,...vals);
+  $("#statToday").textContent=Math.round(vals[6]/60)+"分"; $("#statWeek").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/60)+"分";
+  let n=0; Object.values(S.done||{}).forEach(a=>n+=a.length); $("#statDone").textContent=n+"行";
+  const wb=$("#weekBars"); wb.innerHTML="";
+  days.forEach((d,i)=>{ const c=el("div","wb"); const b=el("div","bar"); b.style.height=Math.max(3,Math.round(vals[i]/max*90))+"px"; b.title=Math.round(vals[i]/60)+"分";
+    const l=el("div","wd"); l.textContent=i===6?"今日":"日月火水木金土"[d.getDay()]; c.append(b,l); wb.append(c); });
+}
+const TABNAMES={practice:"練習",sets:"セット",record:"記録",settings:"設定"};
+let curTab="practice";
+function showTab(name){
+  closeSheet(); curTab=name;
+  Object.keys(TABNAMES).forEach(k=>{ $("#view-"+k).hidden=k!==name; });
+  document.querySelectorAll(".tabbar button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===name)));
+  $("#tbTitle").textContent=TABNAMES[name];
+  if(name==="practice") renderStage();
+  if(name==="sets") renderChips();
+  if(name==="record"){ renderStats(); requestAnimationFrame(drawRec); }
+  window.scrollTo(0,0);
+}
+let sheetHome=null;
+function openSheet(id){
+  const node=$("#"+id); if(!node) return; closeSheet();
+  sheetHome={node,parent:node.parentNode,next:node.nextSibling};
+  $("#sheetBody").append(node); $("#sheetBack").hidden=false; const sh=$("#sheet"); sh.setAttribute("aria-hidden","false");
+  requestAnimationFrame(()=>sh.classList.add("open"));
+}
+function closeSheet(){
+  const sh=$("#sheet"); if(!sheetHome) return;
+  sh.classList.remove("open"); sh.setAttribute("aria-hidden","true"); $("#sheetBack").hidden=true;
+  sheetHome.parent.insertBefore(sheetHome.node,sheetHome.next); sheetHome=null;
+}
+function openOnb(){ const o=$("#onb"); o.hidden=false; $("#onbSlides").scrollLeft=0; onbDots(0); }
+function onbIndex(){ const sl=$("#onbSlides"); return Math.round(sl.scrollLeft/Math.max(1,sl.clientWidth)); }
+function onbDots(i){ document.querySelectorAll("#onbDots i").forEach((d,k)=>d.classList.toggle("on",k===i)); $("#onbNext").textContent=i>=2?"はじめる":"次へ"; }
+function closeOnb(){ $("#onb").hidden=true; S.onboarded=true; save(); }
 /* ---------- wiring ---------- */
 load(); applyAuto();
 document.querySelectorAll("#modeSeg button").forEach(b=>b.addEventListener("click",()=>{ stopPlay(); S.mode=b.dataset.m; revealed=false; save(); renderStage(); renderList(); }));
@@ -1242,7 +1474,7 @@ $("#nextBtn").addEventListener("click",()=>select(S.pos+1));
 $("#revealBtn").addEventListener("click",()=>{ revealed=!revealed; renderStage(); renderList(); });
 $("#recBtn").addEventListener("click",recordPlay);
 $("#bgBtn").addEventListener("click",toggleBackground);
-$("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent="🎧 バックグラウンド再生"; $("#bgStatus").textContent="バックグラウンド再生が終わりました。"; });
+$("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent="🎧 BG再生"; $("#bgStatus").textContent="バックグラウンド再生が終わりました。"; });
 function repMode(){ if(S.rep==="inf") return "one"; if(S.autoNext&&S.loopSet) return "all"; return "through"; }
 const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで1回"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"全レベルを無限にくり返し"}};
 function renderTransport(){
@@ -1266,8 +1498,22 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="ArrowRight") select(S.pos+1);
 });
 let rt=0; window.addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(!run) renderStage(); else fitCells(); drawRec(); },150); });
-renderAll();
+
+document.querySelectorAll(".tabbar button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+$("#setName").addEventListener("click",()=>showTab("sets"));
+$("#bpmPill").addEventListener("click",()=>openSheet("grpTempo"));
+$("#kitPill").addEventListener("click",()=>openSheet("grpSound"));
+$("#sheetClose").addEventListener("click",closeSheet);
+$("#sheetBack").addEventListener("click",closeSheet);
+$("#showOnb").addEventListener("click",openOnb);
+$("#resetProgress").addEventListener("click",()=>{ if(confirm("練習時間と「言い切った行」の記録を消しますか？")){ S.done={}; S.stats={}; save(); renderStats(); renderDots(); renderChips(); } });
+$("#onbSlides").addEventListener("scroll",()=>onbDots(onbIndex()),{passive:true});
+$("#onbNext").addEventListener("click",()=>{ const i=onbIndex(); if(i>=2) closeOnb(); else { const sl=$("#onbSlides"); sl.scrollTo({left:(i+1)*sl.clientWidth,behavior:"smooth"}); } });
+$("#onbSkip").addEventListener("click",closeOnb);
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeSheet(); });
+renderAll(); showTab("practice"); setPlaying(false); if(!S.onboarded) openOnb();
 })();
+
 
 </script>
 </body>
