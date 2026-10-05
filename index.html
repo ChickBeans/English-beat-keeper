@@ -484,9 +484,9 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
         <select id="voiceSel" aria-label="お手本の声" style="width:100%"></select>
         <div class="status sublabel">お手本の速さ</div>
         <div class="seg full" role="group" aria-label="お手本の速さ" id="ttsRateSeg">
-          <button type="button" data-r="0.75">ゆっくり</button>
-          <button type="button" data-r="0.9">ふつう</button>
-          <button type="button" data-r="1">速め</button>
+          <button type="button" data-r="0.6">ゆっくり</button>
+          <button type="button" data-r="0.85">ふつう</button>
+          <button type="button" data-r="1.1">速め</button>
         </div>
         <div class="row" style="margin-top:8px"><button type="button" id="voiceTest">▶ 試聴</button></div>
         <details style="margin-top:8px"><summary class="status">この端末で使える英語の声（確認用）</summary><pre id="voiceList" style="white-space:pre-wrap;font-size:.72rem;color:var(--muted);margin:6px 0 0;max-height:220px;overflow:auto"></pre></details>
@@ -530,18 +530,18 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
         <button type="button" data-o="seq">順番どおり</button>
         <button type="button" data-o="shuffle">シャッフル</button>
       </div>
-      <div class="status sublabel">くり返し</div>
-      <div class="seg full" role="group" aria-label="くり返し" id="repSeg">
-        <button type="button" data-r="1">各行1回</button>
-        <button type="button" data-r="2">各行2回</button>
-        <button type="button" data-r="inf">同じ行を無限</button>
+      <div class="status sublabel">各行のくり返し回数</div>
+      <div class="seg full" role="group" aria-label="くり返し回数" id="repSeg">
+        <button type="button" data-r="1">1回</button>
+        <button type="button" data-r="2">2回</button>
+        <button type="button" data-r="3">3回</button>
+        <button type="button" data-r="4">4回</button>
+        <button type="button" data-r="5">5回</button>
       </div>
       <label><input type="checkbox" id="contract"><span>短縮形で読む<small>have been → 've been、going to → gonna など。</small></span></label>
       <label><input type="checkbox" id="skipPick"><span>弱起を省く<small>文頭のウラ（The、and など）を抜いて、最初のオモテから入ります。</small></span></label>
       <label><input type="checkbox" id="fillBar"><span>小節の区切りまで休む</span></label>
       <label><input type="checkbox" id="countIn"><span>最初に「1, 2, 3, and」のカウント</span></label>
-      <label><input type="checkbox" id="autoNext"><span>終わったら次の行へ進む<small>「作る」モードでは1行ずつ止まります。</small></span></label>
-      <label><input type="checkbox" id="loopSet"><span>セットを無限にくり返す</span></label>
     </div>
 
     <h3 class="ghead">その他</h3>
@@ -1124,10 +1124,10 @@ DATA.forEach(d=>d.lines.forEach(L=>{ connect(L.full.words); if(L.short) connect(
 DATA.forEach(d=>{ d.nbMax=Math.max(...d.lines.map(L=>L.full.words.reduce((a,w)=>a+w.syl.filter(x=>x.s).length,0))); d.nb=d.lines[0].full.words.reduce((a,w)=>a+w.syl.filter(s=>s.s).length,0); });
 
 /* ---------- state ---------- */
-const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,voice:"",ttsRate:0.9,lang:null,skin:"gray",disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"even",preset:"mid",bpm:60,autoBpm:true};
+const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,voice:"",ttsRate:0.85,lang:null,skin:"gray",disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"even",preset:"mid",bpm:60,autoBpm:true};
 let S=Object.assign({},DEF);
 var firstVisit=true;
-function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) firstVisit=false; const v=JSON.parse(raw||"null"); if(v&&typeof v==="object") S=Object.assign({},DEF,v); }catch(e){} if(!DATA[S.set]) S.set=0; if(!Array.isArray(S.order)||S.order.length!==DATA[S.set].lines.length) S.order=[0,1,2,3,4]; if(S.pos>=S.order.length) S.pos=0; }
+function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) firstVisit=false; const v=JSON.parse(raw||"null"); if(v&&typeof v==="object") S=Object.assign({},DEF,v); }catch(e){} if(!DATA[S.set]) S.set=0; if(!Array.isArray(S.order)||S.order.length!==DATA[S.set].lines.length) S.order=[0,1,2,3,4]; if(S.pos>=S.order.length) S.pos=0; S.autoNext=true; if(S.rep!=="inf"){ S.rep=Math.max(1,Math.min(5,Math.round(Number(S.rep)||1))); S.repN=S.rep; } const tr_=Number(S.ttsRate)||0.85; S.ttsRate=tr_<0.8?0.6:tr_<0.95?0.85:1.1; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 let revealed=false;
 
@@ -1327,7 +1327,7 @@ function renderSettings(){
   $("#bpmRange").value=S.bpm; $("#bpmOut").textContent=S.bpm+" BPM"; $("#autoBpm").checked=S.autoBpm;
   $("#bpmPill").textContent="♩ "+S.bpm+" BPM"; $("#kitPill").textContent="🥁 "+kitLabel(S.kit);
   renderSettingsHook();
-  ["contract","skipPick","hints","fillBar","countIn","autoNext","loopSet","conn"].forEach(id=>$("#"+id).checked=!!S[id]);
+  ["contract","skipPick","hints","fillBar","countIn","conn"].forEach(id=>$("#"+id).checked=!!S[id]);
 }
 function renderAll(){ renderChips(); renderStage(); renderList(); renderSettings(); }
 function renderSettingsHook(){ document.querySelectorAll(".setnav span").forEach(x=>x.textContent=tr("セット","Set")); if(typeof renderVoiceSel==="function") renderVoiceSel(); if(typeof setModelBtn==="function") setModelBtn(); if(typeof renderTransport==="function") renderTransport(); }
@@ -1743,13 +1743,13 @@ async function toggleBackground(){
 
 
 /* ---------- i18n ---------- */
-const EN_STATIC={"6音 ＝ 6拍": "6 sounds = 6 beats", "日本語は「1音＝1拍」": "Japanese: one sound = one beat", "日本語は、どの音もほぼ同じ長さで話します。「マクドナルド」なら6音で6拍。音が増えるほど、言い終わるまでの時間も長くなります。": "In Japanese, every sound takes about the same time. マクドナルド (ma-ku-do-na-ru-do) is 6 sounds, so 6 beats. The more sounds, the longer it takes to say.", "強い音1つ ＝ 1拍": "1 stressed syllable = 1 beat", "英語は「強い音＝1拍」": "English: one stress = one beat", "英語で拍を打つのは、強く読む音だけ。弱い音は短く軽く、強い音のすき間に詰め込みます。McDonald's は強い音が1つなので、1拍で言えてしまいます。": "In English, only stressed syllables land on the beat. Weak syllables are short and light, squeezed into the gaps. McDonald's has one stressed syllable, so it fits in a single beat.", "どちらも3拍": "Both are 3 beats", "弱い音が増えても拍は同じ": "More weak syllables, same beats", "強い音が3つなら、文が長くなっても3拍のまま。同じテンポで言い切れます。このアプリでは、レベルが上がるほど弱い音が増えますが、拍の数とテンポは変わりません。": "Three stressed syllables means three beats, however long the sentence gets, so you can say it at the same tempo. As you level up, weak syllables are added, but the beats and tempo stay the same.", "0分": "0 min", "2.5音節/秒": "2.5 syll/s", "3.5音節/秒": "3.5 syll/s", "4.5音節/秒": "4.5 syll/s", "BPMを上げる": "Increase BPM", "BPMを下げる": "Decrease BPM", "have been → 've been、going to → gonna など。": "have been → 've been, going to → gonna, etc.", "‿ ＝ つなげて読む／(t) ＝ ほぼ発音しない／dɪdʒu ＝ did you のように音が変わる。": "‿ = link the words / (t) = barely pronounced / dɪdʒu = sounds merge, as in \"did you\".", "▶で再生。「1, 2, 3, and」のあと、光る文字に合わせて言います。慣れたら「思い出す」「作る」モードへ。録音すると、拍に乗れているかを図で確認できます。": "Tap ▶. After \"1, 2, 3, and\", say the words as they light up. Then move on to Recall and Build modes. Record yourself to see if you're on the beat.", "● 録音": "● Rec", "「作る」モードでは1行ずつ止まります。": "In Build mode, playback stops after each line.", "あり": "On", "くり返し": "Repeat", "この7日間": "Last 7 days", "このセットの行": "Lines in this set", "ずれ補正：": "Offset:", "その他": "Other", "つながりを表示（連結・脱落・同化）": "Show connected speech (linking, elision, assimilation)", "なし": "Off", "ふつう": "Normal", "まだ録音がありません。練習画面の「● 録音」で1行を録音すると、ここに声と拍の重なりが表示されます。": "No recordings yet. Record a line with \"● Rec\" on the Practice screen and your voice will be plotted against the beat here.", "ウラの流し方": "Weak-syllable timing", "オモテの数はずっと同じ": "The number of beats never changes", "オモテ大・ウラ小": "Loud on beat, soft off beat", "クリック": "Click", "シャッフル": "Shuffle", "スキップ": "Skip", "セット": "Sets", "セットや速さを変えたら提案BPMに合わせる": "Use the suggested BPM when the set or speed changes", "セットを無限にくり返す": "Loop the whole set", "テンポ": "Tempo", "デザインテーマ": "Theme", "ドラム": "Drums", "ネオン": "Neon", "ビートも鳴らす": "Play the beat too", "レベル": "Levels", "今日": "Today", "作る": "Build", "使い方をもう一度見る": "Show the tutorial again", "光る文字に合わせて声に出す": "Speak along with the highlighted words", "再生": "Play", "前の行": "Previous line", "厳密": "Strict", "各セットはレベル1〜5。下のレベルほどウラが増えますが、オモテの数とテンポは変わりません。同じテンポのまま最後まで言えたら合格です。": "Each set has levels 1–5. Higher levels add more weak syllables, but the number of beats and the tempo stay the same. Get through level 5 without losing the beat and you've got it.", "各行1回": "Once per line", "各行2回": "Twice per line", "同じ行を無限": "Loop one line", "場面": "Scene", "太い縦線が拍の頭（オモテ）、点線が拍の真ん中です。灰色の山が声の大きさ。強い音節の山が太い線のすぐあとに来ていれば、拍に乗れています。": "Thick lines mark the beats, dotted lines the half-beats. The grey shape is your voice. If each stressed syllable peaks just after a thick line, you're on the beat.", "小節の区切りまで休む": "Rest until the end of the bar", "弱形のヒント": "Weak-form hints", "弱起を省く": "Skip the pickup", "思い出す": "Recall", "拍の後半に詰める": "Pack into the off-beat", "拍の音": "Beat sound", "拍全体に均等": "Spread across the beat", "拍数": "Beats", "指示": "Instruction", "文字の表示": "Text display", "文頭のウラ（The、and など）を抜いて、最初のオモテから入ります。": "Leave out the unstressed start (The, and…) and come in on the first beat.", "日本語は1音ずつ同じ長さで話します。英語は、強い音（オモテ）を一定の間隔で打ち、弱い音（ウラ）をその間に詰め込みます。": "Some languages give every syllable the same length. English hits stressed syllables at regular intervals and squeezes the weak ones in between.", "最初に「1, 2, 3, and」のカウント": "Count in with \"1, 2, 3, and\"", "材料": "Words", "森": "Forest", "楽譜": "Score", "標準": "Default", "表現を足す": "Add phrases", "表現": "Phrases", "レベルが上がるごとに、ネイティブがよく使う表現（つなぎの言葉・決まった言い回し）が1つずつ増えていきます。拍の数は増えますが、テンポは変えずに言い切りましょう。": "Each level adds one phrase native speakers use all the time (linking words and set expressions). The number of beats grows, but keep the tempo the same all the way through.", "お手本の声（イギリス英語）": "Model voice (British English)", "お手本の声（イギリス／アメリカ英語）": "Model voice (British / American English)", "お手本の速さ": "Model speed", "ゆっくり": "Slow", "速め": "Fast", "🗣 お手本": "🗣 Model", "お手本の声": "Model voice", "お手本は自然な速さの英語で、拍には合わせていません。拍に乗せる前に、本来のリズムと抑揚を耳に入れる用です。": "The model voice reads at a natural pace and is not locked to the beat. Use it to hear the natural rhythm and intonation before practising on the beat.", "セット": "Sets", "前のセット": "Previous set", "次のセット": "Next set", "303（つながり）": "303 (linking)", "DX7（メロディ）": "DX7 (melody)", "つながり": "Linking", "メロディ": "Melody", "▶ 試聴": "▶ Test", "この端末で使える英語の声（確認用）": "English voices on this device (for checking)", "ダーク": "Dark", "グレー": "Grey", "白系": "Light", "サイバー": "Cyber", "パンク": "punk", "次の行": "Next line", "次へ": "Next", "流し方": "Playback", "画面": "Screens", "目標の話す速さ": "Target speaking speed", "短縮形で読む": "Use contractions", "答えを見る": "Show answer", "終わったら次の行へ進む": "Move on to the next line", "練習": "Practice", "練習の記録をリセット": "Reset practice history", "練習モード": "Practice mode", "練習時間": "Practice time", "自然": "Natural", "英語": "Text", "英語は「拍」で話す言語": "English is spoken on the beat", "英語＋発音記号": "Text + IPA", "行の順番": "Line order", "表示": "Display", "表示が「英語」のとき、the → ðə のような弱い音を表示します。": "With plain text display, shows weak forms such as the → ðə.", "言い切った行": "Lines completed", "記号のみ": "IPA only", "記録": "Stats", "設定": "Settings", "読む": "Read", "録音": "Recording", "録音を聞く": "Play recording", "閉じる": "Close", "音": "Sound", "音節の音": "Syllable sound", "音節の音（文字と一緒に鳴る）": "Syllable sound (plays with each word)", "音色": "Kit", "音色（名機を再現した合成音）": "Kit (synthesised classic drum machines)", "順番どおり": "In order", "🎧 BG再生": "🎧 BG play", "言語": "Language"};
+const EN_STATIC={"各行のくり返し回数": "Times per line", "1回": "1×", "2回": "2×", "3回": "3×", "4回": "4×", "5回": "5×", "くり返し回数": "Times per line", "6音 ＝ 6拍": "6 sounds = 6 beats", "日本語は「1音＝1拍」": "Japanese: one sound = one beat", "日本語は、どの音もほぼ同じ長さで話します。「マクドナルド」なら6音で6拍。音が増えるほど、言い終わるまでの時間も長くなります。": "In Japanese, every sound takes about the same time. マクドナルド (ma-ku-do-na-ru-do) is 6 sounds, so 6 beats. The more sounds, the longer it takes to say.", "強い音1つ ＝ 1拍": "1 stressed syllable = 1 beat", "英語は「強い音＝1拍」": "English: one stress = one beat", "英語で拍を打つのは、強く読む音だけ。弱い音は短く軽く、強い音のすき間に詰め込みます。McDonald's は強い音が1つなので、1拍で言えてしまいます。": "In English, only stressed syllables land on the beat. Weak syllables are short and light, squeezed into the gaps. McDonald's has one stressed syllable, so it fits in a single beat.", "どちらも3拍": "Both are 3 beats", "弱い音が増えても拍は同じ": "More weak syllables, same beats", "強い音が3つなら、文が長くなっても3拍のまま。同じテンポで言い切れます。このアプリでは、レベルが上がるほど弱い音が増えますが、拍の数とテンポは変わりません。": "Three stressed syllables means three beats, however long the sentence gets, so you can say it at the same tempo. As you level up, weak syllables are added, but the beats and tempo stay the same.", "0分": "0 min", "2.5音節/秒": "2.5 syll/s", "3.5音節/秒": "3.5 syll/s", "4.5音節/秒": "4.5 syll/s", "BPMを上げる": "Increase BPM", "BPMを下げる": "Decrease BPM", "have been → 've been、going to → gonna など。": "have been → 've been, going to → gonna, etc.", "‿ ＝ つなげて読む／(t) ＝ ほぼ発音しない／dɪdʒu ＝ did you のように音が変わる。": "‿ = link the words / (t) = barely pronounced / dɪdʒu = sounds merge, as in \"did you\".", "▶で再生。「1, 2, 3, and」のあと、光る文字に合わせて言います。慣れたら「思い出す」「作る」モードへ。録音すると、拍に乗れているかを図で確認できます。": "Tap ▶. After \"1, 2, 3, and\", say the words as they light up. Then move on to Recall and Build modes. Record yourself to see if you're on the beat.", "● 録音": "● Rec", "「作る」モードでは1行ずつ止まります。": "In Build mode, playback stops after each line.", "あり": "On", "くり返し": "Repeat", "この7日間": "Last 7 days", "このセットの行": "Lines in this set", "ずれ補正：": "Offset:", "その他": "Other", "つながりを表示（連結・脱落・同化）": "Show connected speech (linking, elision, assimilation)", "なし": "Off", "ふつう": "Normal", "まだ録音がありません。練習画面の「● 録音」で1行を録音すると、ここに声と拍の重なりが表示されます。": "No recordings yet. Record a line with \"● Rec\" on the Practice screen and your voice will be plotted against the beat here.", "ウラの流し方": "Weak-syllable timing", "オモテの数はずっと同じ": "The number of beats never changes", "オモテ大・ウラ小": "Loud on beat, soft off beat", "クリック": "Click", "シャッフル": "Shuffle", "スキップ": "Skip", "セット": "Sets", "セットや速さを変えたら提案BPMに合わせる": "Use the suggested BPM when the set or speed changes", "セットを無限にくり返す": "Loop the whole set", "テンポ": "Tempo", "デザインテーマ": "Theme", "ドラム": "Drums", "ネオン": "Neon", "ビートも鳴らす": "Play the beat too", "レベル": "Levels", "今日": "Today", "作る": "Build", "使い方をもう一度見る": "Show the tutorial again", "光る文字に合わせて声に出す": "Speak along with the highlighted words", "再生": "Play", "前の行": "Previous line", "厳密": "Strict", "各セットはレベル1〜5。下のレベルほどウラが増えますが、オモテの数とテンポは変わりません。同じテンポのまま最後まで言えたら合格です。": "Each set has levels 1–5. Higher levels add more weak syllables, but the number of beats and the tempo stay the same. Get through level 5 without losing the beat and you've got it.", "各行1回": "Once per line", "各行2回": "Twice per line", "同じ行を無限": "Loop one line", "場面": "Scene", "太い縦線が拍の頭（オモテ）、点線が拍の真ん中です。灰色の山が声の大きさ。強い音節の山が太い線のすぐあとに来ていれば、拍に乗れています。": "Thick lines mark the beats, dotted lines the half-beats. The grey shape is your voice. If each stressed syllable peaks just after a thick line, you're on the beat.", "小節の区切りまで休む": "Rest until the end of the bar", "弱形のヒント": "Weak-form hints", "弱起を省く": "Skip the pickup", "思い出す": "Recall", "拍の後半に詰める": "Pack into the off-beat", "拍の音": "Beat sound", "拍全体に均等": "Spread across the beat", "拍数": "Beats", "指示": "Instruction", "文字の表示": "Text display", "文頭のウラ（The、and など）を抜いて、最初のオモテから入ります。": "Leave out the unstressed start (The, and…) and come in on the first beat.", "日本語は1音ずつ同じ長さで話します。英語は、強い音（オモテ）を一定の間隔で打ち、弱い音（ウラ）をその間に詰め込みます。": "Some languages give every syllable the same length. English hits stressed syllables at regular intervals and squeezes the weak ones in between.", "最初に「1, 2, 3, and」のカウント": "Count in with \"1, 2, 3, and\"", "材料": "Words", "森": "Forest", "楽譜": "Score", "標準": "Default", "表現を足す": "Add phrases", "表現": "Phrases", "レベルが上がるごとに、ネイティブがよく使う表現（つなぎの言葉・決まった言い回し）が1つずつ増えていきます。拍の数は増えますが、テンポは変えずに言い切りましょう。": "Each level adds one phrase native speakers use all the time (linking words and set expressions). The number of beats grows, but keep the tempo the same all the way through.", "お手本の声（イギリス英語）": "Model voice (British English)", "お手本の声（イギリス／アメリカ英語）": "Model voice (British / American English)", "お手本の速さ": "Model speed", "ゆっくり": "Slow", "速め": "Fast", "🗣 お手本": "🗣 Model", "お手本の声": "Model voice", "お手本は自然な速さの英語で、拍には合わせていません。拍に乗せる前に、本来のリズムと抑揚を耳に入れる用です。": "The model voice reads at a natural pace and is not locked to the beat. Use it to hear the natural rhythm and intonation before practising on the beat.", "セット": "Sets", "前のセット": "Previous set", "次のセット": "Next set", "303（つながり）": "303 (linking)", "DX7（メロディ）": "DX7 (melody)", "つながり": "Linking", "メロディ": "Melody", "▶ 試聴": "▶ Test", "この端末で使える英語の声（確認用）": "English voices on this device (for checking)", "ダーク": "Dark", "グレー": "Grey", "白系": "Light", "サイバー": "Cyber", "パンク": "punk", "次の行": "Next line", "次へ": "Next", "流し方": "Playback", "画面": "Screens", "目標の話す速さ": "Target speaking speed", "短縮形で読む": "Use contractions", "答えを見る": "Show answer", "終わったら次の行へ進む": "Move on to the next line", "練習": "Practice", "練習の記録をリセット": "Reset practice history", "練習モード": "Practice mode", "練習時間": "Practice time", "自然": "Natural", "英語": "Text", "英語は「拍」で話す言語": "English is spoken on the beat", "英語＋発音記号": "Text + IPA", "行の順番": "Line order", "表示": "Display", "表示が「英語」のとき、the → ðə のような弱い音を表示します。": "With plain text display, shows weak forms such as the → ðə.", "言い切った行": "Lines completed", "記号のみ": "IPA only", "記録": "Stats", "設定": "Settings", "読む": "Read", "録音": "Recording", "録音を聞く": "Play recording", "閉じる": "Close", "音": "Sound", "音節の音": "Syllable sound", "音節の音（文字と一緒に鳴る）": "Syllable sound (plays with each word)", "音色": "Kit", "音色（名機を再現した合成音）": "Kit (synthesised classic drum machines)", "順番どおり": "In order", "🎧 BG再生": "🎧 BG play", "言語": "Language"};
 const EN_CUE={"丁寧な依頼（could you ~ for me）": "Polite request (could you ~ for me)", "丁寧な確認（would you be ~ing）": "Polite check (would you be ~ing)", "予定だった・完了": "Was going to · perfect", "予定だった・完了（was going to have）": "Was going to · perfect (was going to have)", "予定だった・進行": "Was going to · continuous", "予定だった・進行（was going to be ~ing）": "Was going to · continuous (was going to be ~ing)", "予定だった（was going to）": "Was going to", "予定だった（were going to）": "Was going to (were going to)", "予定の進行": "Future plan · continuous", "予定の進行（and で始める）": "Future plan · continuous (starts with \"and\")", "予定・予想（going to be）": "Plan / prediction (going to be)", "予定・受け身": "Future plan · passive", "予定（going to）": "Future plan (going to)", "予想＋for us": "Prediction + for us", "仮定・完了": "Hypothetical · perfect", "仮定・完了の受け身": "Hypothetical · perfect passive", "仮定・完了進行": "Hypothetical · perfect continuous", "仮定・完了（would have）": "Hypothetical · perfect (would have)", "依頼（can you）": "Request (can you)", "受け身・後悔（主語を入れ替え）": "Passive · regret (subject swapped)", "受け身（主語を入れ替え）": "Passive (subject swapped)", "可能性・完了の受け身": "Possibility · perfect passive", "命令形": "Imperative", "後悔・受け身": "Regret · passive", "後悔（should have been ~ing）": "Regret (should have been ~ing)", "後悔（should have）": "Regret (should have)", "推量（must have）": "Deduction (must have)", "推量（must have）＋所有格": "Deduction (must have) + possessive", "推量＋when節": "Deduction + when-clause", "推量＋関係詞（and で始める）": "Deduction + relative clause (starts with \"and\")", "推量＋関係詞（that's）": "Deduction + relative clause (that's)", "未来完了・受け身": "Future perfect · passive", "未来完了（I'll have）": "Future perfect (I'll have)", "未来完了（by tonight）": "Future perfect (by tonight)", "未来進行": "Future continuous", "未来（I'll）": "Future (I'll)", "未来（we'll）": "Future (we'll)", "未来（will）": "Future (will)", "未来＋相手（send you）": "Future + object (send you)", "現在完了": "Present perfect", "現在完了・受け身": "Present perfect · passive", "現在完了進行": "Present perfect continuous", "現在完了進行形": "Present perfect continuous", "現在形": "Present simple", "現在形（冠詞なし）": "Present simple (no articles)", "現在形（平叙文）": "Present simple (statement)", "疑問文・予定だった": "Question · was going to", "疑問文・予定だった進行": "Question · was going to · continuous", "疑問文・予定だった（was going to）": "Question · was going to", "疑問文・予定の完了": "Question · future plan · perfect", "疑問文・予定の進行": "Question · future plan · continuous", "疑問文・予定（be going to be ~ing）": "Question · future plan (be going to be ~ing)", "疑問文・予定（be going to）": "Question · future plan (be going to)", "疑問文・予定（going to）": "Question · future plan (going to)", "疑問文・予想（going to be）": "Question · prediction (going to be)", "疑問文・予想＋for you": "Question · prediction + for you", "疑問文・仮定の完了": "Question · hypothetical perfect", "疑問文・仮定の完了進行": "Question · hypothetical perfect continuous", "疑問文・依頼（can we）": "Question · request (can we)", "疑問文・後悔（should have been ~ing）": "Question · regret (should have been ~ing)", "疑問文・後悔（should have）": "Question · regret (should have)", "疑問文・未来完了": "Question · future perfect", "疑問文・未来完了（will you have）": "Question · future perfect (will you have)", "疑問文・未来進行": "Question · future continuous", "疑問文・未来（will）": "Question · future (will)", "疑問文・現在": "Question · present", "疑問文・現在完了": "Question · present perfect", "疑問文・現在完了進行": "Question · present perfect continuous", "疑問文・現在形": "Question · present simple", "疑問文・現在形（冠詞なし）": "Question · present simple (no articles)", "疑問文・現在進行": "Question · present continuous", "疑問文・現在（一般論）": "Question · present (general)", "疑問文・現在（予定）": "Question · present (timetable)", "疑問文・現在（冠詞なし）": "Question · present (no articles)", "疑問文・現在（所有格なし）": "Question · present (no possessive)", "疑問文・進行形の予定": "Question · present continuous for arrangements", "疑問文・過去": "Question · past", "疑問文・過去進行": "Question · past continuous", "疑問文・過去（所有格なし）": "Question · past (no possessive)", "過去・受け身": "Past · passive", "過去完了進行": "Past perfect continuous", "過去形": "Past simple", "過去形（主語なし）": "Past simple (no subject)", "過去形（冠詞なし）": "Past simple (no articles)", "過去形（所有格なし）": "Past simple (no possessive)", "過去進行形": "Past continuous"};
 function tr(ja,en){ return S.lang==="en"?en:ja; }
 function TC(c){ if(S.lang!=="en") return c; if(EN_CUE[c]) return EN_CUE[c]; if(c==="基本の文") return "Base sentence"; if(c.startsWith("＋")) return "+ "+c.slice(1).replace(/（.*?）/g,"").trim(); return c; }
 const SC_EN={all:"All",basic:"Basic",biz:"Business",daily:"Daily",expr:"Phrases"};
 const TAB_EN={practice:"Practice",sets:"Sets",record:"Stats",settings:"Settings"};
-const REP_EN={through:"Play once to the end",one:"Loop this line",all:"Loop all levels"};
+const REP_EN={through:"Play through to the end",one:"Loop this line",all:"Loop all levels"};
 const KIT_EN={
  tr606:["606","TR-606 style. Light, thin analogue sounds. Beat = short kick, half-beat = thin hat, stressed = snare, weak = high tom."],
  tr707:["707","TR-707 style. Crisp 80s sounds. Beat = tight kick, half-beat = sharp hat, stressed = snare, weak = rimshot."],
@@ -1789,17 +1789,18 @@ function voiceQ(v){ const t=(v.name+" "+v.voiceURI).toLowerCase(); return /premi
 function isMale(v){ const n=v.name.toLowerCase(); return [...MALE].some(m=>n.indexOf(m)>=0); }
 function voiceScore(v){ const i=VOICE_PREF.findIndex(n=>v.name.indexOf(n)>=0); return voiceQ(v)*100+(/^en[-_]GB/i.test(v.lang)?50:0)+(isMale(v)?20:0)+(i>=0?(VOICE_PREF.length-i):0); }
 function gbVoices(){ if(!HAS_TTS) return []; return speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang)); }
-const NOVELTY=/^(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley)\b/i;
+const NOVELTY=/^(albert|bad ?news|deranged|hysterical|princess|bahh|bells|boing|bubbles|cellos|good ?news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley)\b/i;
+function isNovelty(v){ const u=v.voiceURI||""; return NOVELTY.test(v.name)||/speech\.synthesis\.voice\.|\.eloquence\./i.test(u)||NOVELTY.test(u.split(".").pop()||""); }
 function enVoices(){
   if(!HAS_TTS) return [];
-  const list=speechSynthesis.getVoices().filter(v=>/^en[-_](GB|US)$/i.test(v.lang)&&!NOVELTY.test(v.name));
+  const list=speechSynthesis.getVoices().filter(v=>/^en[-_](GB|US)$/i.test(v.lang)&&!isNovelty(v));
   const best={};
   list.forEach(v=>{ const k=v.name.replace(/\s*\((enhanced|premium|compact)\)/i,"").toLowerCase()+"|"+v.lang.toLowerCase(); if(!best[k]||voiceQ(v)>voiceQ(best[k])) best[k]=v; });
   return Object.values(best);
 }
 function pickVoice(){
   if(!HAS_TTS) return null; const all=speechSynthesis.getVoices();
-  if(S.voice){ const v=all.find(v=>v.voiceURI===S.voice); if(v) return v; }
+  if(S.voice){ const v=enVoices().find(v=>v.voiceURI===S.voice); if(v) return v; }
   const vs=enVoices().slice().sort((a,b)=>voiceScore(b)-voiceScore(a));
   return vs[0]||all.find(v=>/^en/i.test(v.lang))||null;
 }
@@ -1810,7 +1811,7 @@ function renderVoiceSel(){
   const lst=$("#voiceList"); if(lst){ const vs=enVoices().slice().sort((a,b)=>voiceScore(b)-voiceScore(a)); lst.textContent=vs.length?vs.map(v=>v.name+" | "+v.lang+" | "+v.voiceURI).join("\n"):tr("（英語の声が見つかりません）","(no English voices found)"); }
   sel.value=S.voice||""; if(sel.value!==(S.voice||"")) sel.value="";
   sel.disabled=!HAS_TTS;
-  document.querySelectorAll("#ttsRateSeg button").forEach(b=>b.setAttribute("aria-pressed",String(Number(b.dataset.r)===(S.ttsRate||0.9))));
+  document.querySelectorAll("#ttsRateSeg button").forEach(b=>b.setAttribute("aria-pressed",String(Number(b.dataset.r)===(S.ttsRate||0.85))));
 }
 let speaking=false, hlWords=[];
 function hlWord(wi){
@@ -1829,7 +1830,7 @@ function speakModel(){
   const u=new SpeechSynthesisUtterance(sent.text); const v=pickVoice();
   if(v){ u.voice=v; u.lang=v.lang; } else u.lang="en-GB";
   if(v&&!/^en[-_]GB/i.test(v.lang)) toast(tr("イギリス英語の声が見つからないため、別の英語の声で読みます","No British voice found, using another English voice"));
-  u.rate=S.ttsRate||0.9;
+  u.rate=S.ttsRate||0.85;
   u.onboundary=e=>{ if(e.name&&e.name!=="word") return; let wi=0; for(let i=0;i<offs.length;i++){ if(offs[i]<=e.charIndex) wi=i; } hlWord(wi); };
   u.onend=()=>{ speaking=false; hlWord(-1); setModelBtn(); };
   u.onerror=u.onend;
@@ -1898,8 +1899,8 @@ $("#btn303").addEventListener("click",()=>{ S.sylMode=sylMode()==="303"?"on":"30
 $("#btnDX7").addEventListener("click",()=>{ S.sylMode=sylMode()==="dx7"?"on":"dx7"; save(); renderSettings(); toast(sylMode()==="dx7"?tr("DX7：抑揚のメロディを鳴らす","DX7: intonation melody on"):tr("DX7：オフ","DX7: off")); });
 document.querySelectorAll("#timingSeg button").forEach(b=>b.addEventListener("click",()=>{ stopPlay(); S.timing=b.dataset.t; save(); renderStage(); renderSettings(); }));
 document.querySelectorAll("#orderSeg button").forEach(b=>b.addEventListener("click",()=>{ stopPlay(); S.ord=b.dataset.o; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); }));
-document.querySelectorAll("#repSeg button").forEach(b=>b.addEventListener("click",()=>{ S.rep=b.dataset.r==="inf"?"inf":Number(b.dataset.r); save(); renderSettings(); }));
-["contract","skipPick","hints","fillBar","countIn","autoNext","loopSet","conn"].forEach(id=>$("#"+id).addEventListener("change",e=>{ stopPlay(); S[id]=e.target.checked; if(["contract","skipPick"].includes(id)) applyAuto(); save(); renderStage(); renderList(); renderSettings(); }));
+document.querySelectorAll("#repSeg button").forEach(b=>b.addEventListener("click",()=>{ S.rep=S.repN=Number(b.dataset.r); save(); renderSettings(); renderNext(); }));
+["contract","skipPick","hints","fillBar","countIn","conn"].forEach(id=>$("#"+id).addEventListener("change",e=>{ stopPlay(); S[id]=e.target.checked; if(["contract","skipPick"].includes(id)) applyAuto(); save(); renderStage(); renderList(); renderSettings(); }));
 $("#autoBpm").addEventListener("change",e=>{ S.autoBpm=e.target.checked; applyAuto(); save(); renderSettings(); });
 function setBpm(v){ S.bpm=Math.max(40,Math.min(160,Math.round(v))); S.autoBpm=false; save(); renderSettings(); }
 $("#bpmRange").addEventListener("input",e=>setBpm(+e.target.value));
@@ -1912,8 +1913,9 @@ $("#revealBtn").addEventListener("click",()=>{ revealed=!revealed; renderStage()
 $("#recBtn").addEventListener("click",recordPlay);
 $("#bgBtn").addEventListener("click",toggleBackground);
 $("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent=tr("🎧 BG再生","🎧 BG play"); $("#bgStatus").textContent=tr("バックグラウンド再生が終わりました。","Background playback finished."); });
+function repCount(){ const n=Number(S.repN||S.rep); return n>=1&&n<=5?Math.round(n):1; }
 function repMode(){ if(S.rep==="inf") return "one"; if(S.autoNext&&S.loopSet) return "all"; return "through"; }
-const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで1回"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"全レベルを無限にくり返し"}};
+const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで再生"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"全レベルを無限にくり返し"}};
 const LOOP='<path d="M5.5 11a6.5 6.5 0 0 1 11.3-4.4M17 3.3v3.8h-3.8M18.5 13a6.5 6.5 0 0 1-11.3 4.4M7 20.7v-3.8h3.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 const REPICONS={
   through:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 8h14M14 4.5 18 8l-4 3.5M4 16.5h14M14 13l4 3.5-4 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -1928,9 +1930,10 @@ function renderTransport(){
 $("#shufBtn").addEventListener("click",()=>{ stopPlay(); S.ord=S.ord==="shuffle"?"seq":"shuffle"; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); toast(S.ord==="shuffle"?tr("シャッフル：オン","Shuffle: on"):tr("シャッフル：オフ","Shuffle: off")); });
 $("#repBtn").addEventListener("click",()=>{
   const next={through:"one",one:"all",all:"through"}[repMode()];
-  if(next==="through"){ S.rep=1; S.autoNext=true; S.loopSet=false; }
+  const n=repCount();
+  if(next==="through"){ S.rep=n; S.autoNext=true; S.loopSet=false; }
   else if(next==="one"){ S.rep="inf"; }
-  else { S.rep=1; S.autoNext=true; S.loopSet=true; }
+  else { S.rep=n; S.autoNext=true; S.loopSet=true; }
   save(); renderSettings(); toast(repLabel(next)); if(S.mode==="build"&&next!=="one") stageStatus(tr("「作る」モードでは1行ずつ止まります","Build mode stops after each line"));
 });
 $("#recPlay").addEventListener("click",playRec);
@@ -1956,7 +1959,7 @@ function applySkin(){
 document.querySelectorAll("#skinSeg button").forEach(b=>b.addEventListener("click",()=>{ S.skin=b.dataset.k; save(); applySkin(); if(rec) drawRec(); }));
 
 $("#modelBtn").addEventListener("click",speakModel);
-$("#voiceTest").addEventListener("click",()=>{ if(!HAS_TTS) return; stopPlay(); speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance("Hello, I'm your model voice. Let's practise the rhythm of English."); const v=pickVoice(); if(v){u.voice=v;u.lang=v.lang;} else u.lang="en-GB"; u.rate=S.ttsRate||0.9; speechSynthesis.speak(u); toast(v?v.name:"en-GB"); });
+$("#voiceTest").addEventListener("click",()=>{ if(!HAS_TTS) return; stopPlay(); speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance("Hello, I'm your model voice. Let's practise the rhythm of English."); const v=pickVoice(); if(v){u.voice=v;u.lang=v.lang;} else u.lang="en-GB"; u.rate=S.ttsRate||0.85; speechSynthesis.speak(u); toast(v?v.name:"en-GB"); });
 if(HAS_TTS){ let tries=0; const poll=setInterval(()=>{ tries++; if(speechSynthesis.getVoices().length||tries>20){ renderVoiceSel(); if(tries>3) clearInterval(poll); } if(tries>20) clearInterval(poll); },300); }
 
 $("#voiceSel").addEventListener("change",e=>{ S.voice=e.target.value; save(); });
