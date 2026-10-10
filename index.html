@@ -1484,7 +1484,7 @@ function schedule(pos,T,opt){
   if(!noSound){ const sm=sylMode();
     if(sm==="on") ev.forEach(e=>{ if(e.syl) sylTone(e.t,e.s); });
     else if(sm==="303"||sm==="dx7"||sm==="gtr"){ const tm={}; ev.forEach(e=>{ if(e.syl) tm[e.syl]=e.t; }); const end=T+B.beats.length*beat; if(sm==="303") play303(sent,tm,end); else if(sm==="gtr") playGuitar(sent,tm,end); else playDX7(sent,tm,end); } }
-  return {pos,ev,T,beat,rests:B.beats.map(b=>b.rest),end:T+B.beats.length*beat,p:-2,next:null,done:false,single:!!opt.single,rep:opt.rep||1};
+  return {pos,ev,T,beat,bpm,rests:B.beats.map(b=>b.rest),end:T+B.beats.length*beat,p:-2,next:null,done:false,single:!!opt.single,rep:opt.rep||1};
 }
 function clearHL(){ if(hl.cell) hl.cell.classList.remove("now"); if(hl.syl) hl.syl.classList.remove("now"); if(hl.ft) hl.ft.classList.remove("now"); hl={cell:null,syl:null,ft:null}; $("#countBadge").hidden=true; $("#countBig").hidden=true; }
 function pulse(soft){ const p=$("#pulse"); p.classList.remove("go","soft"); void p.offsetWidth; p.classList.add("go"); if(soft) p.classList.add("soft"); }
@@ -1508,7 +1508,7 @@ function nextOf(r){
 function loop(){
   raf=0; if(!run||!ctx) return; trackTime();
   const now=ctx.currentTime-(ctx.outputLatency||0);
-  if(!run.next&&!run.done&&ctx.currentTime>=run.end-run.beat-.4){ const nx=nextOf(run); if(nx){ run.next=schedule(nx.pos,run.end,{rep:nx.rep}); run.next.wrap=!!nx.wrap; } else run.done=true; }
+  if(!run.next&&!run.done&&ctx.currentTime>=run.end-run.beat-.4){ const nx=nextOf(run); if(nx){ const nb=S.bpm!==run.bpm; run.next=schedule(nx.pos,nb?run.end+4*60/S.bpm:run.end,{rep:nx.rep,countIn:nb}); run.next.wrap=!!nx.wrap; } else run.done=true; }
   const handoff=run.next?Math.min(run.end,run.next.ev.length?run.next.ev[0].t:run.end):run.end;
   if(now>=handoff){
     if(run.next){ markDone(run.pos); const r=run.next; if(r.pos!==S.pos||r.wrap){ S.pos=r.pos; revealed=false; save(); renderStage(); renderList(); } run=r; run.p=-2; }
@@ -1962,7 +1962,7 @@ document.querySelectorAll("#orderSeg button").forEach(b=>b.addEventListener("cli
 document.querySelectorAll("#repSeg button").forEach(b=>b.addEventListener("click",()=>{ S.rep=S.repN=Number(b.dataset.r); save(); renderSettings(); renderNext(); }));
 ["contract","skipPick","hints","fillBar","countIn","conn"].forEach(id=>$("#"+id).addEventListener("change",e=>{ stopPlay(); S[id]=e.target.checked; if(["contract","skipPick"].includes(id)) applyAuto(); save(); renderStage(); renderList(); renderSettings(); }));
 $("#autoBpm").addEventListener("change",e=>{ S.autoBpm=e.target.checked; applyAuto(); save(); renderSettings(); });
-function setBpm(v){ S.bpm=Math.max(40,Math.min(160,Math.round(v))); S.autoBpm=false; save(); renderSettings(); }
+function setBpm(v){ const old=S.bpm; S.bpm=Math.max(40,Math.min(160,Math.round(v))); S.autoBpm=false; save(); renderSettings(); if(run&&!run.single&&S.bpm!==old) toast(tr("次の行から ♩ "+S.bpm+" BPM（4カウントで入ります）","Next line at ♩ "+S.bpm+" BPM (with a 4-count)")); }
 $("#bpmRange").addEventListener("input",e=>setBpm(+e.target.value));
 $("#bpmDown").addEventListener("click",()=>setBpm(S.bpm-2));
 $("#bpmUp").addEventListener("click",()=>setBpm(S.bpm+2));
