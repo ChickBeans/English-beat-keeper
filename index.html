@@ -1623,26 +1623,28 @@ function playDX7(sent,tm,end){
 
 
 /* ---------- guitar solo voice ---------- */
-const VOLGTR=0.11;
+const VOLGTR=0.095;
 let DRIVE=null;
-function driveCurve(){ if(!DRIVE){ const n=2048; DRIVE=new Float32Array(n); for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; DRIVE[i]=Math.tanh(x*6)/Math.tanh(6); } } return DRIVE; }
+function driveCurve(){ if(!DRIVE){ const n=2048; DRIVE=new Float32Array(n); for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; const y=Math.tanh(x*22)/Math.tanh(22); DRIVE[i]=Math.tanh(y*2.5)/Math.tanh(2.5); } } return DRIVE; }
 const PENTA=[0,3,5,7,10,12,15,17,19];
 function snapPenta(semi){ let best=PENTA[0]; PENTA.forEach(p=>{ if(Math.abs(p-semi)<Math.abs(best-semi)) best=p; }); return best; }
 function playGuitar(sent,tm,end){
   const it=melody(sent).filter(x=>tm[x.k]!=null); if(!it.length) return;
-  const hz=semi=>293.66*Math.pow(2,semi/12);
-  const o1=ctx.createOscillator(), o2=ctx.createOscillator(), pre=ctx.createGain(), sh=ctx.createWaveShaper();
+  const hz=semi=>146.83*Math.pow(2,semi/12);
+  const o1=ctx.createOscillator(), o2=ctx.createOscillator(), o5=ctx.createOscillator(), o8=ctx.createOscillator(), chord=ctx.createGain(), pre=ctx.createGain(), sh=ctx.createWaveShaper();
+  o5.type="sawtooth"; o8.type="sawtooth"; o5.detune.value=-6; chord.gain.value=0;
   const hp=ctx.createBiquadFilter(), mid=ctx.createBiquadFilter(), cab=ctx.createBiquadFilter(), amp=ctx.createGain();
   const dl=ctx.createDelay(1), fb=ctx.createGain(), wet=ctx.createGain();
   o1.type="sawtooth"; o2.type="sawtooth"; o2.detune.value=8;
   pre.gain.value=.0001; sh.curve=driveCurve(); sh.oversample="4x";
   hp.type="highpass"; hp.frequency.value=110; mid.type="peaking"; mid.frequency.value=900; mid.Q.value=.8; mid.gain.value=5;
-  cab.type="lowpass"; cab.frequency.value=3800; cab.Q.value=.9; amp.gain.value=VOLGTR;
+  cab.type="lowpass"; cab.frequency.value=3000; cab.Q.value=.9; amp.gain.value=VOLGTR;
   dl.delayTime.value=.27; fb.gain.value=.28; wet.gain.value=.22;
-  o1.connect(pre); o2.connect(pre); pre.connect(sh); sh.connect(hp); hp.connect(mid); mid.connect(cab); cab.connect(amp); amp.connect(out());
+  o1.connect(pre); o2.connect(pre); o5.connect(chord); o8.connect(chord); chord.connect(pre); pre.connect(sh); sh.connect(hp); hp.connect(mid); mid.connect(cab); cab.connect(amp); amp.connect(out());
   amp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(out());
-  const f=(t,v)=>{ o1.frequency.setValueAtTime(v,t); o2.frequency.setValueAtTime(v,t); };
-  const glide=(t,v,tc)=>{ o1.frequency.setTargetAtTime(v,t,tc); o2.frequency.setTargetAtTime(v,t,tc); };
+  const FIFTH=1.4983;
+  const f=(t,v)=>{ o1.frequency.setValueAtTime(v,t); o2.frequency.setValueAtTime(v,t); o5.frequency.setValueAtTime(v*FIFTH,t); o8.frequency.setValueAtTime(v/2,t); };
+  const glide=(t,v,tc)=>{ o1.frequency.setTargetAtTime(v,t,tc); o2.frequency.setTargetAtTime(v,t,tc); o5.frequency.setTargetAtTime(v*FIFTH,t,tc); o8.frequency.setTargetAtTime(v/2,t,tc); };
   const t0=tm[it[0].k]; f(t0,hz(snapPenta(it[0].semi)));
   const nucI=it.map(x=>x.s).lastIndexOf(true);
   let open=false;
@@ -1650,6 +1652,7 @@ function playGuitar(sent,tm,end){
     const t=tm[x.k], nt=i<it.length-1?tm[it[i+1].k]:Math.min(end,t+.6), gap=Math.max(.06,nt-t);
     const semi=snapPenta(x.semi), legato=i>0&&it[i-1].slide&&open;
     const lvl=x.s?.9:.45;
+    chord.gain.setTargetAtTime(x.s?(i===nucI?.9:.7):0,t,.005);
     if(legato){ glide(t,hz(semi),.015); pre.gain.setTargetAtTime(lvl,t,.01); }
     else {
       // pick: start a little flat on stressed notes and bend up into pitch
@@ -1662,14 +1665,14 @@ function playGuitar(sent,tm,end){
     if(x.s&&gap>.3){
       const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.frequency.value=5.6;
       lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(hz(semi)*.018,t+Math.min(.25,gap*.6));
-      lfo.connect(lg); lg.connect(o1.frequency); lg.connect(o2.frequency);
+      lfo.connect(lg); lg.connect(o1.frequency); lg.connect(o2.frequency); lg.connect(o5.frequency);
       const e=t+gap; lfo.start(t); lfo.stop(e); reg(lfo,e);
     }
     if(x.glide) glide(t+.08,hz(semi+(x.glide>0?3:-3)),.08);
     if(!x.slide){ pre.gain.setTargetAtTime(.0001,t+Math.min(gap*.85,.45),.03); open=false; }
   });
   const stopAt=Math.min(end,tm[it[it.length-1].k]+.8)+.1;
-  [o1,o2].forEach(o=>{ o.start(t0-.005); o.stop(stopAt); reg(o,stopAt); });
+  [o1,o2,o5,o8].forEach(o=>{ o.start(t0-.005); o.stop(stopAt); reg(o,stopAt); });
 }
 
 /* ---------- recording ---------- */
