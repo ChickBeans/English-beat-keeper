@@ -1980,33 +1980,61 @@ function waveBar(t,ch,next,beat){
 }
 
 
-// club: four-on-the-floor, rolling sub bass, drifting acid line, whole-mix filter swell every 8 bars
+// club: four-on-the-floor, gliding sub + reese bass, drifting acid line, whole-mix filter swell every 8 bars
 function clubFilter(){ if(!ctx._cf){ const f=ctx.createBiquadFilter(); f.type="lowpass"; f.Q.value=1.2; f.frequency.value=8000; f.connect(mbus()); ctx._cf=f; } return ctx._cf; }
-function clubKick(t,v){ const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(42,t+.09);
-  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(v,t+.003); g.gain.exponentialRampToValueAtTime(.0001,t+.5);
-  o.connect(g); g.connect(out()); o.start(t); o.stop(t+.55); reg(o,t+.55); nz(t,{v:v*.25,dec:.006,hp:3000}); }
+function clubKick(t,v){ const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.setValueAtTime(170,t); o.frequency.exponentialRampToValueAtTime(46,t+.11);
+  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(v,t+.003); g.gain.setTargetAtTime(v*.6,t+.06,.12); g.gain.exponentialRampToValueAtTime(.0001,t+.62);
+  o.connect(g); g.connect(out()); o.start(t); o.stop(t+.67); reg(o,t+.67); nz(t,{v:v*.25,dec:.006,hp:3000}); }
+// bass bus: bypasses the 8-bar swell and the voice duck so the low end never thins out; it breathes against the kick
+const SAT=(()=>{ const n=1024,c=new Float32Array(n); for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=Math.tanh(x*2.2)/Math.tanh(2.2); } return c; })();
+function clubBass(){ if(!ctx._cb){ const sc=ctx.createGain(), sh=ctx.createWaveShaper(), lp=ctx.createBiquadFilter(), pre=ctx.createGain();
+    const lv=ctx.createGain(); lv.gain.value=.3; sc.gain.value=1; sc.connect(lv); lv.connect(out()); sh.curve=SAT; lp.type="lowpass"; lp.frequency.value=260; lp.Q.value=.7; pre.gain.value=1;
+    pre.connect(sh); sh.connect(lp); lp.connect(sc); ctx._cb={sc,sub:pre}; } return ctx._cb; }
+// 8th-note bass line that glides between root, octave, fifth and seventh, and slides into the next chord's root
+const BASS_PATS=[[0,0,12,0,7,0,12,10],[0,12,0,7,10,12,7,5],[0,0,7,12,0,15,12,7],[0,12,10,7,0,7,12,14]];
+function bassLine(t,beat,ch,nextRoot,bar){
+  const cb=clubBass(), pat=BASS_PATS[bar%4], step=beat/2, end=t+4*beat;
+  const sub=ctx.createOscillator(), mid=ctx.createOscillator(), r1=ctx.createOscillator(), r2=ctx.createOscillator();
+  sub.type="sine"; mid.type="triangle"; r1.type="sawtooth"; r2.type="sawtooth"; r1.detune.value=-16; r2.detune.value=16;
+  const gs=ctx.createGain(), gm=ctx.createGain(), gr=ctx.createGain(), rf=ctx.createBiquadFilter();
+  gs.gain.value=.55; gm.gain.value=.16; gr.gain.value=.0001; rf.type="lowpass"; rf.Q.value=7; rf.frequency.value=300;
+  sub.connect(gs); gs.connect(cb.sub); mid.connect(gm); gm.connect(cb.sub);
+  r1.connect(rf); r2.connect(rf); rf.connect(gr); gr.connect(cb.sc);
+  // reese wobble: cutoff LFO whose rate changes every bar (1/4, 1/8, triplet, 1/16)
+  const lfo=ctx.createOscillator(), ld=ctx.createGain(), rates=[1,2,1.5,4][bar%4];
+  lfo.frequency.value=rates/beat; ld.gain.value=900; lfo.connect(ld); ld.connect(rf.frequency); rf.frequency.setValueAtTime(380,t); rf.frequency.linearRampToValueAtTime(900,end);
+  gr.gain.setValueAtTime(.0001,t); gr.gain.linearRampToValueAtTime(.075,t+.02); gr.gain.setTargetAtTime(.0001,end-.03,.01);
+  for(let i=0;i<8;i++){ const tt=t+i*step, hz=ch.root*Math.pow(2,pat[i]/12);
+    [sub,mid,r1,r2].forEach((o,j)=>{ const f=hz*(j===0?1:2); if(i===0) o.frequency.setValueAtTime(f,tt); else o.frequency.setTargetAtTime(f,tt,.022); });
+    if(i===7) [sub,mid,r1,r2].forEach((o,j)=>o.frequency.setTargetAtTime(nextRoot*(j===0?1:2),tt+step*.55,.04));
+  }
+  const e=end+.08; [sub,mid,r1,r2,lfo].forEach(o=>{ o.start(t); o.stop(e); reg(o,e); });
+}
 function acid(t,f,dur,v,cut,acc){ const drift=(Math.random()*2-1)*14;
   sOsc(t,{type:"sawtooth",f,detune:drift,v:v*(acc?1.4:1),att:.003,dec:dur,rel:.03,lp:cut*(acc?2.2:1.2),lpTo:Math.max(200,cut*.35),lpT:dur*.9,q:14,dest:clubFilter()}); }
 
 // one gliding acid voice per bar that wanders through the C major scale (2 octaves) around the chord root;
 // the motif shifts every bar so it never settles
 const ACID_SCALE=[65.41,73.42,82.41,87.31,98,110,123.47,130.81,146.83,164.81,174.61,196,220,246.94,261.63];
-const ACID_MOTIF=[0,2,4,7,4,2,5,3,0,4,7,9,7,4,2,1,0,-1,2,4,6,4,2,0];
+const ACID_MOTIF=[0,2,4,7,9,7,4,2,5,3,8,10,7,4,2,1,0,-2,2,4,6,9,11,7,4,0,-1,3];
 function rootDeg(ch){ const r=ch.root*2; let best=0; ACID_SCALE.forEach((f,i)=>{ if(Math.abs(Math.log(f/r))<Math.abs(Math.log(ACID_SCALE[best]/r))) best=i; }); return best; }
 function acidLine(t,beat,ch,bar,cut){
   const o=ctx.createOscillator(), f=ctx.createBiquadFilter(), g=ctx.createGain(), step=beat/4, rd=rootDeg(ch), shift=(bar*5)%ACID_MOTIF.length;
-  o.type="sawtooth"; f.type="lowpass"; f.Q.value=13; g.gain.value=.0001;
+  o.type="sawtooth"; f.type="lowpass"; f.Q.value=15; g.gain.value=.0001;
   o.connect(f); f.connect(g); g.connect(clubFilter());
+  const pl=ctx.createOscillator(), pd=ctx.createGain(), fl=ctx.createOscillator(), fd=ctx.createGain();   // pitch drift + cutoff sweep
+  pl.frequency.value=.7/beat; pd.gain.value=35; pl.connect(pd); pd.connect(o.detune);
+  fl.frequency.value=(bar%2?.75:.375)/beat; fd.gain.value=1400; fl.connect(fd); fd.connect(f.detune);
   for(let i=0;i<16;i++){
     const tt=t+i*step, deg=Math.max(0,Math.min(ACID_SCALE.length-1,rd+ACID_MOTIF[(i+shift)%ACID_MOTIF.length]));
-    const hz=ACID_SCALE[deg]*(i%8===6?2:1), slide=i%4===3||i%7===5, rest=(i+bar)%5===4, acc=i%4===0;
-    if(i===0) o.frequency.setValueAtTime(hz,tt); else if(slide) o.frequency.setTargetAtTime(hz,tt,.03); else o.frequency.setValueAtTime(hz,tt);
+    const hz=ACID_SCALE[deg]*(i%8===6||(i+bar)%11===9?2:1), slide=i%2===1||i%7===4, rest=(i+bar)%5===4, acc=i%4===0;
+    if(i===0) o.frequency.setValueAtTime(hz,tt); else if(slide) o.frequency.setTargetAtTime(hz,tt,.045); else o.frequency.setValueAtTime(hz,tt);
     const peak=rest?.0001:(acc?.05:.034);
     if(!slide||i===0){ g.gain.setValueAtTime(.0001,tt); g.gain.linearRampToValueAtTime(peak,tt+.004); } else g.gain.setTargetAtTime(peak,tt,.01);
     g.gain.setTargetAtTime(peak*.35,tt+step*.5,.03);
     f.frequency.setValueAtTime(cut*(acc?2.6:1.5),tt); f.frequency.setTargetAtTime(Math.max(220,cut*.4),tt+.01,step*.6);
   }
-  const e=t+16*step+.05; g.gain.setTargetAtTime(.0001,t+16*step-.02,.01); o.start(t); o.stop(e); reg(o,e);
+  const e=t+16*step+.05; g.gain.setTargetAtTime(.0001,t+16*step-.02,.01); [o,pl,fl].forEach(n=>{ n.start(t); n.stop(e); reg(n,e); });
 }
 function counterLine(t,beat,ch,bar){
   // high 8th-note line walking chord tones with passing notes, pattern rotates per bar
@@ -2017,7 +2045,7 @@ function counterLine(t,beat,ch,bar){
 }
 
 function clubBar(t,ch,beat,bar){
-  const pump=pbus(), cf=clubFilter();
+  const pump=pbus(), cf=clubFilter(), cb=clubBass(), nextRoot=CHORDS[(CHORDS.indexOf(ch)+1)%CHORDS.length].root;
   // whole mix opens and closes over 8 bars (underwater -> wide open)
   const ph=(bar%8)/8, nxt=((bar%8)+1)/8, fq=p=>500*Math.pow(16,.5-.5*Math.cos(2*Math.PI*p));
   cf.frequency.setValueAtTime(fq(ph),t); cf.frequency.linearRampToValueAtTime(fq(nxt),t+4*beat);
@@ -2026,11 +2054,12 @@ function clubBar(t,ch,beat,bar){
   for(let k=0;k<4;k++){ const bt=t+k*beat;
     clubKick(bt,S.sound==="none"?.75:.5);
     pump.gain.setValueAtTime(.08,bt); pump.gain.setTargetAtTime(1,bt+.03,beat*.2);
-    for(let i=1;i<4;i++) sOsc(bt+i*beat/4,{f:ch.root*2,v:.22,att:.003,dec:beat*.17,rel:.02,dest:cf});   // rolling sub
+    cb.sc.gain.setValueAtTime(.12,bt); cb.sc.gain.setTargetAtTime(1,bt+.05,beat*.16);                 // bass ducks under the kick
     nz(bt+beat/2,{v:.16,dec:.16,hp:7000});                                                              // open hat
     for(let h=0;h<4;h++) if(h!==2) nz(bt+h*beat/4,{v:.045,dec:.018,hp:9500});
     if(k%2===1) clap(bt,.42);
   }
+  bassLine(t,beat,ch,nextRoot,bar);
   acidLine(t,beat,ch,bar,cut);
   counterLine(t,beat,ch,bar);
   if(bar%2===0){ [1.5,3.5].forEach(o=>ch.notes.forEach(f=>sOsc(t+o*beat,{type:"square",f,detune:(Math.random()*2-1)*10,v:.012,att:.004,dec:.18,rel:.06,lp:2400,lpTo:700,lpT:.18,q:2,dest:cf}))); }
