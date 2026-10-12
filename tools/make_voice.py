@@ -24,6 +24,7 @@ usage:
   python tools/make_voice.py index.html voice/ [--voice bm_george] SET_INDEX [...]
       render clips for the given sets with one Kokoro voice
   python tools/make_voice.py index.html voice/ --ranges [SET_INDEX ...]
+  python tools/make_voice.py index.html voice/ --voice bm_george --add 170,180 0 1   # extra tempos only
       only compute every line's natural tempo range (all sets if none given);
       the app derives its practice / normal / natural tempo presets from it
 """
@@ -32,7 +33,7 @@ import numpy as np, soundfile as sf, torch, lameenc
 from kokoro import KPipeline
 
 VOICE = "bf_emma"  # overridden by --voice
-BPMS = list(range(80, 161, 10))
+BPMS = list(range(80, 181, 10))
 MIN_SQUEEZE = 0.6   # a beat may not be shorter than 60% of its natural length
 PAUSE_OK = 0.15     # silence per beat we tolerate (s); slower tempos get no AI voice
 SR, FRAME = 24000, 600            # Kokoro: one duration unit = 600 samples = 25 ms
@@ -51,6 +52,9 @@ src = open(sys.argv[1], encoding="utf-8").read()
 outdir = sys.argv[2]; args = sys.argv[3:]
 RANGES = "--ranges" in args
 if "--voice" in args: VOICE = args[args.index("--voice") + 1]; args.remove(VOICE)
+# --add 170,180: make only these tempos into a separate sprite (s<set>x.mp3) and keep the existing clips
+ADD = None
+if "--add" in args: ADD = [int(x) for x in args[args.index("--add") + 1].split(",")]; args.remove(args[args.index("--add") + 1])
 want = [int(x) for x in args if not x.startswith("--")]
 IPA = json.loads(re.search(r"const IPA=(\{.*?\});\n", src).group(1))
 blk = src[src.index("const SETS=["):src.index("const IPA=")]
@@ -208,7 +212,7 @@ def encode_mp3(audio, path):
     open(path, "wb").write(enc.encode(pcm) + enc.flush())
 for si in want:
     sprite = [np.zeros(int(SR * GAP), np.float32)]; sprite_len = len(sprite[0])
-    sprite_file = "%s/s%d.mp3" % (VOICE, si)
+    sprite_file = "%s/s%d%s.mp3" % (VOICE, si, "x" if ADD else "")
     for li, (full, cue, short) in enumerate(ENTRY.findall(sets[si].split("lines:[", 1)[1])):
         for variant, line in (("full", full), ("short", short)):
             if not line: continue
@@ -255,7 +259,7 @@ for si in want:
                 manifest["range"][key] = [int(round(minbpm)), int(round(maxbpm)), int(round(natbpm))]
             if RANGES:
                 print(key, manifest["range"][key], line); continue
-            use = BPMS
+            use = ADD or BPMS
             clips = []
             for bpm in use:
                 beat = FPS * 60 / bpm
@@ -299,6 +303,7 @@ for si in want:
                 sprite_len += len(audio) + int(SR * GAP)
                 clips.append(dict(bpm=bpm, file=sprite_file, off=round(off, 4), dur=round(len(audio) / SR, 4),
                                   anchors=anchors, first=first, end=end))
+            if ADD: clips = [c for c in vlines.get(key, []) if c["bpm"] not in ADD] + clips
             vlines[key] = clips
             print(si, li, variant, "%d-%d BPM" % (round(minbpm), round(maxbpm)), [c["bpm"] for c in clips], tts_text(words))
     if not RANGES and sprite_len > SR * GAP:
