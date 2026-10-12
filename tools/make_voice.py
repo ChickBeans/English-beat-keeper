@@ -7,7 +7,9 @@ synthesised already speaking in time:
 * the onset (first consonant) of every stressed syllable lands exactly on a
   beat; weak syllables keep their natural proportions inside each beat,
 * when a beat is longer than the natural phrase, sounds stretch at most
-  MAX_STRETCH and the rest becomes a pause between words,
+  MAX_STRETCH and the rest is inserted as real silence at the word boundary
+  after the stressed word (Kokoro smears long "space" tokens into the
+  previous sound, so the pause is spliced into the waveform instead),
 * one clip per BPM in BPMS; the app picks the nearest and stretches the
   whole clip uniformly by a few percent.
 
@@ -21,7 +23,7 @@ VOICE = "bf_emma"
 BPMS = list(range(50, 131, 10))
 SR, FRAME = 24000, 600            # Kokoro: one duration unit = 600 samples = 25 ms
 FPS = SR / FRAME
-MAX_STRETCH = 1.3
+MAX_STRETCH = 1.12
 VOWELS = set("aeiouɑɐɒɔæəɘɚɛɜɝɞɤɨɪɯɵøœɶʉʊʌʏAIOWYQᵊ")
 CAPS = set("AIOWYQ")
 MARKS = set("ˈˌ")
@@ -104,14 +106,15 @@ def synth(ps, dur):
         audio = m.decoder(t_en @ aln, F0, N, ref_s[:, :128]).squeeze()
     return audio.numpy()
 
-def retime(nat, slots_by_seg, pause_slot, tgt):
-    """scale durations of the slots in one beat so they sum to tgt frames."""
+def retime(nat, slots_by_seg, can_pause, tgt):
+    """durations for the slots of one beat, plus frames of silence to splice in, summing to tgt."""
     total = sum(nat[i] for i in slots_by_seg)
     r = tgt / total
-    new = {i: nat[i] * min(r, MAX_STRETCH) for i in slots_by_seg}
-    new = {i: max(1, int(round(v))) for i, v in new.items()}
-    left = tgt - sum(new.values())
-    if left > 0 and r > MAX_STRETCH and pause_slot is not None: new[pause_slot] += left; left = 0
+    if r > MAX_STRETCH and not can_pause: r_use = r          # nowhere to pause: stretch after all
+    else: r_use = min(r, MAX_STRETCH)
+    new = {i: max(1, int(round(nat[i] * r_use))) for i in slots_by_seg}
+    goal = tgt if r_use == r else int(round(total * r_use))
+    left = goal - sum(new.values())
     order = sorted(slots_by_seg, key=lambda i: -nat[i])
     k = 0
     while left != 0 and k < 10000:            # spread rounding error over the longest sounds
@@ -119,7 +122,22 @@ def retime(nat, slots_by_seg, pause_slot, tgt):
         if left > 0: new[i] += 1; left -= 1
         elif new[i] > 1: new[i] -= 1; left += 1
         k += 1
-    return new
+    return new, tgt - sum(new.values())
+
+def splice(audio, pauses):
+    """insert (sample_position, n_samples) runs of silence at quiet points with short fades."""
+    fade = int(SR * .006)
+    for pos, n in sorted(pauses, reverse=True):
+        if n <= 0: continue
+        lo, hi = max(fade, pos - 300), min(len(audio) - fade, pos + 300)
+        w = 96
+        if hi - lo > w:
+            e = np.convolve(np.abs(audio[lo - w // 2:hi + w // 2]), np.ones(w) / w, "valid")[:hi - lo]
+            pos = lo + int(np.argmin(e))
+        a, b = audio[:pos].copy(), audio[pos:].copy()
+        a[-fade:] *= np.linspace(1, 0, fade); b[:fade] *= np.linspace(0, 1, fade)
+        audio = np.concatenate([a, np.zeros(n, dtype=audio.dtype), b])
+    return audio
 
 os.makedirs(outdir, exist_ok=True)
 manifest = {"voice": VOICE, "sr": SR, "bpms": BPMS, "lines": {}}
@@ -144,22 +162,25 @@ for si in want:
             clips = []
             for bpm in BPMS:
                 beat = FPS * 60 / bpm
-                dur = list(nat)
+                dur = list(nat); pauses = []   # (char index the pause goes before, frames)
                 for j in range(len(stress) - 1):
                     c0, c1 = stress[j][1], stress[j + 1][1]
                     slots = list(range(c0 + 1, c1 + 1))               # slot = char index + 1
                     wend = stress[j][3]                                # end of the stressed word
-                    pause = next((i + 1 for i in range(wend, c1) if ps[i] == " "), None)
+                    gap = next((i for i in range(wend, c1) if ps[i] == " "), None)
                     # exact beat length, measured from the start of the line so rounding never drifts
                     tgt = int(round((j + 1) * beat)) - int(round(j * beat))
-                    new = retime(nat, slots, pause, tgt)
+                    new, extra = retime(nat, slots, gap is not None, tgt)
                     for i, v in new.items(): dur[i] = v
+                    if extra > 0: pauses.append((gap, extra))
                 audio = synth(ps, dur)
                 start = np.cumsum([0] + dur)
-                at = lambda c: round(float(start[c + 1] / FPS), 4)
+                audio = splice(audio, [(int(start[c + 1] * FRAME), f * FRAME) for c, f in pauses])
+                shift = lambda c: sum(f for g, f in pauses if g < c)       # silence inserted before char c
+                at = lambda c: round(float((start[c + 1] + shift(c)) / FPS), 4)
                 anchors = {k: at(o) for k, o, _, _ in syl}
                 first = at(stress[0][1])
-                end = round(float(start[spans[-1][1] + 1] / FPS), 4)
+                end = at(spans[-1][1])
                 fn = "s%d_l%d_%s_%d.wav" % (si, li, variant, bpm)
                 sf.write(os.path.join(outdir, fn), audio, SR, subtype="PCM_16")
                 clips.append(dict(bpm=bpm, file=fn, anchors=anchors, first=first, end=end))
