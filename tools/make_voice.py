@@ -24,6 +24,8 @@ BPMS = list(range(50, 131, 10))
 SR, FRAME = 24000, 600            # Kokoro: one duration unit = 600 samples = 25 ms
 FPS = SR / FRAME
 MAX_STRETCH = 1.12
+# stress contrast: weak syllables quieter, shorter and lower; stressed ones a little higher
+WEAK_GAIN, WEAK_DUR, WEAK_F0, STRESS_F0 = 0.45, 0.8, 0.96, 1.1
 VOWELS = set("aeiouɑɐɒɔæəɘɚɛɜɝɞɤɨɪɯɵøœɶʉʊʌʏAIOWYQᵊ")
 CAPS = set("AIOWYQ")
 MARKS = set("ˈˌ")
@@ -85,7 +87,7 @@ pipe = KPipeline(lang_code="b")
 model = pipe.model
 pack = pipe.load_voice(VOICE)
 
-def synth(ps, dur):
+def synth(ps, dur, f0mul=None):
     ids = torch.LongTensor([[0] + [model.vocab[p] for p in ps] + [0]]).to(model.device)
     ref_s = pack[len(ps) - 1].to(model.device)
     m = model
@@ -102,6 +104,9 @@ def synth(ps, dur):
         aln = aln.unsqueeze(0)
         en = d.transpose(-1, -2) @ aln
         F0, N = m.predictor.F0Ntrain(en, s)
+        if f0mul is not None:                       # one factor per duration frame; F0 runs at 2x
+            fm = torch.FloatTensor(np.repeat(f0mul, 2))[None, :F0.shape[-1]]
+            F0 = F0 * fm
         t_en = m.text_encoder(ids, L, mask)
         audio = m.decoder(t_en @ aln, F0, N, ref_s[:, :128]).squeeze()
     return audio.numpy()
@@ -159,10 +164,18 @@ for si in want:
                 ons = syllable_onsets(ps, a, b, w["n"]) or [a + (b - a) * k // w["n"] for k in range(w["n"])]
                 for k, o in enumerate(ons): syl.append(("%d:%d" % (wi, k), o, w["stress"][k], b))
             stress = [s for s in syl if s[2]]
+            # stressed flag for every phoneme char (spaces belong to the syllable before them)
+            cflag = [False] * len(ps)
+            for i, (_, o, st, _) in enumerate(syl):
+                o2 = syl[i + 1][1] if i + 1 < len(syl) else len(ps)
+                for c in range(o, o2): cflag[c] = st
+            base = list(nat)
+            for c in range(len(ps)):
+                if not cflag[c] and ps[c] not in " .,!?": base[c + 1] = max(1, base[c + 1] * WEAK_DUR)
             clips = []
             for bpm in BPMS:
                 beat = FPS * 60 / bpm
-                dur = list(nat); pauses = []   # (char index the pause goes before, frames)
+                dur = [max(1, int(round(v))) for v in base]; pauses = []   # (char index the pause goes before, frames)
                 for j in range(len(stress) - 1):
                     c0, c1 = stress[j][1], stress[j + 1][1]
                     slots = list(range(c0 + 1, c1 + 1))               # slot = char index + 1
@@ -170,11 +183,20 @@ for si in want:
                     gap = next((i for i in range(wend, c1) if ps[i] == " "), None)
                     # exact beat length, measured from the start of the line so rounding never drifts
                     tgt = int(round((j + 1) * beat)) - int(round(j * beat))
-                    new, extra = retime(nat, slots, gap is not None, tgt)
+                    new, extra = retime(base, slots, gap is not None, tgt)
                     for i, v in new.items(): dur[i] = v
                     if extra > 0: pauses.append((gap, extra))
-                audio = synth(ps, dur)
                 start = np.cumsum([0] + dur)
+                f0mul = np.ones(int(start[-1]))
+                for c in range(len(ps)):
+                    if ps[c] in " .,!?": continue
+                    f0mul[int(start[c + 1]):int(start[c + 2])] = STRESS_F0 if cflag[c] else WEAK_F0
+                audio = synth(ps, dur, f0mul)
+                gain = np.ones(len(audio))
+                for c in range(len(ps)):
+                    if not cflag[c]: gain[int(start[c + 1]) * FRAME:int(start[c + 2]) * FRAME] = WEAK_GAIN
+                w = int(SR * .02); gain = np.convolve(np.pad(gain, (w, w), "edge"), np.ones(w) / w, "same")[w:-w]
+                audio = (audio * gain[:len(audio)]).astype(np.float32)
                 audio = splice(audio, [(int(start[c + 1] * FRAME), f * FRAME) for c, f in pauses])
                 shift = lambda c: sum(f for g, f in pauses if g < c)       # silence inserted before char c
                 at = lambda c: round(float((start[c + 1] + shift(c)) / FPS), 4)
