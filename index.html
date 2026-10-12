@@ -1240,7 +1240,8 @@ function lineRange(pos){ const k=voiceKeyAt(pos==null?S.pos:pos); return (VMAN&&
 // which the most lines are inside their natural range, natural = the median plain-reading tempo,
 // practice = 20% under normal.
 function presetsFor(){
-  const rs=S.order.map((_,p)=>lineRange(p)).filter(Boolean); if(!rs.length) return null;
+  // always from the full forms, so switching contractions never changes the set's tempo
+  const rs=DATA[S.set].lines.map((_,n)=>VMAN&&VMAN.range&&VMAN.range[S.set+":"+n+":full"]).filter(Boolean); if(!rs.length) return null;
   const q=v=>Math.max(BPM_MIN,Math.min(160,Math.round(v/2)*2));
   let mid=BPM_MIN, best=-1;
   for(let b=BPM_MIN;b<=160;b+=2){ const n=rs.filter(r=>b>=r[0]-1&&b<=r[1]+1).length; if(n>best){ best=n; mid=b; } }
