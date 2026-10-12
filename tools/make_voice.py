@@ -6,10 +6,13 @@ synthesised already speaking in time:
 
 * the onset (first consonant) of every stressed syllable lands exactly on a
   beat; weak syllables keep their natural proportions inside each beat,
-* when a beat is longer than the natural phrase, sounds stretch at most
-  MAX_STRETCH and the rest is inserted as real silence at the word boundary
-  after the stressed word (Kokoro smears long "space" tokens into the
-  previous sound, so the pause is spliced into the waveform instead),
+* when a beat is longer than the natural phrase, it is lengthened the way
+  speakers slow down: mostly the stressed vowel (up to VOWEL_MAX), a little
+  on continuant consonants (up to CONT_MAX), never stops or weak syllables,
+  and at most MAX_STRETCH of the beat's natural length. The rest becomes
+  real silence after the stressed word, which first decays to FADE_FLOOR
+  (Kokoro smears long "space" tokens, so the pause is spliced into the
+  waveform instead),
 * one clip per BPM in BPMS; the app picks the nearest and stretches the
   whole clip uniformly by a few percent.
 
@@ -23,9 +26,12 @@ VOICE = "bf_emma"
 BPMS = list(range(50, 131, 10))
 SR, FRAME = 24000, 600            # Kokoro: one duration unit = 600 samples = 25 ms
 FPS = SR / FRAME
-MAX_STRETCH = 1.12
+MAX_STRETCH = 1.3
+VOWEL_MAX, CONT_MAX = 1.6, 1.2
+CONTINUANTS = set("mnŋlɹrwjhfvθðszʃʒ")
+FADE_FLOOR = 0.05
 # stress contrast: weak syllables quieter, shorter and lower; stressed ones a little higher
-WEAK_GAIN, WEAK_DUR, WEAK_F0, STRESS_F0 = 0.45, 0.8, 0.96, 1.1
+WEAK_GAIN, WEAK_DUR, WEAK_F0, STRESS_F0 = 10 ** (-12 / 20), 0.8, 0.96, 1.1
 VOWELS = set("aeiouɑɐɒɔæəɘɚɛɜɝɞɤɨɪɯɵøœɶʉʊʌʏAIOWYQᵊ")
 CAPS = set("AIOWYQ")
 MARKS = set("ˈˌ")
@@ -111,16 +117,26 @@ def synth(ps, dur, f0mul=None):
         audio = m.decoder(t_en @ aln, F0, N, ref_s[:, :128]).squeeze()
     return audio.numpy()
 
-def retime(nat, slots_by_seg, can_pause, tgt):
-    """durations for the slots of one beat, plus frames of silence to splice in, summing to tgt."""
-    total = sum(nat[i] for i in slots_by_seg)
-    r = tgt / total
-    if r > MAX_STRETCH and not can_pause: r_use = r          # nowhere to pause: stretch after all
-    else: r_use = min(r, MAX_STRETCH)
-    new = {i: max(1, int(round(nat[i] * r_use))) for i in slots_by_seg}
-    goal = tgt if r_use == r else int(round(total * r_use))
+def retime(nat, slots, can_pause, tgt, cap):
+    """durations for the slots of one beat, plus frames of silence to add, summing to tgt.
+    cap[i] is how far slot i may stretch (stressed vowel > continuant > everything else)."""
+    total = sum(nat[i] for i in slots)
+    if tgt <= total or not can_pause:            # compress (or nowhere to pause): scale evenly
+        new = {i: nat[i] * tgt / total for i in slots}
+    else:
+        budget = min(tgt - total, total * (MAX_STRETCH - 1))
+        new = {i: float(nat[i]) for i in slots}
+        for level in (VOWEL_MAX, CONT_MAX):      # vowels first, then continuants
+            room = {i: nat[i] * (min(cap[i], level) - 1) for i in slots if cap[i] >= level}
+            tot = sum(room.values())
+            if tot <= 0 or budget <= 0: continue
+            use = min(budget, tot)
+            for i, r in room.items(): new[i] += r * use / tot
+            budget -= use
+    new = {i: max(1, int(round(v))) for i, v in new.items()}
+    goal = tgt if (tgt <= total or not can_pause) else min(sum(new.values()), tgt)
     left = goal - sum(new.values())
-    order = sorted(slots_by_seg, key=lambda i: -nat[i])
+    order = sorted(slots, key=lambda i: -nat[i])
     k = 0
     while left != 0 and k < 10000:            # spread rounding error over the longest sounds
         i = order[k % len(order)]
@@ -130,16 +146,16 @@ def retime(nat, slots_by_seg, can_pause, tgt):
     return new, tgt - sum(new.values())
 
 def splice(audio, pauses):
-    """insert (sample_position, n_samples) runs of silence at quiet points with short fades."""
+    """pauses: (word start sample, word end sample, n silent samples). The end of the word
+    decays to FADE_FLOOR along an ease-in curve (slow at first, faster at the end), then a
+    6 ms fade to zero and the silence."""
     fade = int(SR * .006)
-    for pos, n in sorted(pauses, reverse=True):
+    for w0, pos, n in sorted(pauses, key=lambda p: -p[1]):
         if n <= 0: continue
-        lo, hi = max(fade, pos - 300), min(len(audio) - fade, pos + 300)
-        w = 96
-        if hi - lo > w:
-            e = np.convolve(np.abs(audio[lo - w // 2:hi + w // 2]), np.ones(w) / w, "valid")[:hi - lo]
-            pos = lo + int(np.argmin(e))
+        L = max(int(SR * .08), int((pos - w0) * .4)); L = min(L, pos - w0)
+        x = np.linspace(0, 1, L)
         a, b = audio[:pos].copy(), audio[pos:].copy()
+        a[-L:] *= 1 - (1 - FADE_FLOOR) * x ** 2
         a[-fade:] *= np.linspace(1, 0, fade); b[:fade] *= np.linspace(0, 1, fade)
         audio = np.concatenate([a, np.zeros(n, dtype=audio.dtype), b])
     return audio
@@ -183,9 +199,13 @@ for si in want:
                     gap = next((i for i in range(wend, c1) if ps[i] == " "), None)
                     # exact beat length, measured from the start of the line so rounding never drifts
                     tgt = int(round((j + 1) * beat)) - int(round(j * beat))
-                    new, extra = retime(base, slots, gap is not None, tgt)
+                    cap = {}
+                    for i in slots:
+                        c = ps[i - 1]
+                        cap[i] = (VOWEL_MAX if (c in VOWELS or c == "ː") else CONT_MAX if c in CONTINUANTS else 1.0) if cflag[i - 1] else 1.0
+                    new, extra = retime(base, slots, gap is not None, tgt, cap)
                     for i, v in new.items(): dur[i] = v
-                    if extra > 0: pauses.append((gap, extra))
+                    if extra > 0: pauses.append((gap, extra, c0))
                 start = np.cumsum([0] + dur)
                 f0mul = np.ones(int(start[-1]))
                 for c in range(len(ps)):
@@ -197,8 +217,8 @@ for si in want:
                     if not cflag[c]: gain[int(start[c + 1]) * FRAME:int(start[c + 2]) * FRAME] = WEAK_GAIN
                 w = int(SR * .02); gain = np.convolve(np.pad(gain, (w, w), "edge"), np.ones(w) / w, "same")[w:-w]
                 audio = (audio * gain[:len(audio)]).astype(np.float32)
-                audio = splice(audio, [(int(start[c + 1] * FRAME), f * FRAME) for c, f in pauses])
-                shift = lambda c: sum(f for g, f in pauses if g < c)       # silence inserted before char c
+                audio = splice(audio, [(int(start[w + 1] * FRAME), int(start[c + 1] * FRAME), f * FRAME) for c, f, w in pauses])
+                shift = lambda c: sum(f for g, f, _ in pauses if g < c)    # silence inserted before char c
                 at = lambda c: round(float((start[c + 1] + shift(c)) / FPS), 4)
                 anchors = {k: at(o) for k, o, _, _ in syl}
                 first = at(stress[0][1])
