@@ -1225,12 +1225,17 @@ function buildBeats(sent){
 // natural, fastest natural, plain-reading tempo]): normal = slowest natural tempo, natural = the
 // plain reading, practice = 20% under normal (outside the natural range, so flagged).
 function lineRange(pos){ const k=voiceKeyAt(pos==null?S.pos:pos); return (VMAN&&VMAN.range&&VMAN.range[k])||null; }
-function presetsFor(pos){
-  const r=lineRange(pos); if(!r) return null;
+// presets are per set so a run through the set never changes tempo: normal = the slowest BPM at
+// which the most lines are inside their natural range, natural = the median plain-reading tempo,
+// practice = 20% under normal.
+function presetsFor(){
+  const rs=S.order.map((_,p)=>lineRange(p)).filter(Boolean); if(!rs.length) return null;
   const q=v=>Math.max(BPM_MIN,Math.min(160,Math.round(v/2)*2));
-  const mid=q(Math.ceil(r[0]/2)*2), top=Math.max(mid,q(Math.min(160,r[1])));
-  const fast=Math.min(top,Math.max(q(r[2]),mid+10)), slow=Math.min(mid,q(mid*.8));
-  return {slow,mid,fast,range:r};
+  let mid=BPM_MIN, best=-1;
+  for(let b=BPM_MIN;b<=160;b+=2){ const n=rs.filter(r=>b>=r[0]-1&&b<=r[1]+1).length; if(n>best){ best=n; mid=b; } }
+  const nats=rs.map(r=>r[2]).sort((a,b)=>a-b), med=nats[Math.floor(nats.length/2)];
+  const fast=Math.min(160,Math.max(q(med),mid+10)), slow=Math.min(mid,q(mid*.8));
+  return {slow,mid,fast,fit:best,total:rs.length,range:[Math.max(...rs.map(r=>r[0])),Math.min(...rs.map(r=>r[1]))]};
 }
 function suggest(pos){
   const lp=presetsFor(pos); if(lp) return {bpm:lp[S.preset],lp};
@@ -1412,7 +1417,7 @@ function renderSettings(){
   if(!KITS[S.kit]) S.kit="tr808"; pr("#kitSeg","k",S.kit); $("#kitDesc").textContent=kitDescT(S.kit); pr("#sylSeg","y",sylMode()); const bv_=$("#btnVoice"); if(bv_){ bv_.classList.toggle("on",sylMode()==="voice"); bv_.setAttribute("aria-pressed",String(sylMode()==="voice")); } const b3=$("#btn303"), bd=$("#btnDX7"); if(b3){ b3.classList.toggle("on",sylMode()==="303"); b3.setAttribute("aria-pressed",String(sylMode()==="303")); } if(bd){ bd.classList.toggle("on",sylMode()==="dx7"); bd.setAttribute("aria-pressed",String(sylMode()==="dx7")); } pr("#timingSeg","t",S.timing); pr("#orderSeg","o",S.ord); pr("#repSeg","r",S.rep);
   const sg=suggest();
   if(sg.lp){ const L=sg.lp;
-    $("#sugg").innerHTML=tr("提案：","Suggested: ")+"<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">"+tr("この行が自然に聞こえるのは "+L.range[0]+"〜"+Math.min(160,L.range[1])+" BPM（ふつう＝その最遅、自然＝AIがそのまま読んだテンポ、練習＝範囲外の遅め）。","This line sounds natural at "+L.range[0]+"–"+Math.min(160,L.range[1])+" BPM (Normal = slowest natural, Natural = plain reading, Practice = slower, outside the range).")+"</span>";
+    $("#sugg").innerHTML=tr("提案：","Suggested: ")+"<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">"+tr("このセットは "+L.mid+" BPM で "+L.total+" 行中 "+L.fit+" 行が自然に聞こえます（ふつう＝その最遅、自然＝AIがそのまま読んだテンポ、練習＝遅め）。テンポはセットの中では変わりません。","At "+L.mid+" BPM, "+L.fit+" of "+L.total+" lines in this set sound natural (Normal = that tempo, Natural = plain reading, Practice = slower). The tempo stays the same within a set.")+"</span>";
   } else $("#sugg").innerHTML=tr("提案：","Suggested: ")+"<strong>"+sg.bpm+" BPM</strong><br><span class=\"status\">"+tr("このセットで一番詰まっている行（1拍あたり "+sg.maxAvg.toFixed(1)+" 音節）でも目標の速さに収まるテンポです。","Even the densest line in this set ("+sg.maxAvg.toFixed(1)+" syllables per beat) fits your target speed.")+"</span>";
   document.querySelectorAll("#presetSeg button").forEach(b=>{ const sm=b.querySelector("small"); if(!sm) return; if(!sm.dataset.orig) sm.dataset.orig=sm.textContent; sm.textContent=sg.lp?sg.lp[b.dataset.p]+" BPM":tr(sm.dataset.orig,trJa(sm.dataset.orig)); });
   $("#voiceAdj").value=S.voiceOffset||0; $("#voiceAdjOut").textContent=(S.voiceOffset>0?"+":"")+(S.voiceOffset||0)+" ms"; $("#bpmRange").value=S.bpm; $("#bpmOut").textContent=S.bpm+" BPM"; $("#autoBpm").checked=S.autoBpm;
