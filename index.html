@@ -1574,7 +1574,7 @@ function schedule(pos,T,opt){
     if(sm==="on") ev.forEach(e=>{ if(e.syl) sylTone(e.t,e.s); });
     else if(sm==="voice"){ if(vclip) playVoiceClip(vclip,T,vscale); else ev.forEach(e=>{ if(e.syl) sylTone(e.t,e.s); }); }
     else if(sm==="303"||sm==="dx7"||sm==="gtr"){ const tm={}; ev.forEach(e=>{ if(e.syl) tm[e.syl]=e.t; }); const end=T+B.beats.length*beat; if(sm==="303") play303(sent,tm,end); else if(sm==="gtr") playGuitar(sent,tm,end); else playDX7(sent,tm,end); } }
-  return {pos,ev,T,beat,bpm,rests:B.beats.map(b=>b.rest),end:T+B.beats.length*beat,p:-2,next:null,done:false,single:!!opt.single,rep:opt.rep||1};
+  return {pos,set:S.set,ev,T,beat,bpm,rests:B.beats.map(b=>b.rest),end:T+B.beats.length*beat,p:-2,next:null,done:false,single:!!opt.single,rep:opt.rep||1};
 }
 function clearHL(){ if(hl.cell) hl.cell.classList.remove("now"); if(hl.syl) hl.syl.classList.remove("now"); if(hl.ft) hl.ft.classList.remove("now"); hl={cell:null,syl:null,ft:null}; $("#countBadge").hidden=true; $("#countBig").hidden=true; }
 function pulse(soft){ const p=$("#pulse"); p.classList.remove("go","soft"); void p.offsetWidth; p.classList.add("go"); if(soft) p.classList.add("soft"); }
@@ -1591,6 +1591,7 @@ function nextOf(r){
   if(S.rep==="inf"||r.rep<S.rep) return {pos:r.pos,rep:r.rep+1};
   if(S.autoNext&&S.mode!=="build"){
     if(r.pos<S.order.length-1) return {pos:r.pos+1,rep:1};
+    if(S.loopCat){ const L=setList(); if(L.length){ const p=L.indexOf(S.set); return {pos:0,rep:1,wrap:true,set:L[(p+1)%L.length]}; } }
     if(S.loopSet){ if(S.ord==="shuffle"){ const last=S.order[r.pos]; makeOrder(); if(S.order.length>1&&S.order[0]===last){ [S.order[0],S.order[1]]=[S.order[1],S.order[0]]; } } return {pos:0,rep:1,wrap:true}; }
   }
   return null;
@@ -1598,10 +1599,13 @@ function nextOf(r){
 function loop(){
   raf=0; if(!run||!ctx) return; trackTime();
   const now=ctx.currentTime-(ctx.outputLatency||0);
-  if(!run.next&&!run.done&&ctx.currentTime>=run.end-run.beat-.4){ const nx=nextOf(run); if(nx){ if(S.autoBpm){ const nbpm=suggest(nx.pos).bpm; if(nbpm!==S.bpm){ S.bpm=nbpm; save(); renderSettings(); } } const nb=S.bpm!==run.bpm; run.next=schedule(nx.pos,nb?run.end+4*60/S.bpm:run.end,{rep:nx.rep,countIn:nb}); run.next.wrap=!!nx.wrap; } else run.done=true; }
+  if(!run.next&&!run.done&&ctx.currentTime>=run.end-run.beat-.4){ const nx=nextOf(run); if(nx){ if(nx.set!=null&&nx.set!==S.set){ S.set=nx.set; makeOrder(); } if(S.autoBpm){ const nbpm=suggest(nx.pos).bpm; if(nbpm!==S.bpm){ S.bpm=nbpm; save(); renderSettings(); } } const nb=S.bpm!==run.bpm; run.next=schedule(nx.pos,nb?run.end+4*60/S.bpm:run.end,{rep:nx.rep,countIn:nb}); run.next.wrap=!!nx.wrap; } else run.done=true; }
   const handoff=run.next?Math.min(run.end,run.next.ev.length?run.next.ev[0].t:run.end):run.end;
   if(now>=handoff){
-    if(run.next){ markDone(run.pos); const r=run.next; if(r.pos!==S.pos||r.wrap){ S.pos=r.pos; revealed=false; save(); renderStage(); renderList(); } run=r; run.p=-2; }
+    if(run.next){ markDone(run.pos,run.set); const r=run.next; const newSet=r.set!==run.set;
+      if(r.pos!==S.pos||r.wrap||newSet){ S.pos=r.pos; revealed=false; save(); if(newSet){ renderAll(); const d=DATA[S.set]; toast("» "+(d.grow?d.base.join(" · "):d.base.map(x=>x.toUpperCase()).join(" "))); } else { renderStage(); renderList(); } }
+      run=r; run.p=-2;
+      if(S.loopCat&&sylMode()==="voice"&&run.pos===S.order.length-1){ const L=setList(), p=L.indexOf(S.set); if(L.length) preloadVoiceFor(L[(p+1)%L.length]); } }
     else { const wasBuild=S.mode==="build"&&!recState; if(!recState) markDone(run.pos); stopPlay(); if(wasBuild){ revealed=true; renderStage(); renderList(); } return; }
   }
   let p=-1; for(let k=0;k<run.ev.length;k++){ if(run.ev[k].t<=now) p=k; else break; }
@@ -1623,7 +1627,9 @@ function stopPlay(){
   lastTick=0;
   nodes.forEach(n=>{try{n.stop();}catch(e){}}); nodes=[];
   if(recSrc){ try{recSrc.stop();}catch(e){} recSrc=null; }
+  const desync=run&&run.set!==S.set;
   run=null; if(raf) cancelAnimationFrame(raf); raf=0; clearHL();
+  if(desync){ S.pos=0; revealed=false; save(); renderAll(); }
   if(recState) finishRecording();
   setPlaying(false);
 }
@@ -1777,7 +1783,8 @@ function loadVoiceManifest(){ if(!vmanP) vmanP=fetch(VOICE_DIR+"manifest.json").
 function voiceKeyAt(pos){ const {L,num}=lineAt(pos); return S.set+":"+num+":"+((S.contract&&L.short)?"short":"full"); }
 function curLines(){ const v=VMAN&&VMAN.voices&&(VMAN.voices[S.aiVoice]||VMAN.voices.bf_emma); return (v&&v.lines)||{}; }
 function voiceSetAvailable(){ return Object.keys(curLines()).some(k=>k.startsWith(S.set+":")); }
-function setClips(){ if(!VMAN) return []; const out=[]; Object.entries(curLines()).forEach(([k,cs])=>{ if(k.startsWith(S.set+":")) cs.forEach(c=>out.push(c)); }); return out; }
+function setClips(set){ if(set==null) set=S.set; if(!VMAN) return []; const out=[]; Object.entries(curLines()).forEach(([k,cs])=>{ if(k.startsWith(set+":")) cs.forEach(c=>out.push(c)); }); return out; }
+function preloadVoiceFor(set){ setClips(set).forEach(loadClip); }
 function voiceSetReady(){ return setClips().every(c=>VBUF[c.file]); }
 function loadClip(c){
   if(VBUF[c.file]) return Promise.resolve(VBUF[c.file]);
@@ -1927,7 +1934,7 @@ async function renderBackground(){
   const m=repMode(), loop=m!=="through", beat=60/S.bpm, n=S.order.length;
   let seq=[];
   if(m==="one") seq=[S.pos];
-  else { const from=m==="all"?0:S.pos; const reps=S.rep==="inf"?1:S.rep; for(let p=from;p<n;p++) for(let r=0;r<reps;r++) seq.push(p); }
+  else { const from=(m==="all"||m==="cat")?0:S.pos; const reps=S.rep==="inf"?1:S.rep; for(let p=from;p<n;p++) for(let r=0;r<reps;r++) seq.push(p); }
   const sr=22050, maxSec=600;
   let est=loop?beat:4*beat+.1; for(const p of seq){ est+=buildBeats(lineAt(p).sent).beats.length*beat; }
   const saved={ctx,OUT,NOISE,nodes}; const off=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,Math.ceil(Math.min(est+1,maxSec)*sr),sr);
@@ -1971,7 +1978,7 @@ function tr(ja,en){ return S.lang==="en"?en:ja; }
 function TC(c){ if(S.lang!=="en") return c; if(EN_CUE[c]) return EN_CUE[c]; if(c==="基本の文") return "Base sentence"; if(c.startsWith("＋")) return "+ "+c.slice(1).replace(/（.*?）/g,"").trim(); return c; }
 const SC_EN={all:"All",basic:"Basic",biz:"Business",daily:"Daily",expr:"Phrases",travel:"Travel"};
 const TAB_EN={practice:"Practice",sets:"Sets",record:"Stats",settings:"Settings"};
-const REP_EN={through:"Play through to the end",one:"Loop this line",all:"Loop all levels"};
+const REP_EN={through:"Play through to the end",one:"Loop this line",all:"Loop all levels of this set",cat:"Loop every set in this category"};
 const KIT_EN={
  tr606:["606","TR-606 style. Light, thin analogue sounds. Beat = short kick, half-beat = thin hat, stressed = snare, weak = high tom."],
  tr707:["707","TR-707 style. Crisp 80s sounds. Beat = tight kick, half-beat = sharp hat, stressed = snare, weak = rimshot."],
@@ -2062,7 +2069,7 @@ if(HAS_TTS){ try{ speechSynthesis.getVoices(); speechSynthesis.addEventListener(
 
 /* ---------- app shell: progress, stats, tabs, sheets, onboarding ---------- */
 function dayKey(d){ d=d||new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
-function markDone(pos){ const num=S.order[pos]; if(num==null) return; S.done=S.done||{}; const a=S.done[S.set]||(S.done[S.set]=[]); if(!a.includes(num)){ a.push(num); save(); renderDots(); } }
+function markDone(pos,set){ if(set==null) set=S.set; if(set!==S.set) return; const num=S.order[pos]; if(num==null) return; S.done=S.done||{}; const a=S.done[set]||(S.done[set]=[]); if(!a.includes(num)){ a.push(num); save(); renderDots(); } }
 var lastTick=0, unsaved=0;
 function trackTime(){ const t=performance.now(); if(lastTick){ const dt=Math.min(1,(t-lastTick)/1000); S.stats=S.stats||{}; const k=dayKey(); S.stats[k]=(S.stats[k]||0)+dt; unsaved+=dt; if(unsaved>5){ unsaved=0; save(); } } lastTick=t; }
 function renderDots(){
@@ -2139,12 +2146,13 @@ $("#recBtn").addEventListener("click",recordPlay);
 $("#bgBtn").addEventListener("click",toggleBackground);
 $("#bgAudio").addEventListener("ended",()=>{ $("#bgBtn").textContent=tr("🎧 BG再生","🎧 BG play"); $("#bgStatus").textContent=tr("バックグラウンド再生が終わりました。","Background playback finished."); });
 function repCount(){ const n=Number(S.repN||S.rep); return n>=1&&n<=5?Math.round(n):1; }
-function repMode(){ if(S.rep==="inf") return "one"; if(S.autoNext&&S.loopSet) return "all"; return "through"; }
-const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで再生"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"全レベルを無限にくり返し"}};
+function repMode(){ if(S.rep==="inf") return "one"; if(S.autoNext&&S.loopCat) return "cat"; if(S.autoNext&&S.loopSet) return "all"; return "through"; }
+const REPMODES={through:{badge:"→5",label:"選んだ行から最後まで通しで再生"},one:{badge:"1",label:"選んだ行だけを無限にくり返し"},all:{badge:"∞",label:"このセットの全レベルを無限にくり返し"},cat:{badge:"全",label:"同じカテゴリの全セットを順番に無限ループ"}};
 const LOOP='<path d="M5.5 11a6.5 6.5 0 0 1 11.3-4.4M17 3.3v3.8h-3.8M18.5 13a6.5 6.5 0 0 1-11.3 4.4M7 20.7v-3.8h3.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 const REPICONS={
   through:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 8h14M14 4.5 18 8l-4 3.5M4 16.5h14M14 13l4 3.5-4 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   all:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">'+LOOP+'</svg>',
+  cat:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">'+LOOP+'<rect x="12.4" y="1.6" width="10.4" height="9.6" rx="2.4" fill="currentColor"/><path d="M14.6 4.4h6M14.6 6.4h6M14.6 8.4h6" stroke="var(--panel)" stroke-width="1.2" stroke-linecap="round"/></svg>',
   one:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">'+LOOP+'<circle cx="17.6" cy="6.4" r="5" fill="currentColor"/><text x="17.6" y="9.1" text-anchor="middle" font-size="7.6" font-weight="700" font-family="system-ui,sans-serif" fill="var(--panel)">1</text></svg>'
 };
 function toast(t){ const el_=$("#toast"); el_.textContent=t; el_.hidden=false; el_.classList.remove("show"); void el_.offsetWidth; el_.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>{ el_.hidden=true; },1900); }
@@ -2154,11 +2162,12 @@ function renderTransport(){
 }
 $("#shufBtn").addEventListener("click",()=>{ stopPlay(); S.ord=S.ord==="shuffle"?"seq":"shuffle"; makeOrder(); S.pos=0; revealed=false; save(); renderAll(); toast(S.ord==="shuffle"?tr("シャッフル：オン","Shuffle: on"):tr("シャッフル：オフ","Shuffle: off")); });
 $("#repBtn").addEventListener("click",()=>{
-  const next={through:"one",one:"all",all:"through"}[repMode()];
+  const next={through:"one",one:"all",all:"cat",cat:"through"}[repMode()];
   const n=repCount();
-  if(next==="through"){ S.rep=n; S.autoNext=true; S.loopSet=false; }
-  else if(next==="one"){ S.rep="inf"; }
-  else { S.rep=n; S.autoNext=true; S.loopSet=true; }
+  if(next==="through"){ S.rep=n; S.autoNext=true; S.loopSet=false; S.loopCat=false; }
+  else if(next==="one"){ S.rep="inf"; S.loopCat=false; }
+  else if(next==="all"){ S.rep=n; S.autoNext=true; S.loopSet=true; S.loopCat=false; }
+  else { S.rep=n; S.autoNext=true; S.loopSet=false; S.loopCat=true; }
   save(); renderSettings(); toast(repLabel(next)); if(S.mode==="build"&&next!=="one") stageStatus(tr("「作る」モードでは1行ずつ止まります","Build mode stops after each line"));
 });
 $("#recPlay").addEventListener("click",playRec);
