@@ -16,13 +16,18 @@ synthesised already speaking in time:
 * one clip per BPM in BPMS; the app picks the nearest and stretches the
   whole clip uniformly by a few percent.
 
-usage: python tools/make_voice.py index.html voice/ SET_INDEX [SET_INDEX ...]
+usage:
+  python tools/make_voice.py index.html voice/ [--voice bm_george] SET_INDEX [...]
+      render clips for the given sets with one Kokoro voice
+  python tools/make_voice.py index.html voice/ --ranges [SET_INDEX ...]
+      only compute every line's natural tempo range (all sets if none given);
+      the app derives its practice / normal / natural tempo presets from it
 """
 import json, re, sys, os
 import numpy as np, soundfile as sf, torch
 from kokoro import KPipeline
 
-VOICE = "bf_emma"
+VOICE = "bf_emma"  # overridden by --voice
 BPMS = list(range(80, 161, 10))
 MIN_SQUEEZE = 0.6   # a beat may not be shorter than 60% of its natural length
 PAUSE_OK = 0.15     # silence per beat we tolerate (s); slower tempos get no AI voice
@@ -39,7 +44,10 @@ CAPS = set("AIOWYQ")
 MARKS = set("ˈˌ")
 
 src = open(sys.argv[1], encoding="utf-8").read()
-outdir = sys.argv[2]; want = [int(x) for x in sys.argv[3:]]
+outdir = sys.argv[2]; args = sys.argv[3:]
+RANGES = "--ranges" in args
+if "--voice" in args: VOICE = args[args.index("--voice") + 1]; args.remove(VOICE)
+want = [int(x) for x in args if not x.startswith("--")]
 IPA = json.loads(re.search(r"const IPA=(\{.*?\});\n", src).group(1))
 blk = src[src.index("const SETS=["):src.index("const IPA=")]
 ENTRY = re.compile(r'\["((?:[^"\\]|\\.)*)","((?:[^"\\]|\\.)*)"(?:,"((?:[^"\\]|\\.)*)")?\]')
@@ -173,8 +181,12 @@ def splice(audio, pauses):
         audio = np.concatenate([a, np.zeros(n, dtype=audio.dtype), b])
     return audio
 
-os.makedirs(outdir, exist_ok=True)
-manifest = {"voice": VOICE, "sr": SR, "bpms": BPMS, "lines": {}}
+os.makedirs(os.path.join(outdir, VOICE), exist_ok=True)
+mpath = os.path.join(outdir, "manifest.json")
+manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}
+if "voices" not in manifest: manifest = {"sr": SR, "range": manifest.get("range", {}), "voices": {}}
+vlines = manifest["voices"].setdefault(VOICE, {"lines": {}})["lines"]
+if RANGES and not want: want = list(range(len(sets)))
 for si in want:
     for li, (full, cue, short) in enumerate(ENTRY.findall(sets[si].split("lines:[", 1)[1])):
         for variant, line in (("full", full), ("short", short)):
@@ -215,6 +227,12 @@ for si in want:
                 shortest_ok = max(shortest_ok, tot * MIN_SQUEEZE / FPS, (stress[j + 1][1] - stress[j][1]) / FPS)
             minbpm = 60 / longest_ok if longest_ok else BPMS[0]
             maxbpm = 60 / shortest_ok if shortest_ok else BPMS[-1]
+            segs = [sum(nat[i] for i in range(stress[j][1] + 1, stress[j + 1][1] + 1)) / FPS for j in range(len(stress) - 1)]
+            natbpm = 60 / (sum(segs) / len(segs)) if segs else minbpm      # tempo of the plain reading
+            key = "%d:%d:%s" % (si, li, variant)
+            manifest["range"][key] = [int(round(minbpm)), int(round(maxbpm)), int(round(natbpm))]
+            if RANGES:
+                print(key, manifest["range"][key], line); continue
             use = BPMS
             clips = []
             for bpm in use:
@@ -251,13 +269,12 @@ for si in want:
                 anchors = {k: at(o) for k, o, _, _ in syl}
                 first = at(stress[0][1])
                 end = at(spans[-1][1])
-                fn = "s%d_l%d_%s_%d.wav" % (si, li, variant, bpm)
+                fn = "%s/s%d_l%d_%s_%d.wav" % (VOICE, si, li, variant, bpm)
                 sf.write(os.path.join(outdir, fn), audio, SR, subtype="PCM_16")
                 clips.append(dict(bpm=bpm, file=fn, anchors=anchors, first=first, end=end))
                 got = [round((anchors[s[0]] - first) * bpm / 60, 3) for s in stress]
                 if not all(abs(g - i) < 0.06 for i, g in enumerate(got)):   # too dense to fit this tempo
                     clips.pop(); os.remove(os.path.join(outdir, fn)); print("  skip", bpm, "BPM (cannot fit)")
-            manifest["lines"]["%d:%d:%s" % (si, li, variant)] = clips
-            manifest.setdefault("range", {})["%d:%d:%s" % (si, li, variant)] = [int(round(minbpm)), int(round(maxbpm))]
+            vlines[key] = clips
             print(si, li, variant, "%d-%d BPM" % (round(minbpm), round(maxbpm)), [c["bpm"] for c in clips], tts_text(words))
-json.dump(manifest, open(os.path.join(outdir, "manifest.json"), "w"), ensure_ascii=False, separators=(",", ":"))
+json.dump(manifest, open(mpath, "w"), ensure_ascii=False, separators=(",", ":"))
