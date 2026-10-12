@@ -681,3 +681,138 @@
 | 3 | she *holds the *cards and the *car *keys. | ＋she |
 | 4 | so she *holds the *cards and the *car *keys. | ＋so |
 | 5 | so she *holds the *cards and the *car *keys for us. | ＋for us |
+
+### 17. thick, thorny, thistles, thrive, thundery, Thursdays（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *thick, *thorn-y, *this-tles, *thrive, *thun-der-y, *thurs-days. | 強：全部の拍が θ（無声のth） |
+| 2 | *thick *thorn-y *this-tles *thrive on *thun-der-y *thurs-days. | 早口言葉にする |
+| 3 | the *thick *thorn-y *this-tles *thrive on *thun-der-y *thurs-days. | ＋the（ð） |
+| 4 | the *thick *thorn-y *this-tles *thrive on the *thun-der-y *thurs-days. | ＋the（2回目） |
+| 5 | and the *thick *thorn-y *this-tles *thrive on the *thun-der-y *thurs-days. | ＋and |
+
+### 18. think, this, thank, that, thought, those（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *think *this, *thank *that, *thought *those. | 強：1拍ごとに θ と ð が入れ替わる |
+| 2 | I *think *this, I *thank *that, I *thought *those. | ＋I |
+| 3 | then I *think *this, then I *thank *that, then I *thought *those. | ＋then（ð） |
+| 4 | then they *think *this, then they *thank *that, then they *thought *those. | ＋they（ð） |
+| 5 | and then they *think *this, and then they *thank *that, and then they *thought *those. | ＋and |
+
+### 19. three, seas, thick, sand, thin, sails（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *three, *seas, *thick, *sand, *thin, *sails. | 強：θ と s を交互に（日本人が一番混ぜやすい組み合わせ） |
+| 2 | *three *seas, *thick *sand, *thin *sails. | 早口言葉にする |
+| 3 | the *three *seas, the *thick *sand, the *thin *sails. | ＋the |
+| 4 | there are *three *seas, and *thick *sand, and *thin *sails. | ＋there are・and |
+| 5 | so there are *three *seas, and *thick *sand, and *thin *sails. | ＋so（s） |
+
+### 20. father, mother, bathe, there, together（5拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *fa-ther, *moth-er, *bathe, *there, to-*geth-er. | 強：全部の拍に ð（有声のth） |
+| 2 | *fa-ther and *moth-er *bathe *there to-*geth-er. | 早口言葉にする |
+| 3 | their *fa-ther and *moth-er *bathe *there to-*geth-er. | ＋their（ð） |
+| 4 | their *fa-ther and their *moth-er *bathe *there to-*geth-er. | ＋their（2回目） |
+| 5 | then their *fa-ther and their *moth-er *bathe *there to-*geth-er. | ＋then（ð） |
+
+### 21. six, sick, snakes, slither, silently, south（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *six, *sick, *snakes, *slith-er, *si-lent-ly, *south. | 強：全部の拍が s で始まる |
+| 2 | *six *sick *snakes *slith-er *si-lent-ly *south. | 早口言葉にする |
+| 3 | six-ty-*six *sick *snakes *slith-er *si-lent-ly *south. | ＋sixty（弱い音も s） |
+| 4 | so six-ty-*six *sick *snakes *slith-er *si-lent-ly *south. | ＋so（s） |
+| 5 | and so six-ty-*six *sick *snakes *slith-er *si-lent-ly *south. | ＋and |
+
+### 22. zany, zebras, zigzag, buzzing, zones（5拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *za-ny, *ze-bras, *zig-zag, *buzz-ing, *zones. | 強：全部の拍に z |
+| 2 | *za-ny *ze-bras *zig-zag through *buzz-ing *zones. | 早口言葉にする |
+| 3 | these *za-ny *ze-bras *zig-zag through *buzz-ing *zones. | ＋these（z） |
+| 4 | these *za-ny *ze-bras *zig-zag through his *buzz-ing *zones. | ＋his（z） |
+| 5 | as these *za-ny *ze-bras *zig-zag through his *buzz-ing *zones. | ＋as（z） |
+
+### 23. Sue, zips, Sam, zooms, Sid, snoozes（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *sip, *zip, *sue, *zoo, *seal, *zeal. | 強：s と z を交互に |
+| 2 | *sue *zips, *sam *zooms, *sid *snooz-es. | 1拍ごとに s と z が入れ替わる |
+| 3 | so *sue *zips, *sam *zooms, *sid *snooz-es. | ＋so（s） |
+| 4 | so *sue *zips, and *sam *zooms, and *sid *snooz-es. | ＋and |
+| 5 | so *sue *zips, and *sam *zooms, and *sid just *snooz-es. | ＋just（st） |
+
+### 24. four, fluffy, foxes, found, fifty, figs（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *four, *fluff-y, *fox-es, *found, *fif-ty, *figs. | 強：全部の拍が f で始まる |
+| 2 | *four *fluff-y *fox-es *found *fif-ty *figs. | 早口言葉にする |
+| 3 | if *four *fluff-y *fox-es *found *fif-ty *figs. | ＋if（f） |
+| 4 | if *four *fluff-y *fox-es *found *fif-ty of the *figs. | ＋of（v） |
+| 5 | if *four of the *fluff-y *fox-es *found *fif-ty of the *figs. | ＋of（2回目） |
+
+### 25. vivid, violet, vans, visit, Venice（5拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *viv-id, *vi-o-let, *vans, *vis-it, *ven-ice. | 強：全部の拍が v で始まる |
+| 2 | *viv-id *vi-o-let *vans *vis-it *ven-ice. | 早口言葉にする |
+| 3 | *viv-id *vi-o-let *vans have *vis-it-ed *ven-ice. | ＋have（v） |
+| 4 | the *viv-id *vi-o-let *vans have *vis-it-ed *ven-ice. | ＋the |
+| 5 | and the *viv-id *vi-o-let *vans have *vis-it-ed *ven-ice. | ＋and |
+
+### 26. fine, vine, fast, van, few, views（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *fine *vine, *fast *van, *few *views. | 強：1拍ごとに f と v が入れ替わる |
+| 2 | a *fine *vine, a *fast *van, a *few *views. | ＋a |
+| 3 | a *fine *vine and a *fast *van and a *few *views. | ＋and |
+| 4 | there's a *fine *vine and a *fast *van and a *few *views. | ＋there's |
+| 5 | there's a *fine *vine, and there's a *fast *van, and a *few *views. | ＋there's（2回目） |
+
+### 27. Rory's, rusty, red, rocket, rarely, runs, right（7拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *ror-y's, *rust-y, *red, *rock-et, *rare-ly, *runs, *right. | 強：全部の拍が r で始まる |
+| 2 | *ror-y's *rust-y *red *rock-et *rare-ly *runs *right. | 早口言葉にする |
+| 3 | *ror-y's *rust-y *red *rock-et *rare-ly ev-er *runs *right. | ＋ever |
+| 4 | but *ror-y's *rust-y *red *rock-et *rare-ly ev-er *runs *right. | ＋but |
+| 5 | but then *ror-y's *rust-y *red *rock-et *rare-ly ev-er *runs *right. | ＋then |
+
+### 28. lazy, lions, lick, lovely, lemon, lollies（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *la-zy, *li-ons, *lick, *love-ly, *lem-on, *lol-lies. | 強：全部の拍が l で始まる |
+| 2 | *la-zy *li-ons *lick *love-ly *lem-on *lol-lies. | 早口言葉にする |
+| 3 | *la-zy *li-ons *lick the *love-ly *lem-on *lol-lies. | ＋the |
+| 4 | the *la-zy *li-ons *lick the *love-ly *lem-on *lol-lies. | ＋the（2回目） |
+| 5 | and the *la-zy *li-ons, like, *lick the *love-ly *lem-on *lol-lies. | ＋and・like（l） |
+
+### 29. red, lolly, ripe, lime, raw, leeks（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *red *lol-ly, *ripe *lime, *raw *leeks. | 強：1拍ごとに r と l が入れ替わる |
+| 2 | a *red *lol-ly, a *ripe *lime, *raw *leeks. | ＋a |
+| 3 | a *red *lol-ly and a *ripe *lime and *raw *leeks. | ＋and |
+| 4 | there's a *red *lol-ly and a *ripe *lime and *raw *leeks. | ＋there's |
+| 5 | there's a *red *lol-ly, there's a *ripe *lime, and there are *raw *leeks. | ＋there's・there are |
+
+### 30. Larry, rarely, rolls, really, large, lorries（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *lar-ry, *rare-ly, *rolls, *real-ly, *large, *lor-ries. | 強：r と l が1語の中でも混ざる |
+| 2 | *lar-ry *rare-ly *rolls *real-ly *large *lor-ries. | 早口言葉にする |
+| 3 | *lar-ry *rare-ly *rolls the *real-ly *large *lor-ries. | ＋the |
+| 4 | *lar-ry *rare-ly ev-er *rolls the *real-ly *large *lor-ries. | ＋ever |
+| 5 | but *lar-ry *rare-ly ev-er *rolls the *real-ly *large *lor-ries. | ＋but |
+
+### 31. Sheila's, shop, sells, shiny, silver, shoes（6拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *shei-la's, *shop, *sells, *shin-y, *sil-ver, *shoes. | 強：sh と s を詰め込む |
+| 2 | *shei-la's *shop *sells *shin-y *sil-ver *shoes. | 早口言葉にする |
+| 3 | so *shei-la's *shop *sells *shin-y *sil-ver *shoes. | ＋so（s） |
+| 4 | so *shei-la's *shop *sells some *shin-y *sil-ver *shoes. | ＋some（s） |
+| 5 | so *shei-la's *shop *sells some *shin-y *sil-ver *shoes, sir. | ＋sir（s） |
