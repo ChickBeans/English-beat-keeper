@@ -16,7 +16,7 @@ synthesised already speaking in time:
 * one clip per BPM in BPMS; the app picks the nearest and stretches the
   whole clip uniformly by a few percent.
 
-Output: one MP3 "sprite" per set and voice (voice/<voice>/s<set>.mp3) holding every clip
+Output: one MP3 "sprite" per set and voice (voice/<voice>/<set id>.mp3) holding every clip
 back to back with short gaps; the manifest gives each clip's offset. "on" is when the first
 sound starts in the sprite, so the app can measure and cancel the MP3 decoder delay.
 
@@ -24,7 +24,8 @@ usage:
   python tools/make_voice.py index.html voice/ [--voice bm_george] SET_INDEX [...]
       render clips for the given sets with one Kokoro voice
   python tools/make_voice.py index.html voice/ --ranges [SET_INDEX ...]
-  python tools/make_voice.py index.html voice/ --voice bm_george --add 170,180 0 1   # extra tempos only
+  python tools/make_voice.py index.html voice/ --voice bm_george cons                    # a whole scene
+  python tools/make_voice.py index.html voice/ --voice bm_george --add 170,180 basic.cats-chase-mice   # extra tempos only
       only compute every line's natural tempo range (all sets if none given);
       the app derives its practice / normal / natural tempo presets from it
 """
@@ -55,7 +56,7 @@ if "--voice" in args: VOICE = args[args.index("--voice") + 1]; args.remove(VOICE
 # --add 170,180: make only these tempos into a separate sprite (s<set>x.mp3) and keep the existing clips
 ADD = None
 if "--add" in args: ADD = [int(x) for x in args[args.index("--add") + 1].split(",")]; args.remove(args[args.index("--add") + 1])
-want = [int(x) for x in args if not x.startswith("--")]
+want_args = [x for x in args if not x.startswith("--")]
 IPA = json.loads(re.search(r"const IPA=(\{.*?\});\n", src).group(1))
 blk = src[src.index("const SETS=["):src.index("const IPA=")]
 ENTRY = re.compile(r'\["((?:[^"\\]|\\.)*)","((?:[^"\\]|\\.)*)"(?:,"((?:[^"\\]|\\.)*)")?\]')
@@ -194,6 +195,15 @@ mpath = os.path.join(outdir, "manifest.json")
 manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}
 if "voices" not in manifest: manifest = {"sr": SR, "range": manifest.get("range", {}), "voices": {}}
 vlines = manifest["voices"].setdefault(VOICE, {"lines": {}})["lines"]
+# every set has a stable id ("basic.cats-chase-mice"); arguments may be ids, scene names (basic, biz, daily,
+# travel, cons) or positions in SETS
+SID = [re.search(r'id:"([^"]+)"', st).group(1) for st in sets]
+SCENE = [(re.search(r'scene:"(\w+)"', st[:80]) or [None, "basic"])[1] for st in sets]
+want = []
+for x in want_args:
+    if x.isdigit(): want.append(int(x))
+    elif x in SID: want.append(SID.index(x))
+    else: want += [i for i, sc in enumerate(SCENE) if sc == x]
 if RANGES and not want: want = list(range(len(sets)))
 GAP = 0.4
 def save_manifest():
@@ -212,7 +222,7 @@ def encode_mp3(audio, path):
     open(path, "wb").write(enc.encode(pcm) + enc.flush())
 for si in want:
     sprite = [np.zeros(int(SR * GAP), np.float32)]; sprite_len = len(sprite[0])
-    sprite_file = "%s/s%d%s.mp3" % (VOICE, si, "x" if ADD else "")
+    sprite_file = "%s/%s%s.mp3" % (VOICE, SID[si], ".x" if ADD else "")
     for li, (full, cue, short) in enumerate(ENTRY.findall(sets[si].split("lines:[", 1)[1])):
         for variant, line in (("full", full), ("short", short)):
             if not line: continue
@@ -254,7 +264,7 @@ for si in want:
             maxbpm = 60 / shortest_ok if shortest_ok else BPMS[-1]
             segs = [sum(nat[i] for i in range(stress[j][1] + 1, stress[j + 1][1] + 1)) / FPS for j in range(len(stress) - 1)]
             natbpm = 60 / (sum(segs) / len(segs)) if segs else minbpm      # tempo of the plain reading
-            key = "%d:%d:%s" % (si, li, variant)
+            key = "%s:%d:%s" % (SID[si], li, variant)
             if RANGES or key not in manifest["range"]:   # ranges come from the reference voice (--ranges run)
                 manifest["range"][key] = [int(round(minbpm)), int(round(maxbpm)), int(round(natbpm))]
             if RANGES:

@@ -16,12 +16,12 @@ for sc, title in names.items():
     out += ["## " + title, ""]
     n = 0
     for st in sets:
-        if 'scene:"%s"' % sc not in st[:40]: continue
+        if 'scene:"%s"' % sc not in st[:120]: continue
         n += 1
         base = re.findall(r'"([^"]+)"', re.search(r"base:(\[[^\]]*\])", st).group(1))
         lines = ENTRY.findall(st.split("lines:[", 1)[1])
         beats = [l[0].count("*") for l in lines]
-        tag = ("応用 %d→%d拍" % (beats[0], beats[-1])) if "grow:true" in st[:60] else ("%d拍" % beats[0])
+        tag = ("応用 %d→%d拍" % (beats[0], beats[-1])) if "grow:true" in st[:160] else ("%d拍" % beats[0])
         out += ["### %d. %s（%s）" % (n, ", ".join(base), tag), "| Lv | 文 | 追加したもの |", "|---|---|---|"]
         for k, (f, c, sh) in enumerate(lines):
             out.append("| %d | %s | %s |" % (k + 1, f + (" ／ 短縮: " + sh if sh else ""), c))

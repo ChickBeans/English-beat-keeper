@@ -64,9 +64,10 @@
     - 弱く読む機能語は、IPA表の弱形（ðə, həv, bɪn など）を指定して読ませる。
   - BPM 80〜180 を10刻みで作成（170と180は `--add 170,180` で別のファイル `s<セット番号>x.mp3` に追加）。アプリは一番近いBPMを選んで、全体を数%だけ均等に伸び縮みさせる（WSOLA）。
   - 1拍に音が入りきらないBPMは作らない（その場合アプリは音節の音で再生し、範囲を表示する）。
-- データ: `voice/manifest.json` と `voice/<声>/s<セット番号>.mp3`（1セット・1声で1ファイル、40kbps）。
+- データ: `voice/manifest.json` と `voice/<声>/<セットID>.mp3`（1セット・1声で1ファイル、40kbps。170・180 BPM は `<セットID>.x.mp3`）。
+- 各セットには変わらないID（例: `basic.cats-chase-mice`、`cons.red-lorry-yellow-lorry`）がある。練習記録・AI声・manifest はIDで紐づけているので、セットの並べ替えや追加をしても記録はずれない。
   - アプリは読み込み時にMP3デコーダーの頭の遅れ（約46ms）を測って補正する。
-  - `manifest.range[<set>:<line>:<full|short>] = [自然に聞こえる最遅BPM, 最速BPM, 素読みテンポ]`（全540行ぶんある）。
+  - `manifest.range[<セットID>:<line>:<full|short>] = [自然に聞こえる最遅BPM, 最速BPM, 素読みテンポ]`（全540行ぶんある）。
 - 収録済み: **基本32セット × 男女**。残りのカテゴリは未生成。
 
 ### テンポのプリセット（セットごと）
@@ -80,7 +81,7 @@
 # 全行の自然なテンポ範囲を計算（基準は bf_emma）
 python tools/make_voice.py index.html voice --ranges
 # セットの音声を生成（例: 男性の声でセット0と1）
-python tools/make_voice.py index.html voice --voice bm_george 0 1
+python tools/make_voice.py index.html voice --voice bm_george cons   # 場面ごと（IDや番号でも指定できる）
 ```
 - 必要なもの: Python venv に torch（CPU版）, kokoro, soundfile, lameenc。
 - 必要なネットワーク許可: huggingface.co, *.huggingface.co, *.hf.co, download.pytorch.org。
@@ -99,7 +100,7 @@ python tools/make_voice.py index.html voice --voice bm_george 0 1
 
 1. **残りのカテゴリにAI声を入れる**（子音 → 日常会話 → 旅行 → ビジネス、それぞれ男女）。例文の確認が終わってから。
    - ビジネスは強い音が隣り合う行が多く、「ふつう」が速くなりがち（中央値130前後）。広げる前に要相談。
-2. **一般公開**
+2. **一般公開**（決定: アカウントは購入時・引き継ぎ時だけ作る／まずアプリ内課金のみ（RevenueCat）／録音は端末だけ／アプリ化は Capacitor）
    - 音声: Cloudflare R2（10GB無料・転送料なし）。
    - アプリ: Cloudflare Pages。公開すれば claude.ai の中では使えない録音機能も使える。
    - まずはPWA（ホーム画面に追加）で出す。
@@ -115,7 +116,7 @@ python tools/make_voice.py index.html voice --voice bm_george 0 1
 
 ## 5. 残っている課題・メモ
 
-- 「言い切った行」の記録は「セット番号＋レベル」で保存している。例文を書き換えたレベルも完了扱いのまま残る。
+- 「言い切った行」の記録は「セットID＋レベル」で保存している。例文を書き換えたレベルも完了扱いのまま残る。
 - 1つのファイル（約2,000行）が限界に近い。公開前に Vite + TypeScript へ分割したい。
 - 例文の拍の頭そろえ（全拍を同じ長さにする）は英語の理想化。強い音が隣り合う箇所は実際には詰まる。
 - 「TR-808」などはローランドの商標なので、宣伝での表記に注意。
