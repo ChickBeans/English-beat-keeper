@@ -16,6 +16,10 @@ synthesised already speaking in time:
 * one clip per BPM in BPMS; the app picks the nearest and stretches the
   whole clip uniformly by a few percent.
 
+Output: one MP3 "sprite" per set and voice (voice/<voice>/s<set>.mp3) holding every clip
+back to back with short gaps; the manifest gives each clip's offset. "on" is when the first
+sound starts in the sprite, so the app can measure and cancel the MP3 decoder delay.
+
 usage:
   python tools/make_voice.py index.html voice/ [--voice bm_george] SET_INDEX [...]
       render clips for the given sets with one Kokoro voice
@@ -24,7 +28,7 @@ usage:
       the app derives its practice / normal / natural tempo presets from it
 """
 import json, re, sys, os
-import numpy as np, soundfile as sf, torch
+import numpy as np, soundfile as sf, torch, lameenc
 from kokoro import KPipeline
 
 VOICE = "bf_emma"  # overridden by --voice
@@ -187,7 +191,24 @@ manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}
 if "voices" not in manifest: manifest = {"sr": SR, "range": manifest.get("range", {}), "voices": {}}
 vlines = manifest["voices"].setdefault(VOICE, {"lines": {}})["lines"]
 if RANGES and not want: want = list(range(len(sets)))
+GAP = 0.4
+def save_manifest():
+    """merge this run's voice (and ranges, for --ranges) into the file on disk, so runs for
+    different voices can go in parallel."""
+    disk = json.load(open(mpath)) if os.path.exists(mpath) else {"sr": SR, "range": {}, "voices": {}}
+    disk.setdefault("voices", {})[VOICE] = manifest["voices"][VOICE]
+    disk.setdefault("range", {})
+    for k, v in manifest["range"].items():
+        if RANGES or k not in disk["range"]: disk["range"][k] = v
+    tmp = mpath + ".%d.tmp" % os.getpid()
+    json.dump(disk, open(tmp, "w"), ensure_ascii=False, separators=(",", ":")); os.replace(tmp, mpath)
+def encode_mp3(audio, path):
+    enc = lameenc.Encoder(); enc.set_bit_rate(40); enc.set_in_sample_rate(SR); enc.set_channels(1); enc.set_quality(2)
+    pcm = (np.clip(audio, -1, 1) * 32767).astype("<i2").tobytes()
+    open(path, "wb").write(enc.encode(pcm) + enc.flush())
 for si in want:
+    sprite = [np.zeros(int(SR * GAP), np.float32)]; sprite_len = len(sprite[0])
+    sprite_file = "%s/s%d.mp3" % (VOICE, si)
     for li, (full, cue, short) in enumerate(ENTRY.findall(sets[si].split("lines:[", 1)[1])):
         for variant, line in (("full", full), ("short", short)):
             if not line: continue
@@ -270,12 +291,20 @@ for si in want:
                 anchors = {k: at(o) for k, o, _, _ in syl}
                 first = at(stress[0][1])
                 end = at(spans[-1][1])
-                fn = "%s/s%d_l%d_%s_%d.wav" % (VOICE, si, li, variant, bpm)
-                sf.write(os.path.join(outdir, fn), audio, SR, subtype="PCM_16")
-                clips.append(dict(bpm=bpm, file=fn, anchors=anchors, first=first, end=end))
                 got = [round((anchors[s[0]] - first) * bpm / 60, 3) for s in stress]
                 if not all(abs(g - i) < 0.06 for i, g in enumerate(got)):   # too dense to fit this tempo
-                    clips.pop(); os.remove(os.path.join(outdir, fn)); print("  skip", bpm, "BPM (cannot fit)")
+                    print("  skip", bpm, "BPM (cannot fit)"); continue
+                off = sprite_len / SR
+                sprite.append(audio.astype(np.float32)); sprite.append(np.zeros(int(SR * GAP), np.float32))
+                sprite_len += len(audio) + int(SR * GAP)
+                clips.append(dict(bpm=bpm, file=sprite_file, off=round(off, 4), dur=round(len(audio) / SR, 4),
+                                  anchors=anchors, first=first, end=end))
             vlines[key] = clips
             print(si, li, variant, "%d-%d BPM" % (round(minbpm), round(maxbpm)), [c["bpm"] for c in clips], tts_text(words))
-json.dump(manifest, open(mpath, "w"), ensure_ascii=False, separators=(",", ":"))
+    if not RANGES and sprite_len > SR * GAP:
+        full_audio = np.concatenate(sprite)
+        encode_mp3(full_audio, os.path.join(outdir, sprite_file))
+        on = int(np.argmax(np.abs(full_audio) > 0.02))
+        manifest["voices"][VOICE].setdefault("sprites", {})[sprite_file] = {"on": round(on / SR, 5)}
+        save_manifest()   # save as we go
+save_manifest()

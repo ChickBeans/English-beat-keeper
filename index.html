@@ -1772,7 +1772,7 @@ function playGuitar(sent,tm,end){
 // vowel-onset time of every syllable. Each clip is time-stretched (WSOLA, pitch kept) so those
 // onsets land exactly on the scheduled syllable times, whatever the BPM or timing mode.
 const VOICE_DIR="voice/";
-let VMAN=null, vmanP=null; const VBUF={}, VLOAD={};
+let VMAN=null, vmanP=null; const VBUF={}, VLOAD={}, VDELAY={};
 function loadVoiceManifest(){ if(!vmanP) vmanP=fetch(VOICE_DIR+"manifest.json").then(r=>r.ok?r.json():null).catch(()=>null).then(j=>{ VMAN=j; return j; }); return vmanP; }
 function voiceKeyAt(pos){ const {L,num}=lineAt(pos); return S.set+":"+num+":"+((S.contract&&L.short)?"short":"full"); }
 function curLines(){ const v=VMAN&&VMAN.voices&&(VMAN.voices[S.aiVoice]||VMAN.voices.bf_emma); return (v&&v.lines)||{}; }
@@ -1781,7 +1781,11 @@ function setClips(){ if(!VMAN) return []; const out=[]; Object.entries(curLines(
 function voiceSetReady(){ return setClips().every(c=>VBUF[c.file]); }
 function loadClip(c){
   if(VBUF[c.file]) return Promise.resolve(VBUF[c.file]);
-  if(!VLOAD[c.file]) VLOAD[c.file]=fetch(VOICE_DIR+c.file).then(r=>r.arrayBuffer()).then(ab=>new Promise((ok,ng)=>{ if(!ensureCtx()) return ng(); ctx.decodeAudioData(ab,ok,ng); })).then(b=>{ VBUF[c.file]=b; return b; }).catch(()=>{ delete VLOAD[c.file]; return null; });
+  if(!VLOAD[c.file]) VLOAD[c.file]=fetch(VOICE_DIR+c.file).then(r=>r.arrayBuffer()).then(ab=>new Promise((ok,ng)=>{ if(!ensureCtx()) return ng(); ctx.decodeAudioData(ab,ok,ng); })).then(b=>{
+      // MP3 decoders may add a few ms of leading silence: compare where sound starts with the manifest
+      const sp=((VMAN.voices||{})[c.file.split("/")[0]]||{}).sprites||{}, on=sp[c.file]&&sp[c.file].on;
+      if(on!=null){ const x=b.getChannelData(0); let i=0; while(i<x.length&&Math.abs(x[i])<=.02) i++; VDELAY[c.file]=i/b.sampleRate-on; console.debug("voice delay",c.file,Math.round(VDELAY[c.file]*1000)+"ms"); } else VDELAY[c.file]=0;
+      VBUF[c.file]=b; return b; }).catch(()=>{ delete VLOAD[c.file]; return null; });
   return VLOAD[c.file];
 }
 async function voiceNote(){
@@ -1805,9 +1809,9 @@ function pickVoiceClip(pos,bpm){
 // the clip was synthesised with stressed onsets exactly on its own beat; scale it uniformly to the
 // current tempo and start it so its first stressed onset falls on T (the first beat).
 function playVoiceClip(c,T,scale){
-  const buf=VBUF[c.file], sr=buf.sampleRate, x=buf.getChannelData(0);
-  const from=S.skipPick?c.first:0, endS=Math.min(buf.duration,c.end+.25);
-  const seg=x.subarray(Math.floor(from*sr),Math.floor(endS*sr));
+  const buf=VBUF[c.file], sr=buf.sampleRate, x=buf.getChannelData(0), base=(c.off||0)+(VDELAY[c.file]||0);
+  const from=S.skipPick?c.first:0, endS=Math.min(c.dur||buf.duration,c.end+.25);
+  const seg=x.subarray(Math.max(0,Math.floor((base+from)*sr)),Math.min(x.length,Math.floor((base+endS)*sr)));
   const y=Math.abs(scale-1)<.005?seg:wsolaWarp(seg,sr,[0,seg.length/sr],[0,seg.length/sr*scale]);
   const ob=ctx.createBuffer(1,y.length,sr); ob.getChannelData(0).set(y);
   const src=ctx.createBufferSource(), g=ctx.createGain(); g.gain.value=.95; src.buffer=ob; src.connect(g); g.connect(out());
