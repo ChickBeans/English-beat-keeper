@@ -1366,7 +1366,7 @@ function renderStage(){
     lane.append(bar);
   }
   if(document.fonts&&document.fonts.status!=="loaded") document.fonts.ready.then(fitCells);
-  renderNext(); requestAnimationFrame(fitCells);
+  renderNext(); requestAnimationFrame(fitCells); if(typeof voiceNote==="function") voiceNote();
 }
 function renderList(){
   const list=$("#list"); list.innerHTML="";
@@ -1400,7 +1400,7 @@ function renderSettings(){
   ["contract","skipPick","hints","fillBar","countIn","conn"].forEach(id=>$("#"+id).checked=!!S[id]);
 }
 function renderAll(){ renderChips(); renderStage(); renderList(); renderSettings(); }
-function renderSettingsHook(){ document.querySelectorAll(".setnav span").forEach(x=>x.textContent=tr("セット","Set")); if(typeof renderVoiceSel==="function") renderVoiceSel(); if(typeof setModelBtn==="function") setModelBtn(); if(typeof renderTransport==="function") renderTransport(); }
+function renderSettingsHook(){ document.querySelectorAll(".setnav span").forEach(x=>x.textContent=tr("セット","Set")); if(typeof renderVoiceSel==="function") renderVoiceSel(); if(typeof setModelBtn==="function") setModelBtn(); if(typeof renderTransport==="function") renderTransport(); if(typeof voiceNote==="function") voiceNote(); }
 function select(p){ if(p<0||p>=S.order.length) return; stopPlay(); if(typeof stopModel==="function") stopModel(); S.pos=p; revealed=false; save(); renderStage(); renderList(); }
 function setSet(i){ stopPlay(); lastTick=0; S.set=i; makeOrder(); S.pos=0; revealed=false; applyAuto(); save(); renderAll(); if(sylMode()==="voice") preloadVoiceSet(); }
 function stageStatus(t){ $("#stageStatus").textContent=t||""; }
@@ -1762,11 +1762,22 @@ function loadClip(c){
   if(!VLOAD[c.file]) VLOAD[c.file]=fetch(VOICE_DIR+c.file).then(r=>r.arrayBuffer()).then(ab=>new Promise((ok,ng)=>{ if(!ensureCtx()) return ng(); ctx.decodeAudioData(ab,ok,ng); })).then(b=>{ VBUF[c.file]=b; return b; }).catch(()=>{ delete VLOAD[c.file]; return null; });
   return VLOAD[c.file];
 }
-async function preloadVoiceSet(){ await loadVoiceManifest(); await Promise.all(setClips().map(loadClip)); }
+async function voiceNote(){
+  const st=$("#stageStatus"); if(!st) return;
+  const was=st.dataset.voice==="1";
+  let msg="";
+  if(sylMode()==="voice"&&VMAN&&voiceSetAvailable()){
+    const key=voiceKeyAt(S.pos), cs=VMAN.lines[key]||[], r=(VMAN.range||{})[key];
+    if(!cs.some(c=>Math.abs(c.bpm-S.bpm)<=6)&&cs.length){ const lo=Math.min(...cs.map(c=>c.bpm))-5, hi=Math.min(160,Math.max(...cs.map(c=>c.bpm))+5);
+      msg=tr("この行のAI声は "+lo+"〜"+hi+" BPM で鳴ります（今は音節の音で再生）","AI voice for this line plays at "+lo+"–"+hi+" BPM (syllable sounds for now)"); }
+  }
+  if(msg){ st.textContent=msg; st.dataset.voice="1"; } else if(was){ st.textContent=""; st.dataset.voice=""; }
+}
+async function preloadVoiceSet(){ await loadVoiceManifest(); await Promise.all(setClips().map(loadClip)); voiceNote(); }
 function pickVoiceClip(pos,bpm){
   const clips=VMAN&&VMAN.lines[voiceKeyAt(pos)]; if(!clips) return null;
-  let best=null; clips.forEach(c=>{ if(!VBUF[c.file]) return; const d=Math.abs(Math.log(c.bpm/bpm)); if(!best||d<best.d) best={c,d}; });
-  return best&&best.c;
+  let best=null; clips.forEach(c=>{ if(!VBUF[c.file]) return; const d=Math.abs(c.bpm-bpm); if(!best||d<best.d) best={c,d}; });
+  return best&&best.d<=6?best.c:null;   // only tempos the line can be spoken at naturally
 }
 // the clip was synthesised with stressed onsets exactly on its own beat; scale it uniformly to the
 // current tempo and start it so its first stressed onset falls on T (the first beat).

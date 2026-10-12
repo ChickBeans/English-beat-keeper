@@ -23,7 +23,9 @@ import numpy as np, soundfile as sf, torch
 from kokoro import KPipeline
 
 VOICE = "bf_emma"
-BPMS = list(range(50, 131, 10))
+BPMS = list(range(60, 161, 10))
+MIN_SQUEEZE = 0.6   # a beat may not be shorter than 60% of its natural length
+PAUSE_OK = 0.15     # silence per beat we tolerate (s); slower tempos get no AI voice
 SR, FRAME = 24000, 600            # Kokoro: one duration unit = 600 samples = 25 ms
 FPS = SR / FRAME
 MAX_STRETCH = 1.3
@@ -188,8 +190,23 @@ for si in want:
             base = list(nat)
             for c in range(len(ps)):
                 if not cflag[c] and ps[c] not in " .,!?": base[c + 1] = max(1, base[c + 1] * WEAK_DUR)
+            # slowest tempo this line can be spoken at without long gaps: every beat's stretched
+            # length (+ a short natural pause) must still fill the beat
+            def capof(i):
+                c = ps[i - 1]
+                return (VOWEL_MAX if (c in VOWELS or c == "ː") else CONT_MAX if c in CONTINUANTS else 1.0) if cflag[i - 1] else 1.0
+            longest_ok, shortest_ok = None, 0
+            for j in range(len(stress) - 1):
+                sl = range(stress[j][1] + 1, stress[j + 1][1] + 1)
+                tot = sum(base[i] for i in sl); room = sum(base[i] * (capof(i) - 1) for i in sl)
+                ok = (tot + min(room, tot * (MAX_STRETCH - 1))) / FPS + PAUSE_OK
+                longest_ok = ok if longest_ok is None else min(longest_ok, ok)
+                shortest_ok = max(shortest_ok, tot * MIN_SQUEEZE / FPS, (stress[j + 1][1] - stress[j][1]) / FPS)
+            minbpm = 60 / longest_ok if longest_ok else BPMS[0]
+            maxbpm = 60 / shortest_ok if shortest_ok else BPMS[-1]
+            use = [b for b in BPMS if minbpm - 2 <= b <= maxbpm + 2]
             clips = []
-            for bpm in BPMS:
+            for bpm in use:
                 beat = FPS * 60 / bpm
                 dur = [max(1, int(round(v))) for v in base]; pauses = []   # (char index the pause goes before, frames)
                 for j in range(len(stress) - 1):
@@ -229,5 +246,6 @@ for si in want:
                 got = [round((anchors[s[0]] - first) * bpm / 60, 3) for s in stress]
                 assert all(abs(g - i) < 0.06 for i, g in enumerate(got)), (line, bpm, got)
             manifest["lines"]["%d:%d:%s" % (si, li, variant)] = clips
-            print(si, li, variant, tts_text(words))
+            manifest.setdefault("range", {})["%d:%d:%s" % (si, li, variant)] = [int(round(minbpm)), int(round(maxbpm))]
+            print(si, li, variant, "%d-%d BPM" % (round(minbpm), round(maxbpm)), [c["bpm"] for c in clips], tts_text(words))
 json.dump(manifest, open(os.path.join(outdir, "manifest.json"), "w"), ensure_ascii=False, separators=(",", ":"))
