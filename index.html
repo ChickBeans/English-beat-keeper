@@ -400,15 +400,15 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
         </button>
       </div>
       <div class="pills">
-        <button type="button" class="pill synth" id="btn303" aria-pressed="false" aria-label="303（つながり）">〰 303</button>
+        <button type="button" class="pill synth" id="btn303" hidden aria-pressed="false" aria-label="303（つながり）">〰 303</button>
         <button type="button" class="pill" id="bpmPill">— BPM</button>
         <button type="button" class="pill" id="kitPill">音色</button>
         <button type="button" id="recBtn" class="pill rec">● 録音</button>
-        <button type="button" class="pill synth" id="btnDX7" aria-pressed="false" aria-label="DX7（メロディ）">♪ DX7</button>
+        <button type="button" class="pill synth" id="btnDX7" hidden aria-pressed="false" aria-label="DX7（メロディ）">♪ DX7</button>
       </div>
       <div class="pills prow2">
         <button type="button" class="pill setnav" id="setPrev" aria-label="前のセット"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>セット</span></button>
-        <button type="button" id="modelBtn" class="pill">🗣 お手本</button>
+        <button type="button" id="modelBtn" class="pill" hidden>🗣 お手本</button>
         <button type="button" id="bgBtn" class="pill">🎧 BG再生</button>
         <button type="button" class="pill synth" id="btnVoice" aria-pressed="false" aria-label="AI音声（拍に合わせる）">🎙 AI声</button>
         <button type="button" class="pill setnav" id="setNext" aria-label="次のセット"><span>セット</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 6l6 6-6 6M5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -488,11 +488,11 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
         <div class="status sublabel">音節の音（文字と一緒に鳴る）</div>
         <div class="seg full" role="group" aria-label="音節の音" id="sylSeg">
           <button type="button" data-y="on">あり<small>オモテ大・ウラ小</small></button>
-          <button type="button" data-y="303">303<small>つながり</small></button>
-          <button type="button" data-y="dx7">DX7<small>メロディ</small></button>
-          <button type="button" data-y="gtr">ギター<small>ソロ</small></button>
+          <button type="button" data-y="303" hidden>303<small>つながり</small></button>
+          <button type="button" data-y="dx7" hidden>DX7<small>メロディ</small></button>
+          <button type="button" data-y="gtr" hidden>ギター<small>ソロ</small></button>
           <button type="button" data-y="voice">AI声<small>試作</small></button>
-          <button type="button" data-y="off">なし</button>
+          <button type="button" data-y="off" hidden>なし</button>
         </div>
         <div class="status sublabel">AI声の声</div>
         <div class="seg full" role="group" aria-label="AI声の声" id="aiVoiceSeg">
@@ -502,6 +502,7 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
         <div class="status sublabel"><label for="voiceAdj">AI声のタイミング補正：<output id="voiceAdjOut">0 ms</output></label></div>
         <input type="range" id="voiceAdj" min="-150" max="150" step="5" value="0" aria-label="AI声のタイミング補正">
         <p class="note" style="margin:2px 0 6px">AI声が拍より早く聞こえるなら＋、遅く聞こえるなら−に動かします。行ごとに「自然に聞こえるテンポ」があり、範囲外では注意書きが出ます。</p>
+        <div id="ttsBox" hidden>
         <div class="status sublabel">お手本の声（イギリス／アメリカ英語）</div>
         <select id="voiceSel" aria-label="お手本の声" style="width:100%"></select>
         <div class="status sublabel">お手本の速さ</div>
@@ -513,6 +514,7 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
         <div class="row" style="margin-top:8px"><button type="button" id="voiceTest">▶ 試聴</button></div>
         <details style="margin-top:8px"><summary class="status">この端末で使える英語の声（確認用）</summary><pre id="voiceList" style="white-space:pre-wrap;font-size:.72rem;color:var(--muted);margin:6px 0 0;max-height:220px;overflow:auto"></pre></details>
         <p class="note" id="voiceNote" style="margin:8px 0 0">お手本は自然な速さの英語で、拍には合わせていません。拍に乗せる前に、本来のリズムと抑揚を耳に入れる用です。</p>
+        </div>
       </div>
     </div>
 
@@ -1425,7 +1427,7 @@ function renderList(){
 function renderSettings(){
   const pr=(sel,attr,val)=>document.querySelectorAll(sel+" button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset[attr]===String(val))));
   pr("#presetSeg","p",S.preset); pr("#aiVoiceSeg","v",S.aiVoice||"bf_emma"); pr("#soundSeg","s",S.sound); pr("#dispSeg","d",S.disp);
-  const ks=$("#kitSeg"); if(!ks.childElementCount){ Object.entries(KITS).forEach(([k,v])=>{ const b=el("button"); b.type="button"; b.dataset.k=k; b.textContent=kitLabel(k); b.addEventListener("click",()=>{ S.kit=k; save(); renderSettings(); previewKit(); }); ks.append(b); }); }
+  const ks=$("#kitSeg"); if(!ks.childElementCount){ Object.entries(KITS).forEach(([k,v])=>{ if(KIT_HIDDEN.has(k)) return; const b=el("button"); b.type="button"; b.dataset.k=k; b.textContent=kitLabel(k); b.addEventListener("click",()=>{ S.kit=k; save(); renderSettings(); previewKit(); }); ks.append(b); }); }
   if(!KITS[S.kit]) S.kit="tr808"; pr("#kitSeg","k",S.kit); $("#kitDesc").textContent=kitDescT(S.kit); pr("#sylSeg","y",sylMode()); const bv_=$("#btnVoice"); if(bv_){ bv_.classList.toggle("on",sylMode()==="voice"); bv_.setAttribute("aria-pressed",String(sylMode()==="voice")); } const b3=$("#btn303"), bd=$("#btnDX7"); if(b3){ b3.classList.toggle("on",sylMode()==="303"); b3.setAttribute("aria-pressed",String(sylMode()==="303")); } if(bd){ bd.classList.toggle("on",sylMode()==="dx7"); bd.setAttribute("aria-pressed",String(sylMode()==="dx7")); } pr("#timingSeg","t",S.timing); pr("#orderSeg","o",S.ord); pr("#repSeg","r",S.rep);
   const sg=suggest();
   if(sg.lp){ const L=sg.lp;
@@ -1546,6 +1548,7 @@ const KITS={
     count:t=>rim(t,.45,800,300), and:t=>nz(t,{v:.3,dec:.05,bp:4000,q:.9}),
     click:(t,lv)=>rim(t,[.24,.4,.56][lv],800,300)}
 };
+const KIT_HIDDEN=new Set(["low606","low707","low808","low909"]);   // still usable, just not offered
 const KIT_MIGRATE={orig:"tr808",cr78:"low606",linn:"tr707",lofi:"low707"};
 function K(){ if(KIT_MIGRATE[S.kit]) S.kit=KIT_MIGRATE[S.kit]; return KITS[S.kit]||KITS.tr808; }
 function sylTone(t,strong){ if(strong) K().strong(t); else K().weak(t); }
