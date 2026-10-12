@@ -23,7 +23,7 @@ import numpy as np, soundfile as sf, torch
 from kokoro import KPipeline
 
 VOICE = "bf_emma"
-BPMS = list(range(60, 161, 10))
+BPMS = list(range(80, 161, 10))
 MIN_SQUEEZE = 0.6   # a beat may not be shorter than 60% of its natural length
 PAUSE_OK = 0.15     # silence per beat we tolerate (s); slower tempos get no AI voice
 SR, FRAME = 24000, 600            # Kokoro: one duration unit = 600 samples = 25 ms
@@ -123,20 +123,31 @@ def retime(nat, slots, can_pause, tgt, cap):
     """durations for the slots of one beat, plus frames of silence to add, summing to tgt.
     cap[i] is how far slot i may stretch (stressed vowel > continuant > everything else)."""
     total = sum(nat[i] for i in slots)
-    if tgt <= total or not can_pause:            # compress (or nowhere to pause): scale evenly
+    pause = 0
+    if tgt <= total:                             # compress: scale evenly
         new = {i: nat[i] * tgt / total for i in slots}
     else:
-        budget = min(tgt - total, total * (MAX_STRETCH - 1))
+        extra = tgt - total
+        budget = min(extra, total * (MAX_STRETCH - 1))
         new = {i: float(nat[i]) for i in slots}
-        for level in (VOWEL_MAX, CONT_MAX):      # vowels first, then continuants
+        for level in (VOWEL_MAX, CONT_MAX):      # natural lengthening: vowels first, then continuants
             room = {i: nat[i] * (min(cap[i], level) - 1) for i in slots if cap[i] >= level}
             tot = sum(room.values())
             if tot <= 0 or budget <= 0: continue
             use = min(budget, tot)
             for i, r in room.items(): new[i] += r * use / tot
             budget -= use
+        rest = tgt - sum(new.values())
+        if can_pause: pause = min(rest, PAUSE_OK * FPS); rest -= pause   # a short breath at most
+        if rest > 0:                             # chant: hold the stressed vowel (then continuants)
+            for level in (VOWEL_MAX, CONT_MAX, 1.0):
+                hold = [i for i in slots if cap[i] >= level]
+                if hold:
+                    tot = sum(nat[i] for i in hold)
+                    for i in hold: new[i] += rest * nat[i] / tot
+                    break
     new = {i: max(1, int(round(v))) for i, v in new.items()}
-    goal = tgt if (tgt <= total or not can_pause) else min(sum(new.values()), tgt)
+    goal = tgt - int(round(pause))
     left = goal - sum(new.values())
     order = sorted(slots, key=lambda i: -nat[i])
     k = 0
@@ -204,7 +215,7 @@ for si in want:
                 shortest_ok = max(shortest_ok, tot * MIN_SQUEEZE / FPS, (stress[j + 1][1] - stress[j][1]) / FPS)
             minbpm = 60 / longest_ok if longest_ok else BPMS[0]
             maxbpm = 60 / shortest_ok if shortest_ok else BPMS[-1]
-            use = [b for b in BPMS if minbpm - 2 <= b <= maxbpm + 2]
+            use = BPMS
             clips = []
             for bpm in use:
                 beat = FPS * 60 / bpm
@@ -244,7 +255,8 @@ for si in want:
                 sf.write(os.path.join(outdir, fn), audio, SR, subtype="PCM_16")
                 clips.append(dict(bpm=bpm, file=fn, anchors=anchors, first=first, end=end))
                 got = [round((anchors[s[0]] - first) * bpm / 60, 3) for s in stress]
-                assert all(abs(g - i) < 0.06 for i, g in enumerate(got)), (line, bpm, got)
+                if not all(abs(g - i) < 0.06 for i, g in enumerate(got)):   # too dense to fit this tempo
+                    clips.pop(); os.remove(os.path.join(outdir, fn)); print("  skip", bpm, "BPM (cannot fit)")
             manifest["lines"]["%d:%d:%s" % (si, li, variant)] = clips
             manifest.setdefault("range", {})["%d:%d:%s" % (si, li, variant)] = [int(round(minbpm)), int(round(maxbpm))]
             print(si, li, variant, "%d-%d BPM" % (round(minbpm), round(maxbpm)), [c["bpm"] for c in clips], tts_text(words))
