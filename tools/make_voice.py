@@ -230,7 +230,8 @@ for si in want:
             segs = [sum(nat[i] for i in range(stress[j][1] + 1, stress[j + 1][1] + 1)) / FPS for j in range(len(stress) - 1)]
             natbpm = 60 / (sum(segs) / len(segs)) if segs else minbpm      # tempo of the plain reading
             key = "%d:%d:%s" % (si, li, variant)
-            manifest["range"][key] = [int(round(minbpm)), int(round(maxbpm)), int(round(natbpm))]
+            if RANGES or key not in manifest["range"]:   # ranges come from the reference voice (--ranges run)
+                manifest["range"][key] = [int(round(minbpm)), int(round(maxbpm)), int(round(natbpm))]
             if RANGES:
                 print(key, manifest["range"][key], line); continue
             use = BPMS
