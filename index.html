@@ -1548,7 +1548,7 @@ const KITS={
     count:t=>rim(t,.45,800,300), and:t=>nz(t,{v:.3,dec:.05,bp:4000,q:.9}),
     click:(t,lv)=>rim(t,[.24,.4,.56][lv],800,300)}
 };
-const KIT_HIDDEN=new Set(["low606","low707","low808","low909"]);   // still usable, just not offered
+const KIT_HIDDEN=new Set();   // kits listed here stay usable but are not offered in the picker
 const KIT_MIGRATE={orig:"tr808",cr78:"low606",linn:"tr707",lofi:"low707"};
 function K(){ if(KIT_MIGRATE[S.kit]) S.kit=KIT_MIGRATE[S.kit]; return KITS[S.kit]||KITS.tr808; }
 function sylTone(t,strong){ if(strong) K().strong(t); else K().weak(t); }
