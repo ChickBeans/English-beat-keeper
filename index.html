@@ -2006,8 +2006,11 @@ function rhodes(t,f,v,dur){ const lb=lofiBus(), dt=(Math.random()*2-1)*7;
   sOsc(t,{f,detune:dt,v,att:.006,dec:dur,rel:.25,dest:lb});
   sOsc(t,{type:"triangle",f,detune:dt,v:v*.35,att:.006,dec:dur*.6,rel:.2,lp:1800,lpTo:600,lpT:dur*.6,dest:lb});
   sOsc(t,{f:f*4.02,v:v*.12,att:.002,dec:.12,rel:.05,dest:lb}); }               // the tine "bell"
-function lofiBar(t,ch,nx,beat,bar){
-  const lb=lofiBus(), half=60/beat>=115, st=beat/4, sw=beat*.11, lag=.014;
+function lofiBar(t,ch,nx,beat,bar,sc,next){
+  const lb=lofiBus(), half=60/beat>=115, st=beat/4, sw=beat*.11, lag=.014, sec=sc.sec, pb=bar%4, mel=MEL.lofi[S.sessKey==="minor"?"minor":"major"][sec][sc.v];
+  if(pb===0&&(sec==="S"||sec==="C")){ secToast(t,sec); nz(t,{v:.06,att:.01,dec:1.6,hp:4000,dest:lb}); }
+  if(sec==="B") return lofiBarB(t,ch,nx,beat,bar,mel,next);
+  if(sec==="C") return lofiBarC(t,ch,nx,beat,bar,mel,next);
   // drums: 16 steps per bar. kick / snare patterns depend on the feel
   const K=half?[0,7,10]:(bar%2?[0,6,10,15]:[0,10,11]), SN=half?[8]:[4,12];
   K.forEach((i,n)=>lofiKick(t+i*st,n===0?.62:.45));
@@ -2026,12 +2029,102 @@ function lofiBar(t,ch,nx,beat,bar){
     g.gain.setValueAtTime(.0001,tt); g.gain.linearRampToValueAtTime(v,tt+.012); g.gain.setTargetAtTime(v*.55,tt+.06,d*.5); g.gain.setTargetAtTime(.0001,tt+d,.04);
     os.connect(g); g.connect(bs); const e=tt+d+.3; os.start(tt); os.stop(e); reg(os,e);
     sOsc(tt,{type:"triangle",f:f*2,v:v*.05,att:.008,dec:d*.5,rel:.05,dest:lb}); });
-  // lazy melody fragment every other bar: chord tones an octave up, swung, with a soft echo
-  if(bar%2===1){ const tones=ch.notes.map(f=>f*2), pats=[[3,2,0],[1,2,3,2],[0,1,3],[2,3,1,0]], pt=pats[(bar>>1)%4];
-    pt.forEach((ix,k)=>{ const tt=t+(8+k*2)*st+((k%2)?sw:0), f=tones[ix%tones.length];
-      [0,beat*.75].forEach((d,e)=>sOsc(tt+d,{type:"triangle",f,v:e?.007:.018,att:.004,dec:beat*.6,rel:.1,lp:3000,lpTo:900,lpT:.3,dest:lb})); }); }
+  // melody: A = lazy fragment with a soft echo, chorus = breathy flute lead every bar plus a shaker
+  if(sec==="A") melBar(t,beat,ch,bar,mel,false,(tt,f,d)=>[0,beat*.75].forEach((dd,e)=>sOsc(tt+dd,{type:"triangle",f,v:e?.007:.018,att:.004,dec:Math.max(beat*.6,d*.7),rel:.1,lp:3000,lpTo:900,lpT:.3,dest:lb})));
+  else { melBar(t,beat,ch,bar,mel,false,(tt,f,d,a)=>flute(tt,f,d,a?.026:.02));
+    for(let i=0;i<16;i++) nz(t+i*st+(i%2?sw*.5:0),{v:(i%4===2?.03:.016),dec:.03,bp:7000,q:1.2,dest:lb});
+    if(pb===0) lofiKick(t+3*st,.35); }
+  if(next&&pb===3&&(next.sec==="S"||next.sec==="C")) [12,13,14,15].forEach((i,k)=>lofiSnare(t+i*st+lag,.08+.06*k));
   vinyl(t,4*beat);
 }
+function flute(t,f,dur,v){ const lb=lofiBus(), o=ctx.createOscillator(), g=ctx.createGain(), l=ctx.createOscillator(), ld=ctx.createGain();
+  o.type="sine"; o.frequency.value=f; l.frequency.value=5.2; ld.gain.value=f*.006; l.connect(ld); ld.connect(o.frequency);
+  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(v,t+.05); g.gain.setTargetAtTime(v*.8,t+.08,dur*.4); g.gain.setTargetAtTime(.0001,t+dur*.95,.04);
+  o.connect(g); g.connect(lb); const e=t+dur+.3; [o,l].forEach(n=>{ n.start(t); n.stop(e); reg(n,e); });
+  nz(t,{v:v*.5,att:.03,dec:.12,bp:f*2,q:2,dest:lb}); sOsc(t,{type:"triangle",f:f*2,v:v*.12,att:.04,dec:dur*.6,rel:.05,dest:lb}); }
+function lofiBass(t,ch,nx,beat,bar,pts,vs){ const bs=clubBass().sub;
+  pts.forEach(([o,f,d,v],k)=>{ const os=ctx.createOscillator(), g=ctx.createGain(), tt=t+o; os.type="sine"; os.frequency.setValueAtTime(f,tt);
+    if(k===pts.length-1&&nx) os.frequency.setTargetAtTime(nx.root,tt+d*.6,.05);
+    g.gain.setValueAtTime(.0001,tt); g.gain.linearRampToValueAtTime(v*vs,tt+.012); g.gain.setTargetAtTime(v*vs*.55,tt+.06,d*.5); g.gain.setTargetAtTime(.0001,tt+d,.04);
+    os.connect(g); g.connect(bs); const e=tt+d+.3; os.start(tt); os.stop(e); reg(os,e); }); }
+// B: kick only on 1, side-stick instead of snare, one long chord, vibraphone melody
+function lofiBarB(t,ch,nx,beat,bar,mel,next){
+  const lb=lofiBus(), half=60/beat>=115, st=beat/4, sw=beat*.11;
+  lofiKick(t,.5); if(!half) lofiKick(t+10*st,.32);
+  (half?[8]:[4,12]).forEach(i=>{ nz(t+i*st+.012,{v:.16,dec:.03,bp:3200,q:2,dest:lb}); sOsc(t+i*st+.012,{type:"triangle",f:420,v:.05,att:.001,dec:.03,rel:.01,dest:lb}); });
+  for(let i=0;i<16;i+=2){ const off=(i/2)%2===1; nz(t+i*st+(off?sw:0),{v:(off?.028:.04)*(.75+Math.random()*.5),dec:.02,hp:6500,dest:lb}); }
+  ch.notes.forEach((f,j)=>rhodes(t+j*.025,f,.04,beat*3.5));
+  lofiBass(t,ch,nx,beat,bar,[[0,ch.root,beat*2.5,.45],[12*st+sw,inScale(ch.root*1.5),beat,.3]],1);
+  melBar(t,beat,ch,bar,mel,false,(tt,f,d,a)=>[0,beat*.75].forEach((dd,e)=>{ sOsc(tt+dd,{f,v:e?.008:.022,att:.003,dec:Math.max(beat,d),rel:.2,dest:lb}); sOsc(tt+dd,{f:f*4,v:e?.002:.006,att:.002,dec:.25,rel:.05,dest:lb}); }));
+  if(next&&bar%4===3&&(next.sec==="S"||next.sec==="C")) [12,13,14,15].forEach((i,k)=>lofiSnare(t+i*st+.014,.08+.06*k));
+  vinyl(t,4*beat);
+}
+// C: turnaround chords, sustained keys, music-box arpeggios, drums flip between half-time and straight
+function lofiBarC(t,ch,nx,beat,bar,mel,next){
+  const lb=lofiBus(), half=!(60/beat>=115), st=beat/4, sw=beat*.11, lag=.014;
+  (half?[0,7,10]:[0,10,11]).forEach((i,n)=>lofiKick(t+i*st,n===0?.6:.42));
+  (half?[8]:[4,12]).forEach(i=>lofiSnare(t+i*st+lag,.28));
+  for(let i=0;i<16;i+=2){ const off=(i/2)%2===1; nz(t+i*st+(off?sw:0),{v:(off?.032:.045)*(.75+Math.random()*.5),dec:.025,hp:6500,dest:lb}); }
+  ch.notes.forEach((f,j)=>{ rhodes(t+j*.02,f,.042,beat*3.8); rhodes(t+2*beat+sw+j*.02,f,.022,beat*1.6); });
+  lofiBass(t,ch,nx,beat,bar,[[0,ch.root,beat*1.8,.5],[8*st,inScale(ch.root*1.5),beat*.9,.34],[12*st+sw,ch.root*2,beat*.8,.3]],1);
+  melBar(t,beat,ch,bar,mel,true,(tt,f,d,a)=>[0,beat*.5].forEach((dd,e)=>{ sOsc(tt+dd,{f,v:e?.006:.017,att:.002,dec:beat*.7,rel:.1,dest:lb}); sOsc(tt+dd,{f:f*3,v:e?.002:.005,att:.001,dec:.18,rel:.04,dest:lb}); }));
+  vinyl(t,4*beat);
+}
+
+
+// ---- song sections: every 4-bar phrase picks a section (A most of the time, B ~1/4, chorus ~1/5, C ~1/10)
+// and one of 4 melody variants for the current style and key. Melody strings span 2 bars:
+// 16 chars = 8th notes, 32 chars = 16ths. digits/a-c = scale degree above the chord root (0 root, 2 third, 4 fifth, 7 octave),
+// "-" = hold, "." = rest. C-section strings index the chord tones instead (0-3, 4-7 an octave up).
+const MEL={
+  club:{
+    major:{A:["0247427942024797","7424742474209742","0427042704270429","2470247024797420"],
+           B:["4--2--0-2--4--7-","7---4-2-0---2-4-","2-4-5-4-2---0---","9-7-4---7-4-2---"],
+           S:["7.7.9.7.4...4.2.7.7.9.b.c...9.7.","c.b.9.7.9.7.4.2.4.4.7.9.7...4...","4.7.9.7.4.7.9.c.b.9.7.4.2...0...","7-9-7-4-2-4-7---c-b-9-7-9---7---"],
+           C:["01230123456745670123012345674567","76543210765432107654321001234567","02461357024613570246135776543210","04150415263726370415041526372637"]},
+    minor:{A:["0237320742023740","4320432043207420","0307040703070409","7542024575420245"],
+           B:["7---5-4-2---0---","0-2-3-4-7---4---","4-3-2---4-3-0---","2---4---7---9-7-"],
+           S:["4.4.5.4.2...0.2.4.4.5.7.9...7.4.","7.5.4.2.4.5.7.9.7...4...2...0...","9.7.9.7.4.2.4.7.c.b.9.7.4...2...","0.4.7.4.0.4.7.9.7.4.2.4.0......."],
+           C:["03120312475647560312031247564756","45670123456701237654765432103210","01234567654321010123456776543210","06172435061724357766554433221100"]}},
+  lofi:{
+    major:{A:["........4-2-0...","........2-4-7-4.","........0.2.4-..","........7-4-2-0."],
+           B:["4---2---7---4---","0-2-4---2---0---","7-.-9-7-4---2---","2---4---5-4-2---"],
+           S:["4.4.2.4.7...4.2.0.2.4.7.9.7.4...","7...9.7.4.2.4...c...b.9.7...4...","2.4.7.4.2.0.2.4.9.7.4.2.4.......","0.2.4.7.9.7.4.2.4.7.9.c.9.7.4..."],
+           C:["0.1.2.3.4.3.2.1.0.1.2.3.4.5.6.7.","7.6.5.4.3.2.1.0.4.5.6.7.6.5.4...","0...2...4...6...1...3...5...7...","0.2.1.3.2.4.3.5.4.6.5.7.6.4.2.0."]},
+    minor:{A:["........2-0-4...","........4-5-4-2.","........7.4-2-..","........0.2.3-2."],
+           B:["2---0---4---2---","4-5-4---2---0---","7---5---4-2-0---","0-2-4---5---4---"],
+           S:["4.5.4.2.0...2.4.7.5.4.2.4.......","7...5.4.2.4...0...2.4.5.4.2.....","2.4.5.7.5.4.2.0.4.5.7.9.7.5.4...","0.0.2.4.2.0.4.7.5.4.2.4.0......."],
+           C:["0.2.4.6.7.6.4.2.1.3.5.7.5.3.1...","7.5.3.1.6.4.2.0.7.5.3.1.0.......","0.1.2.3.0.1.2.3.4.5.6.7.4.5.6.7.","6.4.2.0.6.4.2.0.7.5.3.1.7.5.3.1."]}}
+};
+// C sections move to their own chords
+const CLUB_C_MAJ=[{root:43.65,notes:[261.63,349.23,440,523.25]},{root:49,notes:[246.94,293.66,392,493.88]},{root:41.2,notes:[246.94,329.63,392,493.88]},{root:55,notes:[261.63,329.63,440,523.25]}];
+const CLUB_C_MIN=[{root:36.71,notes:[293.66,349.23,440,587.33]},{root:41.2,notes:[246.94,329.63,392,493.88]},{root:43.65,notes:[261.63,349.23,440,523.25]},{root:49,notes:[246.94,293.66,392,493.88]}];
+const LOFI_C_MAJ=[{root:73.42,notes:[174.61,220,261.63,329.63]},{root:98,notes:[174.61,246.94,329.63,392]},{root:82.41,notes:[196,246.94,293.66,329.63]},{root:110,notes:[196,277.18,329.63,392]}];
+const LOFI_C_MIN=[{root:61.74,notes:[220,293.66,349.23,440]},{root:82.41,notes:[207.65,293.66,329.63,415.3]},{root:110,notes:[196,246.94,261.63,329.63]},{root:87.31,notes:[220,261.63,329.63,392]}];
+const MEL_SCALE=(()=>{ const st=[0,2,4,5,7,9,11], a=[]; for(let o=0;o<4;o++) st.forEach(x=>a.push(261.63*Math.pow(2,o+x/12))); return a; })();
+let SEC={};
+function sectionFor(bar){
+  if(bar===0) SEC={};
+  const ph=bar>>2; if(ph===0) return {sec:"A",v:0};
+  if(!SEC[ph]){ const r=Math.random(), prev=(SEC[ph-1]||{}).sec;
+    let sec=r<.1?"C":r<.3?"S":r<.55?"B":"A"; if(sec!=="A"&&sec===prev) sec="A";
+    SEC[ph]={sec,v:Math.floor(Math.random()*4)}; }
+  return SEC[ph];
+}
+function sectionChords(sec){ const m=S.sessKey==="minor", lo=S.session==="lofi";
+  return sec==="C"?(lo?(m?LOFI_C_MIN:LOFI_C_MAJ):(m?CLUB_C_MIN:CLUB_C_MAJ)):sessChords(); }
+// plays half (one bar) of a 2-bar melody string; voice(t,f,dur,accent)
+function melBar(t,beat,ch,bar,str,chordMode,voice){
+  const n=str.length/2, sd=4*beat/n, off=(bar%2)*n, rd=(()=>{ const pc=((Math.round(12*Math.log2(ch.root/261.63))%12)+12)%12; let b=0; MEL_SCALE.slice(0,7).forEach((f,i)=>{ const q=Math.round(12*Math.log2(f/261.63)); if(Math.abs(q-pc)<Math.abs(Math.round(12*Math.log2(MEL_SCALE[b]/261.63))-pc)) b=i; }); return b; })();
+  const tones=ch.notes.slice().sort((a,b)=>a-b);
+  for(let i=0;i<n;i++){ const c=str[off+i]; if(c==="."||c==="-") continue;
+    let len=1; while(i+len<n&&str[off+i+len]==="-") len++;
+    const d=parseInt(c,16), f=chordMode?tones[d%4]*(d>3?4:2):MEL_SCALE[Math.min(MEL_SCALE.length-1,rd+d)];
+    voice(t+i*sd,f,len*sd,i%(n/4)===0); }
+}
+function secToast(t,sec){ if(typeof ctx.startRendering==="function") return; const r0=run, msg=sec==="S"?tr("🔥 サビ","🔥 Chorus"):tr("💎 激レア Cメロ","💎 Rare C section");
+  setTimeout(()=>{ if(run&&run===r0) toast(msg); },Math.max(0,(t-ctx.currentTime)*1000)); }
+function snareRoll(t,beat,v,dest){ for(let i=0;i<8;i++) nz(t+i*beat/4,{v:v*(.3+.7*i/8),dec:.06,bp:1800,q:.8,dest}); }
 
 // club: four-on-the-floor, gliding sub + reese bass, drifting acid line, whole-mix filter swell every 8 bars
 function clubFilter(){ if(!ctx._cf){ const f=ctx.createBiquadFilter(); f.type="lowpass"; f.Q.value=1.2; f.frequency.value=8000; f.connect(mbus()); ctx._cf=f; } return ctx._cf; }
@@ -2098,25 +2191,37 @@ function counterLine(t,beat,ch,bar){
     sOsc(t+i*beat/2,{type:"triangle",f,detune:(Math.random()*2-1)*8,v:i%2?.016:.022,att:.004,dec:beat*.35,rel:.05,lp:5000,lpTo:1500,lpT:.2,q:1,dest:clubFilter()}); }
 }
 
-function clubBar(t,ch,beat,bar,nextRoot){
-  const pump=pbus(), cf=clubFilter(), cb=clubBass();
-  // whole mix opens and closes over 8 bars (underwater -> wide open)
+function ssaw(t,f,dur,v,dest){ [-14,-5,5,14].forEach(dt=>sOsc(t,{type:"sawtooth",f,detune:dt,v,att:.006,hold:dur*.5,dec:dur*.5,rel:.08,lp:6000,lpTo:2500,lpT:dur,q:1,dest})); }
+function clubBar(t,ch,beat,bar,nextRoot,sc,next){
+  const pump=pbus(), cf=clubFilter(), cb=clubBass(), sec=sc.sec, mel=MEL.club[S.sessKey==="minor"?"minor":"major"][sec][sc.v], pb=bar%4;
+  // whole mix opens and closes over 8 bars (underwater -> wide open); chorus stays wide open, C sweeps up over its phrase
   const ph=(bar%8)/8, nxt=((bar%8)+1)/8, fq=p=>500*Math.pow(16,.5-.5*Math.cos(2*Math.PI*p));
-  cf.frequency.setValueAtTime(fq(ph),t); cf.frequency.linearRampToValueAtTime(fq(nxt),t+4*beat);
-  const cut=400+2200*(.5-.5*Math.cos(2*Math.PI*((bar%4)/4)));
-  const seq=[1,0,2,1, 0,1,3,0, 1,2,0,1, 0,3,1,2], notes=[ch.root*2,ch.root*4,ch.root*3,ch.root*6];
+  if(sec==="S"){ cf.frequency.setValueAtTime(12000,t); }
+  else if(sec==="C"){ cf.frequency.setValueAtTime(600*Math.pow(20,pb/4),t); cf.frequency.exponentialRampToValueAtTime(600*Math.pow(20,(pb+1)/4),t+4*beat); }
+  else { cf.frequency.setValueAtTime(fq(ph),t); cf.frequency.linearRampToValueAtTime(fq(nxt),t+4*beat); }
+  const cut=(400+2200*(.5-.5*Math.cos(2*Math.PI*((bar%4)/4))))*(sec==="B"?.6:sec==="S"?1.3:1);
+  if(pb===0&&sec==="S"){ impact(t,.35); nz(t,{v:.14,dec:1.4,hp:5000}); secToast(t,sec); }
+  if(pb===0&&sec==="C"){ secToast(t,sec); }
   for(let k=0;k<4;k++){ const bt=t+k*beat;
     clubKick(bt,S.sound==="none"?.75:.5);
     pump.gain.setValueAtTime(.08,bt); pump.gain.setTargetAtTime(1,bt+.03,beat*.2);
     cb.sc.gain.setValueAtTime(.12,bt); cb.sc.gain.setTargetAtTime(1,bt+.05,beat*.16);                 // bass ducks under the kick
-    nz(bt+beat/2,{v:.16,dec:.16,hp:7000});                                                              // open hat
+    if(sec!=="B") nz(bt+beat/2,{v:sec==="S"?.2:.16,dec:.16,hp:7000});                                    // open hat
     for(let h=0;h<4;h++) if(h!==2) nz(bt+h*beat/4,{v:.045,dec:.018,hp:9500});
-    if(k%2===1) clap(bt,.42);
+    if(k%2===1) clap(bt,sec==="B"?.26:sec==="S"?.5:.42);
+    if(sec==="S"){ clap(bt+beat*.75,.12); ssaw(bt+beat/2,ch.notes[0],beat*.3,.008,cf); ssaw(bt+beat/2,ch.notes[2],beat*.3,.008,cf); }
   }
-  bassLine(t,beat,ch,nextRoot,bar);
+  bassLine(t,beat,ch,nextRoot,sec==="B"?bar+2:bar);
   acidLine(t,beat,ch,bar,cut);
-  counterLine(t,beat,ch,bar);
-  if(bar%2===0){ [1.5,3.5].forEach(o=>ch.notes.forEach(f=>sOsc(t+o*beat,{type:"square",f,detune:(Math.random()*2-1)*10,v:.012,att:.004,dec:.18,rel:.06,lp:2400,lpTo:700,lpT:.18,q:2,dest:cf}))); }
+  // melody layer: A = counter melody (triangle), B = soft square, chorus = supersaw hook over the counter, C = 16th pluck arps
+  const tri=(tt,f,d,a)=>sOsc(tt,{type:"triangle",f,detune:(Math.random()*2-1)*8,v:a?.022:.016,att:.004,dec:Math.max(beat*.35,d*.8),rel:.05,lp:5000,lpTo:1500,lpT:.2,q:1,dest:cf});
+  if(sec==="A") melBar(t,beat,ch,bar,mel,false,tri);
+  else if(sec==="B") melBar(t,beat,ch,bar,mel,false,(tt,f,d,a)=>sOsc(tt,{type:"square",f,v:a?.013:.01,att:.01,hold:d*.5,dec:d*.5,rel:.1,lp:2200,lpTo:900,lpT:d,q:2,dest:cf}));
+  else if(sec==="S"){ melBar(t,beat,ch,bar,MEL.club[S.sessKey==="minor"?"minor":"major"].A[sc.v],false,tri);
+    melBar(t,beat,ch,bar,mel,false,(tt,f,d,a)=>{ ssaw(tt,f,d*.9,a?.011:.009,cf); sOsc(tt,{type:"square",f:f*2,v:.005,att:.004,dec:d*.8,rel:.05,dest:cf}); }); }
+  else melBar(t,beat,ch,bar,mel,true,(tt,f,d,a)=>sOsc(tt,{type:"sawtooth",f,v:a?.016:.011,att:.002,dec:beat*.2,rel:.03,lp:4500,lpTo:600,lpT:beat*.18,q:4,dest:cf}));
+  if(next&&pb===3&&(next.sec==="S"||next.sec==="C")) snareRoll(t+2*beat,beat,.3);
+  if(sec==="A"&&bar%2===0){ [1.5,3.5].forEach(o=>ch.notes.forEach(f=>sOsc(t+o*beat,{type:"square",f,detune:(Math.random()*2-1)*10,v:.012,att:.004,dec:.18,rel:.06,lp:2400,lpTo:700,lpT:.18,q:2,dest:cf}))); }
   if(bar%4===3) riser(t+2*beat,t+4*beat-.01,.18);
 }
 
@@ -2125,15 +2230,15 @@ function sessionLayer(B,T,beat,countIn,setChanged,vclip){
   if(vclip){ const speechEnd=T+(B.beats.findIndex(b=>b.rest)>=0?B.beats.findIndex(b=>b.rest):nb)*beat; // duck under the voice
     bus.gain.setTargetAtTime(.2,T-beat*.5,.05); bus.gain.setTargetAtTime(.4,speechEnd,.15); }
   for(let b=0;b<bars;b++){
-    const CH=sessChords(), t=T+b*4*beat, ch=CH[sessBar%4], barDur=4*beat; sessBar++; const nx=CH[sessBar%4];
+    const sc=sectionFor(sessBar), t=T+b*4*beat, ch=sectionChords(sc.sec)[sessBar%4], barDur=4*beat; sessBar++; const nsc=sectionFor(sessBar), nx=sectionChords(nsc.sec)[sessBar%4];
     if(st==="lofi"){
-      lofiBar(t,ch,nx,beat,sessBar-1);
+      lofiBar(t,ch,nx,beat,sessBar-1,sc,nsc);
     } else if(st==="house"){
       for(let k=0;k<4;k++){ pluckBass(t+k*beat+beat/2,ch.root*2,beat*.45,.16); }
       stab(t+beat*1.5,ch.notes,.035); stab(t+beat*3.5,ch.notes,.03);
       pad(t,ch.notes,barDur,.012,false);
     } else if(st==="club"){
-      clubBar(t,ch,beat,sessBar-1,nx.root);
+      clubBar(t,ch,beat,sessBar-1,nx.root,sc,nsc);
     } else if(st==="wave"){
       waveBar(t,WAVE_CHORDS[(sessBar-1)%4],WAVE_CHORDS[sessBar%4],beat);
     } else if(st==="rave"){
