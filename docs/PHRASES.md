@@ -1,12 +1,12 @@
-# 有料カテゴリと子音トレーニングの例文（下書き）
+# 有料カテゴリと子音トレーニングの例文
 
-アプリの `SETS` から自動で書き出した一覧です。`*` が付いた音節が強い音（拍）です。
+`python tools/list_phrases.py` でアプリの `SETS` から書き出した一覧です。`*` が付いた音節が強い音（拍）です。
 
 作り方のルール:
 - Business・日常会話・旅行は、**時制を変えて文字を増やさない**。
-  - 拍が固定のセットでは、丁寧さ（can you → could you → could you just）、me・for me・with us などの代名詞、so・and・then などのつなぎで弱い音を増やす。
-  - 「表現を足す」セットでは、よく使う表現（旧「表現」カテゴリのもの）を1つずつ足していく（拍も増える）。
-- 子音トレーニングは、1音だけ違う単語のペアを強い音に置く。拍の数は固定で、レベルが上がるほど弱い音が増える。
+  - 拍が固定のセット: 丁寧さ（can you → could you → could you just）、me・for me・with us などの代名詞、so・and・then などのつなぎで弱い音を増やす。
+  - 「応用」セット: よく使う表現を1つずつ足していく（拍も増える）。
+- 子音トレーニングは早口言葉の形で、特定の子音を集中的に練習する。拍の数は固定で、足していく弱い音にも、なるべくその子音を入れる。
 
 ## Business
 
@@ -136,7 +136,7 @@
 | 4 | could you just *send the *fi-nal *ver-sion of the *con-tract to the *le-gal *team be-*fore *fri-day? | ＋just（ちょっと） |
 | 5 | could you just *send the *fi-nal *ver-sion of the *con-tract to the *le-gal *team for me be-*fore *fri-day? | ＋for me（私の代わりに） |
 
-### 15. working with you, really, on this project, honestly（表現を足す 2→6拍）
+### 15. working with you, really, on this project, honestly（応用 2→6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | I'm *look-ing *for-ward to it. | 基本の文 |
@@ -145,7 +145,7 @@
 | 4 | I'm *real-ly *look-ing *for-ward to *work-ing with you on this *proj-ect. | ＋on this project（このプロジェクトで） |
 | 5 | *hon-est-ly, I'm *real-ly *look-ing *for-ward to *work-ing with you on this *proj-ect. | ＋honestly（本当に、心から） |
 
-### 16. to be honest, really, yet, let you know（表現を足す 2→7拍）
+### 16. to be honest, really, yet, let you know（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | I *don't *know. | 基本の文 |
@@ -154,7 +154,7 @@
 | 4 | to be *hon-est, I *don't *real-ly *know *yet. | ＋yet（まだ） |
 | 5 | to be *hon-est, I *don't *real-ly *know *yet, but I'll *let you *know. | ＋but I'll let you know（分かったら知らせるね） |
 
-### 17. in a sense, pretty well, in the end, actually（表現を足す 2→7拍）
+### 17. in a sense, pretty well, in the end, actually（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | the *plan *worked. | 基本の文 |
@@ -163,7 +163,7 @@
 | 4 | in a *sense, the *plan *worked *pret-ty *well in the *end. | ＋in the end（結局は） |
 | 5 | in a *sense, the *plan *ac-tu-al-ly *worked *pret-ty *well in the *end. | ＋actually（実は） |
 
-### 18. more, in other words, basically, a bit（表現を足す 2→7拍）
+### 18. more, in other words, basically, a bit（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | we *need *time. | 基本の文 |
@@ -172,7 +172,7 @@
 | 4 | in *oth-er *words, we *ba-si-cally *need *more *time. | ＋basically（要するに） |
 | 5 | in *oth-er *words, we *ba-si-cally *need a *bit *more *time. | ＋a bit（少し） |
 
-### 19. soon, as soon as I can, don't worry, definitely（表現を足す 2→7拍）
+### 19. soon, as soon as I can, don't worry, definitely（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | I'll *call you *back. | 基本の文 |
@@ -181,7 +181,7 @@
 | 4 | *don't *wor-ry, I'll *call you *back as *soon as I *can. | ＋don't worry（心配しないで） |
 | 5 | *don't *wor-ry, I'll *def-i-nite-ly *call you *back as *soon as I *can. | ＋definitely（絶対に） |
 
-### 20. anyway, now, shall we?, first of all（表現を足す 2→7拍）
+### 20. anyway, now, shall we?, first of all（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | let's *start the *meet-ing. | 基本の文 |
@@ -309,7 +309,7 @@
 | 4 | shall we just *meet *right out-*side the *cin-e-ma at *half past *sev-en on *sat-ur-day *eve-ning? | ＋just（とりあえず） |
 | 5 | so shall we just *meet *right out-*side the *cin-e-ma at *half past *sev-en on *sat-ur-day *eve-ning? | ＋so（じゃあ） |
 
-### 14. a lot of, instead of, actually, these days（表現を足す 2→7拍）
+### 14. a lot of, instead of, actually, these days（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | I *drink *tea. | 基本の文 |
@@ -318,7 +318,7 @@
 | 4 | *ac-tu-al-ly, I *drink a *lot of *tea in-*stead of *cof-fee. | ＋actually（実は） |
 | 5 | *ac-tu-al-ly, I *drink a *lot of *tea in-*stead of *cof-fee these *days. | ＋these days（最近は） |
 
-### 15. if you can, by the way, back, a bit（表現を足す 2→6拍）
+### 15. if you can, by the way, back, a bit（応用 2→6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *call me *lat-er. | 基本の文 |
@@ -327,7 +327,7 @@
 | 4 | by the *way, *call me *back *lat-er, if you *can. | ＋call back（折り返す） |
 | 5 | and by the *way, *call me *back a *bit *lat-er, if you *can. | ＋a bit（少し） |
 
-### 16. but, pretty, on the other hand, a bit too（表現を足す 2→7拍）
+### 16. but, pretty, on the other hand, a bit too（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | the *flat is *cheap. | 基本の文 |
@@ -336,7 +336,7 @@
 | 4 | on the *oth-er *hand, the *flat is *pret-ty *cheap, but *small. | ＋on the other hand（一方で） |
 | 5 | on the *oth-er *hand, the *flat is *pret-ty *cheap, but a *bit too *small. | ＋a bit too（ちょっと〜すぎる） |
 
-### 17. really, you know, I mean, at the moment（表現を足す 2→6拍）
+### 17. really, you know, I mean, at the moment（応用 2→6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *work is *hard. | 基本の文 |
@@ -345,7 +345,7 @@
 | 4 | I *mean, *work is *real-ly *hard, you *know. | ＋I mean（つまり／というか） |
 | 5 | I *mean, *work is *real-ly *hard at the *mo-ment, you *know. | ＋at the moment（今のところ） |
 
-### 18. the most, at the end of the day, right?, always（表現を足す 2→7拍）
+### 18. the most, at the end of the day, right?, always（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *health *mat-ters. | 基本の文 |
@@ -354,7 +354,7 @@
 | 4 | at the *end of the *day, *health *mat-ters the *most, *right? | ＋right?（〜だよね？） |
 | 5 | at the *end of the *day, *health *al-ways *mat-ters the *most, *right? | ＋always（いつも） |
 
-### 19. even though, still, for a walk, a lot（表現を足す 2→7拍）
+### 19. even though, still, for a walk, a lot（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | I *went *out. | 基本の文 |
@@ -363,7 +363,7 @@
 | 4 | I *still *went *out for a *walk, *e-ven though it was *rain-ing. | ＋for a walk（散歩に） |
 | 5 | I *still *went *out for a *walk, *e-ven though it was *rain-ing a *lot. | ＋a lot（たくさん） |
 
-### 20. as well, in fact, and, fluent（表現を足す 2→6拍）
+### 20. as well, in fact, and, fluent（応用 2→6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | she *speaks *French. | 基本の文 |
@@ -509,7 +509,7 @@
 | 4 | could you just *book me a *tax-i to the *air-port for *six o'-*clock to-*mor-row *morn-ing, *please? | ＋just（ちょっと） |
 | 5 | so could you just *book me a *tax-i to the *air-port for *six o'-*clock to-*mor-row *morn-ing, *please? | ＋so（それで） |
 
-### 16. today, as far as I know, actually, unfortunately（表現を足す 2→7拍）
+### 16. today, as far as I know, actually, unfortunately（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | the *shop is *closed. | 基本の文 |
@@ -518,7 +518,7 @@
 | 4 | as *far as I *know, the *shop is *ac-tu-al-ly *closed to-*day. | ＋actually（実は） |
 | 5 | as *far as I *know, the *shop is *ac-tu-al-ly *closed to-*day, un-*for-tu-nate-ly. | ＋unfortunately（残念ながら） |
 
-### 17. kind of, today, to be honest, so（表現を足す 2→7拍）
+### 17. kind of, today, to be honest, so（応用 2→7拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | I *feel *tired. | 基本の文 |
@@ -527,7 +527,7 @@
 | 4 | I *feel *kind of *tired to-*day, to be *hon-est. | ＋to be honest（正直に言うと） |
 | 5 | I *feel *kind of *tired to-*day, to be *hon-est, so I'll *go *home. | ＋so（だから） |
 
-### 18. at least, definitely, if you can, honestly（表現を足す 2→6拍）
+### 18. at least, definitely, if you can, honestly（応用 2→6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *try it *once. | 基本の文 |
@@ -538,34 +538,52 @@
 
 ## 子音トレーニング
 
-### 1. thin, this, thank, that（4拍）
+### 1. three, thirsty, thieves, thought, thoroughly（5拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
-| 1 | *thin, *this, *thank, *that. | θ（無声：thin）とð（有声：this）を交互に |
+| 1 | *three, *thirst-y, *thieves, *thought, *thor-ough-ly. | θ（無声のth）だけを連打 |
+| 2 | *three *thirst-y *thieves *thought *thor-ough-ly. | 早口言葉にする |
+| 3 | thir-ty-*three *thirst-y *thieves *thought *thor-ough-ly. | ＋thirty（弱い音にもθ） |
+| 4 | thir-ty-*three *thirst-y *thieves *thought it *thor-ough-ly. | ＋it |
+| 5 | and thir-ty-*three *thirst-y *thieves *thought it *thor-ough-ly. | ＋and |
+
+### 2. gather, brothers, together, there（4拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *gath-er, *broth-ers, to-*geth-er, *there. | ð（有声のth）だけを連打 |
+| 2 | *gath-er *broth-ers to-*geth-er *there. | 早口言葉にする |
+| 3 | they *gath-er *broth-ers to-*geth-er *there. | ＋they（弱い音もð） |
+| 4 | they *gath-er their *broth-ers to-*geth-er *there. | ＋their（ð） |
+| 5 | and then they *gath-er their *broth-ers to-*geth-er *there. | ＋and then（ð） |
+
+### 3. thin, this, thank, that（4拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *thin, *this, *thank, *that. | θ（thin）とð（this）を交互に |
 | 2 | *thanks for *this, *thanks for *that. | θとðを文の中で |
 | 3 | I *think *this is *bet-ter than *that. | think（θ）／this・than・that（ð） |
 | 4 | I *think that *this is *bet-ter than *that. | ＋that（弱形 ðət） |
 | 5 | and I *think that *this is *bet-ter than *that. | ＋and |
 
-### 2. both, brothers, born, thirtieth, May（5拍）
+### 4. Steve, sells, six, sweets（4拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
-| 1 | *both, *broth-ers, *born, *thir-ti-eth, *may. | θ（both・thirtieth）とð（brothers） |
-| 2 | *both *broth-ers were *born on the *thir-ti-eth of *may. | 文にする（the は ð） |
-| 3 | *both of my *broth-ers were *born on the *thir-ti-eth of *may. | ＋of my |
-| 4 | and *both of my *broth-ers were *born on the *thir-ti-eth of *may. | ＋and |
-| 5 | and *both of my *broth-ers, they were *born on the *thir-ti-eth of *may. | ＋they（ð） |
+| 1 | *steve, *sells, *six, *sweets. | s（無声）だけを連打 |
+| 2 | *steve *sells *six *sweets. | 早口言葉にする |
+| 3 | so *steve *sells *six *sweets. | ＋so（s） |
+| 4 | so *steve *sells us *six *sweets. | ＋us（s） |
+| 5 | so *steve just *sells us *six *sweets. | ＋just（st） |
 
-### 3. price, prize, nice（3拍）
+### 5. Zoe's, zebras, zoom, zoo（4拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
-| 1 | *price, *prize, *nice. | s（無声：price）とz（有声：prize） |
-| 2 | the *prize was a *nice sur-*prise. | prize・was・surprise（z）／nice（s） |
-| 3 | his *prize was a *nice sur-*prise. | ＋his（z） |
-| 4 | his *prize was a *nice sur-*prise for us. | ＋for us（s） |
-| 5 | and his *prize was a *nice sur-*prise for us. | ＋and |
+| 1 | *zo-e's, *ze-bras, *zoom, *zoo. | z（有声）だけを連打 |
+| 2 | *zo-e's *ze-bras *zoom to the *zoo. | 早口言葉にする |
+| 3 | *zo-e's *ze-bras *zoom to his *zoo. | ＋his（z） |
+| 4 | *zo-e's *ze-bras *zoom in-to his *zoo. | ＋into |
+| 5 | as *zo-e's *ze-bras *zoom in-to his *zoo. | ＋as（z） |
 
-### 4. please, close, doors, freezing（4拍）
+### 6. please, close, doors, freezing（4拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *please, *close, *doors, *freez-ing. | 語中・語末の z（please・close・doors・freezing） |
@@ -574,25 +592,61 @@
 | 4 | could you *please *close the *doors, be-cause it's *freez-ing? | ＋because（z） |
 | 5 | so could you *please *close the *doors, be-cause it's *freez-ing? | ＋so（s） |
 
-### 5. fan, van, fine, vine（4拍）
+### 7. Fred, fried, fresh, fish, five, friends（6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
-| 1 | *fan, *van, *fine, *vine. | f（無声：fan）とv（有声：van） |
+| 1 | *fred, *fried, *fresh, *fish, *five, *friends. | f（無声）だけを連打 |
+| 2 | *fred *fried *fresh *fish for *five *friends. | 早口言葉にする（for も f） |
+| 3 | *fred *fried *fresh *fish for his *five *friends. | ＋his |
+| 4 | *fred *fried *fresh *fish for *five of his *friends. | ＋of（v） |
+| 5 | so *fred *fried *fresh *fish for *five of his *friends. | ＋so |
+
+### 8. given, Vera, very, vivid, violets（5拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *giv-en, *ve-ra, *ver-y, *viv-id, *vi-o-lets. | v（有声）だけを連打 |
+| 2 | we've *giv-en *ve-ra *ver-y *viv-id *vi-o-lets. | 早口言葉にする（we've も v） |
+| 3 | we have *giv-en *ve-ra *ver-y *viv-id *vi-o-lets. | ＋have（弱形 həv） |
+| 4 | we have *giv-en *ve-ra some *ver-y *viv-id *vi-o-lets. | ＋some |
+| 5 | so we have *giv-en *ve-ra some *ver-y *viv-id *vi-o-lets. | ＋so |
+
+### 9. fan, van, fine, vine（4拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *fan, *van, *fine, *vine. | f（fan）とv（van）を交互に |
 | 2 | *five *vans, *five *fans. | five（f・v）とvans・fans |
 | 3 | *five *vans *full of *fans. | ＋full of（of は v） |
-| 4 | there were *five *vans *full of *fans. | ＋there were（ð） |
+| 4 | there were *five *vans *full of *fans. | ＋there were |
 | 5 | and there were *five *vans *full of *fans. | ＋and |
 
-### 6. love, having, coffee, friends, Fridays（5拍）
+### 10. red, rabbits, run, round, rocks（5拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
-| 1 | *love, *hav-ing, *cof-fee, *friends, *fri-days. | v（love・having）とf（coffee・friends・Fridays） |
-| 2 | *love *hav-ing *cof-fee with *friends on *fri-days. | 文にする（主語なし） |
-| 3 | I *love *hav-ing *cof-fee with *friends on *fri-days. | ＋I |
-| 4 | I *love *hav-ing a *cof-fee with my *friends on *fri-days. | ＋a・my |
-| 5 | I just *love *hav-ing a *cof-fee with my *friends on *fri-days. | ＋just |
+| 1 | *red, *rab-bits, *run, *round, *rocks. | r だけを連打 |
+| 2 | *red *rab-bits *run *round *rocks. | 早口言葉にする |
+| 3 | *red *rab-bits *run a-*round the *rocks. | ＋around |
+| 4 | *red *rab-bits are *run-ning a-*round the *rocks. | ＋are ～ing |
+| 5 | the *red *rab-bits are *run-ning a-*round the *rocks. | ＋the |
 
-### 7. right, light, read, lead（4拍）
+### 11. lucky, Lily, loves, lemon, lollies（5拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *luck-y, *lil-y, *loves, *lem-on, *lol-lies. | l だけを連打 |
+| 2 | *luck-y *lil-y *loves *lem-on *lol-lies. | 早口言葉にする |
+| 3 | *luck-y *lil-y *loves the *lem-on *lol-lies. | ＋the |
+| 4 | and *luck-y *lil-y *loves the *lem-on *lol-lies. | ＋and |
+| 5 | and *luck-y *lil-y, like, *loves the *lem-on *lol-lies. | ＋like（つなぎの言葉の l） |
+
+### 12. red, lorry, yellow, lorry（4拍）
+| Lv | 文 | 追加したもの |
+|---|---|---|
+| 1 | *red *lor-ry, *yel-low *lor-ry. | イギリスの定番早口言葉（r と l） |
+| 2 | a *red *lor-ry, a *yel-low *lor-ry. | ＋a |
+| 3 | a *red *lor-ry and a *yel-low *lor-ry. | ＋and |
+| 4 | there's a *red *lor-ry and a *yel-low *lor-ry. | ＋there's |
+| 5 | there's a *red *lor-ry, and there's a *yel-low *lor-ry. | ＋there's（2回目） |
+
+### 13. right, light, read, lead（4拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *right, *light, *read, *lead. | r（right）とl（light） |
@@ -601,16 +655,7 @@
 | 4 | then you *turn *right at the *traf-fic *lights. | ＋then |
 | 5 | and then you *turn *right at the *traf-fic *lights. | ＋and |
 
-### 8. library, really, close, lovely, river（5拍）
-| Lv | 文 | 追加したもの |
-|---|---|---|
-| 1 | *li-brar-y, *real-ly, *close, *love-ly, *riv-er. | r と l が混ざる単語 |
-| 2 | the *li-brar-y's *real-ly *close{kləʊs} to the *love-ly *riv-er. | 文にする |
-| 3 | the *li-brar-y is *real-ly *close{kləʊs} to the *love-ly *riv-er. | ＋is（短縮しない） |
-| 4 | our *li-brar-y is *real-ly *close{kləʊs} to the *love-ly *riv-er. | ＋our |
-| 5 | and our *li-brar-y is *real-ly *close{kləʊs} to the *love-ly *riv-er. | ＋and |
-
-### 9. fry, fly, grass, glass（4拍）
+### 14. fry, fly, grass, glass（4拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *fry, *fly, *grass, *glass. | 子音が続く r と l（fr/fl、gr/gl） |
@@ -619,16 +664,16 @@
 | 4 | could you *bring me a *glass of *fresh lem-on-*ade? | ＋could you・me |
 | 5 | could you *bring me a *glass of your *fresh lem-on-*ade? | ＋your |
 
-### 10. sheet, seat, ship, sip（4拍）
+### 15. she, sells, sea, shells, sea, shore（6拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
-| 1 | *sheet, *seat, *ship, *sip. | sh（sheet）とs（seat） |
-| 2 | *she *sells *sea *shells. | she・shells（sh）／sells・sea（s） |
-| 3 | *she *sells her *sea *shells. | ＋her |
-| 4 | and *she *sells her *sea *shells. | ＋and |
-| 5 | and so *she *sells her *sea *shells. | ＋so（s） |
+| 1 | *she, *sells, *sea, *shells, *sea, *shore. | sh と s を交互に |
+| 2 | *she *sells *sea *shells on the *sea *shore. | 定番の早口言葉 |
+| 3 | *she *sells her *sea *shells on the *sea *shore. | ＋her |
+| 4 | so *she *sells her *sea *shells on the *sea *shore. | ＋so（s） |
+| 5 | and so *she *sells her *sea *shells on the *sea *shore. | ＋and |
 
-### 11. cards, cars, holds, holes（4拍）
+### 16. cards, cars, holds, holes（4拍）
 | Lv | 文 | 追加したもの |
 |---|---|---|
 | 1 | *cards, *cars, *holds, *holes. | 語末の子音を落とさない（cards と cars） |
@@ -636,12 +681,3 @@
 | 3 | she *holds the *cards and the *car *keys. | ＋she |
 | 4 | so she *holds the *cards and the *car *keys. | ＋so |
 | 5 | so she *holds the *cards and the *car *keys for us. | ＋for us |
-
-### 12. thin, thing, ran, rang（4拍）
-| Lv | 文 | 追加したもの |
-|---|---|---|
-| 1 | *thin, *thing, *ran, *rang. | n（thin）とng（thing） |
-| 2 | *phone *rang, I *ran *in. | rang（ng）／ran・in（n） |
-| 3 | the *phone *rang and I *ran *in. | ＋the・and |
-| 4 | when the *phone *rang, I *ran *in. | ＋when |
-| 5 | and when the *phone *rang, I *ran *in. | ＋and |
