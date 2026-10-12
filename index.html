@@ -460,7 +460,7 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
           <output id="bpmOut">— BPM</output>
           <button type="button" id="bpmUp" aria-label="BPMを上げる">＋</button>
         </div>
-        <input type="range" id="bpmRange" min="40" max="160" step="1" aria-label="BPM">
+        <input type="range" id="bpmRange" min="80" max="160" step="1" aria-label="BPM">
         <div class="checks"><label><input type="checkbox" id="autoBpm"><span>セットや速さを変えたら提案BPMに合わせる</span></label></div>
       </div>
     </div>
@@ -624,6 +624,7 @@ main{max-width:720px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-i
 const $=s=>document.querySelector(s);
 const el=(tag,cls)=>{const e=document.createElement(tag); if(cls) e.className=cls; return e;};
 const KEY="beatkeep.v1";
+const BPM_MIN=80;
 const PRESETS={slow:2.5,mid:3.5,fast:4.5};
 const FN={a:"ə",an:"ən",the:"ðə",and:"ən",but:"bət",or:"ə",nor:"",so:"",of:"əv",to:"tə",in:"",on:"",at:"ət",for:"fə",from:"frəm",with:"",by:"",as:"əz",into:"",onto:"",per:"pə",
 i:"",me:"",my:"",you:"jə",your:"jə",he:"i",him:"ɪm",his:"ɪz",she:"",her:"hə",it:"",its:"",we:"",us:"əs",our:"",they:"",them:"ðəm",their:"ðə",
@@ -1194,10 +1195,10 @@ DATA.forEach(d=>d.lines.forEach(L=>{ connect(L.full.words); if(L.short) connect(
 DATA.forEach(d=>{ d.nbMax=Math.max(...d.lines.map(L=>L.full.words.reduce((a,w)=>a+w.syl.filter(x=>x.s).length,0))); d.nb=d.lines[0].full.words.reduce((a,w)=>a+w.syl.filter(s=>s.s).length,0); });
 
 /* ---------- state ---------- */
-const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,voice:"",ttsRate:0.85,lang:null,skin:"gray",disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"native",preset:"mid",bpm:60,autoBpm:true};
+const DEF={set:0,cat:3,scene:"all",pos:0,order:[0,1,2,3,4],mode:"read",ord:"seq",rep:1,contract:false,skipPick:false,hints:true,fillBar:true,countIn:true,autoNext:true,loopSet:false,sylSound:true,voice:"",ttsRate:0.85,lang:null,skin:"gray",disp:"en",conn:true,kit:"tr808",sound:"drum",timing:"native",preset:"mid",bpm:100,autoBpm:true};
 let S=Object.assign({},DEF);
 var firstVisit=true;
-function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) firstVisit=false; const v=JSON.parse(raw||"null"); if(v&&typeof v==="object") S=Object.assign({},DEF,v); }catch(e){} if(!DATA[S.set]) S.set=0; if(!Array.isArray(S.order)||S.order.length!==DATA[S.set].lines.length) S.order=[0,1,2,3,4]; if(S.pos>=S.order.length) S.pos=0; S.autoNext=true; if(S.rep!=="inf"){ S.rep=Math.max(1,Math.min(5,Math.round(Number(S.rep)||1))); S.repN=S.rep; } const tr_=Number(S.ttsRate)||0.85; S.ttsRate=tr_<0.8?0.6:tr_<0.95?0.85:1.1; }
+function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) firstVisit=false; const v=JSON.parse(raw||"null"); if(v&&typeof v==="object") S=Object.assign({},DEF,v); }catch(e){} if(!DATA[S.set]) S.set=0; if(!Array.isArray(S.order)||S.order.length!==DATA[S.set].lines.length) S.order=[0,1,2,3,4]; if(S.pos>=S.order.length) S.pos=0; S.bpm=Math.max(BPM_MIN,Math.min(160,Number(S.bpm)||BPM_MIN)); S.autoNext=true; if(S.rep!=="inf"){ S.rep=Math.max(1,Math.min(5,Math.round(Number(S.rep)||1))); S.repN=S.rep; } const tr_=Number(S.ttsRate)||0.85; S.ttsRate=tr_<0.8?0.6:tr_<0.95?0.85:1.1; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 let revealed=false;
 
@@ -1218,7 +1219,7 @@ function buildBeats(sent){
 function suggest(){
   const d=DATA[S.set]; let maxAvg=0;
   d.lines.forEach(L=>{ const s=(S.contract&&L.short)?L.short:L.full; const b=buildBeats(s); maxAvg=Math.max(maxAvg,b.syl/b.n); });
-  let bpm=Math.round(60*PRESETS[S.preset]/maxAvg/2)*2; bpm=Math.max(40,Math.min(160,bpm));
+  let bpm=Math.round(60*PRESETS[S.preset]/maxAvg/2)*2; bpm=Math.max(BPM_MIN,Math.min(160,bpm));
   return {bpm,maxAvg};
 }
 function applyAuto(){ if(S.autoBpm) S.bpm=suggest().bpm; }
@@ -2099,7 +2100,7 @@ document.querySelectorAll("#repSeg button").forEach(b=>b.addEventListener("click
 ["contract","skipPick","hints","fillBar","countIn","conn"].forEach(id=>$("#"+id).addEventListener("change",e=>{ stopPlay(); S[id]=e.target.checked; if(["contract","skipPick"].includes(id)) applyAuto(); save(); renderStage(); renderList(); renderSettings(); }));
 $("#voiceAdj").addEventListener("input",e=>{ S.voiceOffset=+e.target.value; save(); renderSettings(); });
 $("#autoBpm").addEventListener("change",e=>{ S.autoBpm=e.target.checked; applyAuto(); save(); renderSettings(); });
-function setBpm(v){ const old=S.bpm; S.bpm=Math.max(40,Math.min(160,Math.round(v))); S.autoBpm=false; save(); renderSettings(); if(run&&!run.single&&S.bpm!==old) toast(tr("次の行から ♩ "+S.bpm+" BPM（4カウントで入ります）","Next line at ♩ "+S.bpm+" BPM (with a 4-count)")); }
+function setBpm(v){ const old=S.bpm; S.bpm=Math.max(BPM_MIN,Math.min(160,Math.round(v))); S.autoBpm=false; save(); renderSettings(); if(run&&!run.single&&S.bpm!==old) toast(tr("次の行から ♩ "+S.bpm+" BPM（4カウントで入ります）","Next line at ♩ "+S.bpm+" BPM (with a 4-count)")); }
 $("#bpmRange").addEventListener("input",e=>setBpm(+e.target.value));
 $("#bpmDown").addEventListener("click",()=>setBpm(S.bpm-2));
 $("#bpmUp").addEventListener("click",()=>setBpm(S.bpm+2));
