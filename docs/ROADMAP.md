@@ -70,6 +70,18 @@
   - `manifest.range[<セットID>:<line>:<full|short>] = [自然に聞こえる最遅BPM, 最速BPM, 素読みテンポ]`（全540行ぶんある）。
 - 収録済み: **基本32セット × 男女**。残りのカテゴリは未生成。
 
+### 音源の置き場所（Cloudflare R2）
+- バケット `beatkeep-voice`。公開URL（開発用 r2.dev）: `https://pub-2c17e2935b674bad9b0a88a2871dc0d3.r2.dev/voice/...`
+  - 公開時は独自ドメインに切り替える。CORS は GET・HEAD を全オリジンに許可済み。
+- アプリは `VOICE_CDN`（R2）から manifest を読み、読めなければページと同じ場所の `voice/` を使う。引っ越しは `VOICE_CDN` を変えるだけで済む。
+- `python tools/r2_sync.py push|pull|ls`（標準ライブラリだけで動く。S3 API）。
+  - 環境変数: `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_ENDPOINT`
+  - 許可するドメイン: `*.r2.cloudflarestorage.com`、`*.r2.dev`
+- **次にやること**:
+  1. 新しいセッションで `push` して、公開URLから manifest と mp3 が読めることを確認する。
+  2. `voice/` を .gitignore に入れて、git から外す（以後は R2 が原本）。
+  3. 作業を始めるときは `pull` で手元に戻す。
+
 ### テンポのプリセット（セットごと）
 - ふつう = そのセットの行ができるだけ多く「自然に聞こえる範囲」に入るBPMのうち、最も遅いもの。
 - 自然 = 各行の素読みテンポの中央値（ふつう＋10以上）。

@@ -2073,9 +2073,13 @@ function playGuitar(sent,tm,end){
 // voice/manifest.json lists, per "set:line:full|short", clips at a few speaking rates with the
 // vowel-onset time of every syllable. Each clip is time-stretched (WSOLA, pitch kept) so those
 // onsets land exactly on the scheduled syllable times, whatever the BPM or timing mode.
-const VOICE_DIR="voice/";
+// AI voice files live in Cloudflare R2; the copy next to the page is the fallback (e.g. when the CDN is
+// unreachable or blocked). Moving storage later means changing VOICE_CDN only.
+const VOICE_CDN="https://pub-2c17e2935b674bad9b0a88a2871dc0d3.r2.dev/voice/";
+let VOICE_DIR="voice/";
 let VMAN=null, vmanP=null; const VBUF={}, VLOAD={}, VDELAY={};
-function loadVoiceManifest(){ if(!vmanP) vmanP=fetch(VOICE_DIR+"manifest.json").then(r=>r.ok?r.json():null).catch(()=>null).then(j=>{ VMAN=j; return j; }); return vmanP; }
+function loadVoiceManifest(){ if(!vmanP){ const get=dir=>fetch(dir+"manifest.json").then(r=>r.ok?r.json():null).catch(()=>null).then(j=>{ if(j) VOICE_DIR=dir; return j; });
+    vmanP=(VOICE_CDN?get(VOICE_CDN):Promise.resolve(null)).then(j=>j||get("voice/")).then(j=>{ VMAN=j; return j; }); } return vmanP; }
 function voiceKeyAt(pos){ const {L,num}=lineAt(pos); return DATA[S.set].id+":"+num+":"+((S.contract&&L.short)?"short":"full"); }
 function curLines(){ const v=VMAN&&VMAN.voices&&(VMAN.voices[S.aiVoice]||VMAN.voices.bf_emma); return (v&&v.lines)||{}; }
 function voiceSetAvailable(){ const p=DATA[S.set].id+":"; return Object.keys(curLines()).some(k=>k.startsWith(p)); }
